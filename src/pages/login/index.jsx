@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { FaEye, FaEyeSlash, FaLock, FaUser } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
+import api from "../../config/axios";
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({
@@ -11,7 +14,7 @@ const LoginPage = () => {
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-
+  const navigate = useNavigate();
   const validateForm = () => {
     const newErrors = {};
     if (!formData.username.trim()) {
@@ -37,11 +40,18 @@ const LoginPage = () => {
     if (validateForm()) {
       setIsLoading(true);
       try {
-        // Simulate API call
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-        console.log("Login successful", formData);
-      } catch (error) {
-        console.error("Login failed", error);
+        const response = await api.post("login", formData);
+        const { token, role } = response.data.data;
+        localStorage.setItem("token", token); // để xác định role cho be để thao tác api
+        toast.success("Successfully login!");
+        navigate("/homepage");
+        // if (role === "ADMIN") {
+        //   navigate("/dashboard");
+        // } else if (role === "CUSTOMER") {
+        //   navigate("/homepage");
+        // }
+      } catch (err) {
+        toast.error(err.response.data);
       } finally {
         setIsLoading(false);
       }
@@ -57,7 +67,7 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 to-pink-200 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-rose-50 to-rose-200 flex items-center justify-center p-4">
       <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-lg">
         <div>
           <img
@@ -66,7 +76,7 @@ const LoginPage = () => {
             alt="Logo"
           />
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Sign in to your account
+            Welcome!
           </h2>
         </div>
 

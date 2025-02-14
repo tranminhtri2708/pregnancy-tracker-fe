@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { useState } from "react";
 import {
   FaEye,
   FaEyeSlash,
@@ -7,9 +8,9 @@ import {
   FaGoogle,
 } from "react-icons/fa";
 import { auth } from "../../config/firebase";
-import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
-import { Link } from "react-router-dom";
-
+import { Link, useNavigate } from "react-router-dom";
+import api from "../../config/axios";
+import { toast } from "react-toastify";
 const RegisterPage = () => {
   const [formData, setFormData] = useState({
     fullName: "",
@@ -18,10 +19,10 @@ const RegisterPage = () => {
     password: "",
     terms: false,
   });
-
+  const navigate = useNavigate();
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState(0);
 
@@ -111,29 +112,17 @@ const RegisterPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validate all fields
-    Object.keys(formData).forEach((key) => validateField(key, formData[key]));
+    console.log(formData);
 
-    if (Object.keys(errors).length === 0) {
-      setIsLoading(true);
-
-      // Simulate API call
-      try {
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-        setIsSuccess(true);
-        // Reset form after successful submission
-        setFormData({
-          fullName: "",
-          email: "",
-          username: "",
-          password: "",
-          terms: false,
-        });
-      } catch (error) {
-        setErrors({ submit: "Registration failed. Please try again." });
-      } finally {
-        setIsLoading(false);
-      }
+    // promise
+    try {
+      const response = await api.post("register", formData);
+      toast.success("Successully create new account!");
+      navigate("/login");
+    } catch (err) {
+      // bị lỗi =>show ra message lỗi
+      toast.error(err.response.data);
+      console.log(err.response.data);
     }
   };
 
@@ -155,6 +144,7 @@ const RegisterPage = () => {
         return "bg-gray-200";
     }
   };
+
   const handleLoginGoogle = () => {
     console.log("login google...");
     const provider = new GoogleAuthProvider();
@@ -176,8 +166,9 @@ const RegisterPage = () => {
         // ...
       });
   };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 to-pink-200 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-rose-50 to-rose-200 flex items-center justify-center p-4">
       <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-lg">
         {isSuccess ? (
           <div className="text-center">
@@ -428,12 +419,12 @@ const RegisterPage = () => {
                 <FaGoogle className="text-red-500 mr-2" />
               </div>
               <div className="mt-6 text-center">
-                <button className="text-sm text-indigo-600 hover:text-indigo-500 hover:underline focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                  Already have an account?
-                  <Link to={"/login"} className="text-primary hover:underline">
-                    Login
-                  </Link>
-                </button>
+                <Link
+                  to="/login"
+                  className="text-sm text-indigo-600 hover:text-indigo-500 hover:underline focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                >
+                  Already have an account? Login
+                </Link>
               </div>
             </form>
           </>
