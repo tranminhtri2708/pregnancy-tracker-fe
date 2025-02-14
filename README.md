@@ -8,4 +8,4 @@ Currently, two official plugins are available:
 - [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
 
--After clone/ install the projects, run "xargs npm install < requirements.txt" in the terminals to install all the dependencies
+Make sure to install a the dependencies to run the project
