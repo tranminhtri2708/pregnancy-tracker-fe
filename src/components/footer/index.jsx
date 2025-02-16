@@ -2,7 +2,6 @@
 import {
   FaFacebook,
   FaInstagram,
-  FaTwitter,
   FaYoutube,
   FaPhone,
   FaEnvelope,
@@ -70,7 +69,7 @@ const Footer = () => {
             <ul className="space-y-2">
               <li className="flex items-center gap-2">
                 <FaPhone className="text-pink-400" />
-                <span>24/7 Helpline: 1-800-PREGNANT</span>
+                <span>24/7 Helpline: 18004565</span>
               </li>
               <li className="flex items-center gap-2">
                 <FaEnvelope className="text-pink-400" />
@@ -78,12 +77,12 @@ const Footer = () => {
                   href="mailto:support@pregnancy.care"
                   className="hover:text-pink-500 transition-colors duration-300"
                 >
-                  support@pregnancy.care
+                  support@momly.care
                 </a>
               </li>
               <li className="flex items-center gap-2">
                 <FaMapMarkerAlt className="text-pink-400" />
-                <span>123 Maternity Lane, Care City, 12345</span>
+                <span>Số 29 đường Liễu Giai, Quận Ba Đình, Hà Nội</span>
               </li>
             </ul>
           </div>
@@ -147,13 +146,7 @@ const Footer = () => {
               >
                 <FaInstagram size={24} />
               </a>
-              <a
-                href="#"
-                className="text-pink-400 hover:text-pink-600 transition-colors duration-300"
-                aria-label="Twitter"
-              >
-                <FaTwitter size={24} />
-              </a>
+
               <a
                 href="#"
                 className="text-pink-400 hover:text-pink-600 transition-colors duration-300"

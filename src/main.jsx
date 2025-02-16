@@ -31,6 +31,10 @@ const router = createBrowserRouter([
     element: <PregnancyHomepage />,
   },
   {
+    path: "*",
+    element: <PregnancyHomepage />,
+  },
+  {
     path: "/header",
     element: <Header />,
   },
