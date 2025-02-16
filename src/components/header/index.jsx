@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { FiMenu, FiX } from "react-icons/fi";
-
+import { useNavigate } from "react-router-dom";
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const [isLoggedIn] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-
+  const navigate = useNavigate();
   const navItems = ["Home", "Subcription", "Health Tips", "Community"];
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
@@ -71,10 +71,16 @@ const Header = () => {
               </div>
             ) : (
               <div className="hidden md:flex space-x-4">
-                <button className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400">
+                <button
+                  onClick={() => navigate("/login")}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400"
+                >
                   Sign In
                 </button>
-                <button className="px-4 py-2 text-sm font-medium text-white bg-pink-600 rounded-md hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                <button
+                  onClick={() => navigate("/register")}
+                  className="px-4 py-2 text-sm font-medium text-white bg-pink-600 rounded-md hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
                   Sign Up
                 </button>
               </div>
