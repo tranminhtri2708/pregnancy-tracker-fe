@@ -12,6 +12,9 @@ import Footer from "./components/footer";
 import SubcriptionManagement from "./pages/subscription/SubscriptionManagement";
 import PregnancyHomepage from "./pages/homepage";
 import { ToastContainer } from "react-toastify";
+import AdminLayout from "./components/layouts/adminLayout";
+import ManageSubscription from "./pages/admin/manage-subscription";
+import ManageUser from "./pages/admin/manage-user";
 
 const router = createBrowserRouter([
   {
@@ -41,6 +44,20 @@ const router = createBrowserRouter([
   {
     path: "/footer",
     element: <Footer />,
+  },
+  {
+    path: "/dashboard",
+    element: <AdminLayout />,
+    children: [
+      {
+        path: "/dashboard/subscription",
+        element: <ManageSubscription />,
+      },
+      {
+        path: "/dashboard/user",
+        element: <ManageUser />,
+      },
+    ],
   },
 ]);
 createRoot(document.getElementById("root")).render(

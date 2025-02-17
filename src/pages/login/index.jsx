@@ -44,12 +44,12 @@ const LoginPage = () => {
         const { token, role } = response.data.data;
         localStorage.setItem("token", token); // để xác định role cho be để thao tác api
         toast.success("Successfully login!");
-        navigate("/homepage");
-        // if (role === "ADMIN") {
-        //   navigate("/dashboard");
-        // } else if (role === "CUSTOMER") {
-        //   navigate("/homepage");
-        // }
+        // navigate("/homepage");
+        if (role === "ADMIN") {
+          navigate("/dashboard");
+        } else if (role === "CUSTOMER") {
+          navigate("/homepage");
+        }
       } catch (err) {
         toast.error(err.response.data);
       } finally {
