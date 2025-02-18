@@ -15,6 +15,7 @@ import { ToastContainer } from "react-toastify";
 import AdminLayout from "./components/layouts/adminLayout";
 import ManageSubscription from "./pages/admin/manage-subscription";
 import ManageUser from "./pages/admin/manage-user";
+import ForgotPassword from "./pages/forget";
 
 const router = createBrowserRouter([
   {
@@ -44,6 +45,10 @@ const router = createBrowserRouter([
   {
     path: "/footer",
     element: <Footer />,
+  },
+  {
+    path: "/forget",
+    element: <ForgotPassword />,
   },
   {
     path: "/dashboard",
