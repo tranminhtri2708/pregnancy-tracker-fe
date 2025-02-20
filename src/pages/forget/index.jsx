@@ -63,7 +63,7 @@ const ForgotPassword = () => {
             <div>
               <button
                 type="submit"
-                className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-pink-600 hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 transition-colors duration-200"
+                className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200"
               >
                 Send Reset Link
               </button>
@@ -83,7 +83,7 @@ const ForgotPassword = () => {
                 setIsSubmitted(false);
                 setEmail("");
               }}
-              className="text-pink-600 hover:text-pink-700 font-medium transition-colors duration-200"
+              className="text-indigo-600 hover:text-indigo-700 font-medium transition-colors duration-200"
             >
               Try another email
             </button>
@@ -93,7 +93,7 @@ const ForgotPassword = () => {
         <div className="mt-4 text-center">
           <a
             href="#"
-            className="font-medium text-pink-600 hover:text-pink-700 transition-colors duration-200"
+            className="font-medium text-indigo-600 hover:text-indigo-700 transition-colors duration-200"
           >
             Back to Login
           </a>
