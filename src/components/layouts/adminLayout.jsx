@@ -1,11 +1,11 @@
 import React, { useState } from "react";
+
 import {
   DesktopOutlined,
   FileOutlined,
   PieChartOutlined,
   TeamOutlined,
-  UserOutlined, 
-  
+  UserOutlined,
 } from "@ant-design/icons";
 import { Breadcrumb, Layout, Menu, theme } from "antd";
 import { Outlet, Link } from "react-router-dom";
@@ -18,13 +18,10 @@ function getItem(label, key, icon, children) {
     label: <Link to={`/dashboard/${key}`}>{label}</Link>,
   };
 }
-import { useLocation } from 'react-router-dom';
-
 const items = [
-  getItem("Overview", "overview", <PieChartOutlined />),
-  getItem("Subscriptions", "subscription", <DesktopOutlined />),
-  getItem("Users", "user", <UserOutlined />),
-  getItem("Term & Services", "term & services", <DesktopOutlined />),
+  getItem("overview", "overview", <PieChartOutlined />),
+  getItem("subscription", "subscription", <DesktopOutlined />),
+  getItem("user", "user", <DesktopOutlined />),
   //   getItem("User", "sub1", <UserOutlined />, [
   //     getItem("Tom", "3"),
   //     getItem("Bill", "4"),
@@ -37,14 +34,12 @@ const items = [
   //   getItem("Files", "9", <FileOutlined />),
 ];
 const AdminLayout = () => {
-
   const [collapsed, setCollapsed] = useState(false);
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
   return (
-    <div key={location.pathname}>
-      <Layout
+    <Layout
       style={{
         minHeight: "100vh",
       }}
@@ -69,9 +64,6 @@ const AdminLayout = () => {
             background: colorBgContainer,
           }}
         />
-                <div key={location.pathname}>
-        {/* Your layout content */}
-      </div>
         <Content
           style={{
             margin: "0 16px",
@@ -88,16 +80,16 @@ const AdminLayout = () => {
             <Outlet />
           </div>
         </Content>
-        {/* <Footer
+
+        <Footer
           style={{
             textAlign: "center",
           }}
         >
           Ant Design ©{new Date().getFullYear()} Created by Ant UED
-        </Footer> */}
+        </Footer>
       </Layout>
     </Layout>
-    </div>
   );
 };
 export default AdminLayout;

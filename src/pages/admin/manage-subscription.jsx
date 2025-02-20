@@ -26,11 +26,11 @@ const columns = [
     key: "price",
     dataIndex: "price",
   },
-  // {
-  //   title: "Quantity",
-  //   key: "quantity",
-  //   dataIndex: "quantity",
-  // },
+  {
+    title: "Quantity",
+    key: "quantity",
+    dataIndex: "quantity",
+  },
 ];
 
 function ManageSubscription() {
