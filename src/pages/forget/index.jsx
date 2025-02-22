@@ -21,7 +21,7 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 to-pink-200 py-12 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
+    <div className="min-h-screen bg-gradient-to-br from-rose-50 to-rose-200 flex items-center justify-center p-4">
       <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-2xl">
         <div className="text-center">
           <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
@@ -92,7 +92,7 @@ const ForgotPassword = () => {
 
         <div className="mt-4 text-center">
           <a
-            href="#"
+            href="\login"
             className="font-medium text-pink-600 hover:text-pink-700 transition-colors duration-200"
           >
             Back to Login

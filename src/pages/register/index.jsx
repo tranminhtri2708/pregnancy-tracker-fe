@@ -373,11 +373,11 @@ const RegisterPage = () => {
                 <button
                   type="submit"
                   disabled={isLoading || Object.keys(errors).length > 0}
-                  className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white ${
+                  className={`group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white transition-colors duration-200 ${
                     isLoading || Object.keys(errors).length > 0
-                      ? "bg-indigo-400 cursor-not-allowed"
-                      : "bg-indigo-600 hover:bg-indigo-700"
-                  } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500`}
+                      ? "bg-pink-400 cursor-not-allowed"
+                      : "bg-pink-600 hover:bg-pink-700"
+                  } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500`}
                 >
                   {isLoading ? (
                     <svg

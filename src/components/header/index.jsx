@@ -7,7 +7,7 @@ const Header = () => {
   const [isLoggedIn] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const navigate = useNavigate();
-  const navItems = ["Home", "Subcription", "Health Tips", "Community"];
+  const navItems = ["Home", "Subscription", "Health Check", "Community"];
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
   const toggleDropdown = () => setIsDropdownOpen(!isDropdownOpen);
