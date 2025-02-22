@@ -76,7 +76,7 @@ const LoginPage = () => {
             alt="Logo"
           />
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Welcome!
+            Welcome back!
           </h2>
         </div>
 
