@@ -450,14 +450,46 @@ const PregnancyProfile = () => {
           )}
 
           {selectedSubSection === "deactivate" && (
-            <div>
-              <h2 className="text-lg font-semibold text-red-600">
+            <div className="p-4 bg-white shadow-md rounded-lg">
+              <h2 className="text-lg font-semibold text-gray-800">
                 Vô hiệu hóa tài khoản
               </h2>
               <p className="text-gray-600 mt-2">
-                Bạn có chắc chắn muốn vô hiệu hóa tài khoản không?
+                Chúng tôi rất tiếc vì tài khoản của bạn đã bị vô hiệu hóa. Sứ
+                mệnh của chúng tôi là mang đến hành trình chăm sóc sức khỏe tiện
+                lợi dành cho bạn. Chúng tôi luôn nỗ lực hết mình để hỗ trợ bạn,
+                mong rằng chúng tôi sẽ có cơ hội xử lý các sự cố hoặc vấn đề khó
+                khăn bạn đang gặp phải với tài khoản của mình. Sau khi bị vô
+                hiệu hóa tài khoản tại MomCare, bạn sẽ có 30 ngày để khôi phục
+                lại tài khoản bằng cách đăng nhập lại. Nếu bạn không thực hiện
+                thao tác này, tài khoản của bạn với các dữ liệu, thông tin sức
+                khỏe và lịch sử đặt khám sẽ không còn có thể truy cập hay khôi
+                phục được nữa, đồng nghĩa với việc tài khoản sẽ bị xóa vĩnh
+                viễn.
               </p>
-              <button className="mt-4 px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600">
+
+              <label className="block mt-4 text-gray-700 font-medium">
+                Vì sao bạn muốn vô hiệu hóa tài khoản?
+              </label>
+              <select className="mt-2 w-full border rounded-md p-2">
+                <option value="">Chọn lý do</option>
+                <option value="privacy">Lo ngại về quyền riêng tư</option>
+                <option value="not-useful">Ứng dụng không hữu ích</option>
+                <option value="other">Lý do khác</option>
+              </select>
+
+              <button
+                className="mt-4 w-full px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
+                onClick={() => {
+                  if (
+                    window.confirm(
+                      "Bạn có chắc chắn muốn vô hiệu hóa tài khoản không?"
+                    )
+                  ) {
+                    alert("Tài khoản của bạn đã bị vô hiệu hóa!");
+                  }
+                }}
+              >
                 Vô hiệu hóa
               </button>
             </div>
