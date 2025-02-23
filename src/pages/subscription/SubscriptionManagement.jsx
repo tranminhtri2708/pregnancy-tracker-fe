@@ -1,4 +1,4 @@
-import { Button, Form, Input, Modal, Popconfirm, Table } from "antd";
+import { Button, Form, Input, Modal, Popconfirm, Table, Select } from "antd";
 import { useForm } from "antd/es/form/Form";
 import { Image, Upload } from "antd";
 import FormItem from "antd/es/form/FormItem";
@@ -257,6 +257,7 @@ const SubcriptionManagement = () => {
           <FormItem
             label="isActive"
             name="isActive"
+
             rules={[
               {
                 required: true,
@@ -264,7 +265,10 @@ const SubcriptionManagement = () => {
               },
             ]}
           >
-            <Input />
+            <Select>
+              <Option value={true}>Active</Option>
+              <Option value={false}>Inactive</Option>
+            </Select>
           </FormItem>
           <FormItem
             label="CreatedTime"
@@ -281,6 +285,7 @@ const SubcriptionManagement = () => {
           <FormItem
             label="isDeleted"
             name="isDeleted"
+            initialValue={false}
             rules={[
               {
                 required: true,
@@ -288,7 +293,10 @@ const SubcriptionManagement = () => {
               },
             ]}
           >
-            <Input />
+            <Select>
+              <Option value={true}>Active</Option>
+              <Option value={false}>Inactive</Option>
+            </Select>
           </FormItem>
           <FormItem label="Avatar" name="avatar">
             <Upload
