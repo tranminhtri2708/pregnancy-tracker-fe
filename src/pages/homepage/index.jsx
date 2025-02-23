@@ -322,7 +322,7 @@ const PregnancyHomepage = () => {
         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-rose-50 dark:to-gray-900">
           <div className="container mx-auto px-6 pt-32">
             <h2 className="text-5xl font-bold mb-4">
-              Momly, Your Pregnancy Companion
+              MomCare, Your Pregnancy Companion
             </h2>
             <p className="text-xl max-w-2xl">
               Pregnancy is a miraculous and meaningful journey, marking the
