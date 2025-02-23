@@ -18,7 +18,7 @@ const Header = () => {
         <div className="flex items-center justify-between h-16">
           <div className="flex-shrink-0">
             <h1 className="text-2xl font-bold text-pink-600 dark:text-white">
-              Momly
+              MomCare
             </h1>
           </div>
 

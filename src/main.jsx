@@ -16,6 +16,7 @@ import AdminLayout from "./components/layouts/adminLayout";
 import ManageSubscription from "./pages/admin/manage-subscription";
 import ManageUser from "./pages/admin/manage-user";
 import ForgotPassword from "./pages/forget";
+import PregnancyProfile from "./pages/viewprofile";
 
 const router = createBrowserRouter([
   {
@@ -41,6 +42,10 @@ const router = createBrowserRouter([
   {
     path: "/header",
     element: <Header />,
+  },
+  {
+    path: "/viewprofile",
+    element: <PregnancyProfile />,
   },
   {
     path: "/footer",
