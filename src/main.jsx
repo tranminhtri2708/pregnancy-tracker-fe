@@ -9,7 +9,7 @@ import LoginPage from "./pages/login";
 
 import Header from "./components/header";
 import Footer from "./components/footer";
-import SubcriptionManagement from "./pages/subscription/SubscriptionManagement";
+// import SubcriptionManagement from "./pages/subscription/SubscriptionManagement";
 import PregnancyHomepage from "./pages/homepage";
 import { ToastContainer } from "react-toastify";
 import AdminLayout from "./components/layouts/adminLayout";
@@ -17,6 +17,8 @@ import ManageSubscription from "./pages/admin/manage-subscription";
 import ManageUser from "./pages/admin/manage-user";
 import ForgotPassword from "./pages/forget";
 import PregnancyProfile from "./pages/viewprofile";
+
+import MembershipPackages from "./pages/subscription/SubscriptionUser";
 
 const router = createBrowserRouter([
   {
@@ -29,7 +31,7 @@ const router = createBrowserRouter([
   },
   {
     path: "/subscription",
-    element: <SubcriptionManagement />,
+    element: <MembershipPackages />,
   },
   {
     path: "/homepage",
