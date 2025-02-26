@@ -181,7 +181,7 @@ const PregnancyProfile = () => {
               onClick={() => setSelectedSection("save")}
             >
               <FaSave className="text-green-500 text-2xl" />
-              <span>Đã lưu</span>
+              <span>Bài viết đã lưu</span>
             </button>
             {/*Nút Đã tham gia thể hiện các cộng đồng đã tham gia */}
             <button
