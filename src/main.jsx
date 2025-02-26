@@ -19,6 +19,8 @@ import ForgotPassword from "./pages/forget";
 import PregnancyProfile from "./pages/viewprofile";
 
 import MembershipPackages from "./pages/subscription/SubscriptionUser";
+import PregnancyPrep from "./pages/community";
+import Pregnancy from "./pages/community/index1";
 
 const router = createBrowserRouter([
   {
@@ -32,6 +34,14 @@ const router = createBrowserRouter([
   {
     path: "/subscription",
     element: <MembershipPackages />,
+  },
+  {
+    path: "/community/PregnancyPrep",
+    element: <PregnancyPrep />,
+  },
+  {
+    path: "/community/Pregnancy",
+    element: <Pregnancy />,
   },
   {
     path: "/homepage",
@@ -57,6 +67,7 @@ const router = createBrowserRouter([
     path: "/forget",
     element: <ForgotPassword />,
   },
+
   {
     path: "/dashboard",
     element: <AdminLayout />,
