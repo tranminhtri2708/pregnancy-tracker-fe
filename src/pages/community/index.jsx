@@ -38,6 +38,63 @@ const INITIAL_POSTS = [
   },
 ];
 
+// Dữ liệu mẫu cho các nhóm cộng đồng
+const COMMUNITY_GROUPS = [
+  {
+    id: 1,
+    name: "Mẹ Bầu 3 Tháng Đầu",
+    members: 2400,
+    posts: 320,
+    icon: "https://img.icons8.com/?size=100&id=17061&format=png&color=000000",
+  },
+  {
+    id: 2,
+    name: "Mẹ Bầu 3 Tháng Giữa",
+    members: 1800,
+    posts: 280,
+    icon: "https://img.icons8.com/?size=100&id=wraoCSnFlSrw&format=png&color=000000",
+  },
+  {
+    id: 3,
+    name: "Mẹ Bầu 3 Tháng Cuối",
+    members: 2100,
+    posts: 310,
+    icon: "https://img.icons8.com/?size=100&id=UpLMHtRX4A2A&format=png&color=000000",
+  },
+  {
+    id: 4,
+    name: "Dinh Dưỡng Mẹ Bầu",
+    members: 1500,
+    posts: 250,
+    icon: "https://img.icons8.com/?size=100&id=25478&format=png&color=000000",
+  },
+];
+
+// Component hiển thị nhóm cộng đồng
+const CommunityGroupCard = ({ group }) => {
+  return (
+    <div className="bg-white rounded-lg shadow-md p-4 mb-4 transition-all hover:shadow-lg">
+      <div className="flex items-center">
+        <img
+          src={group.icon}
+          alt={group.name}
+          className="h-10 w-10 rounded-full object-cover"
+          loading="lazy"
+        />
+        <div className="ml-3 flex-1">
+          <h3 className="font-semibold text-gray-800">{group.name}</h3>
+          <p className="text-sm text-gray-500">
+            {group.members.toLocaleString()} thành viên • {group.posts} bài viết
+          </p>
+        </div>
+        <button className="bg-pink-100 text-pink-600 px-3 py-1 rounded-full text-sm hover:bg-pink-200 transition-colors">
+          Tham gia
+        </button>
+      </div>
+    </div>
+  );
+};
+
 // Tách PostCard thành component riêng biệt
 const PostCard = ({ post, onLike }) => {
   return (
@@ -83,11 +140,37 @@ const PostCard = ({ post, onLike }) => {
         </button>
         <button
           className="flex items-center space-x-2 text-gray-600 hover:text-pink-500 transition-colors"
-          aria-label="Share post"
+          aria-label="Save post"
         >
           <FiSave />
           <span>Save</span>
         </button>
+      </div>
+    </div>
+  );
+};
+
+// Component cho phần trending
+const TrendingTopics = () => {
+  const topics = [
+    "Thai nhi khỏe mạnh",
+    "Tiêm phòng",
+    "Ăn uống đủ chất",
+    "Yoga bầu",
+  ];
+
+  return (
+    <div className="bg-white rounded-lg shadow-md p-4 mb-6">
+      <h2 className="font-bold text-lg mb-3 text-gray-800">Chủ đề nổi bật</h2>
+      <div className="flex flex-wrap gap-2">
+        {topics.map((topic, index) => (
+          <span
+            key={index}
+            className="bg-pink-50 text-pink-600 px-3 py-1 rounded-full text-sm"
+          >
+            #{topic}
+          </span>
+        ))}
       </div>
     </div>
   );
@@ -153,9 +236,9 @@ const CreatePostModal = ({ show, onClose, onSubmit }) => {
 
 // Banner component được điều chỉnh để hiển thị ảnh tốt hơn
 const Banner = () => (
-  <div className="w-full mt-16 flex justify-center">
+  <div className="w-full mt-25 flex justify-center">
     <div
-      className="w-full max-w-6xl h-auto py-45"
+      className="w-full max-w-6xl h-auto py-55"
       style={{
         background: `url('https://cdn-together.hellohealthgroup.com/2024/10/1729480091_6715c59be23826.55274785') no-repeat center center`,
         backgroundSize: "cover",
@@ -167,8 +250,9 @@ const Banner = () => (
     ></div>
   </div>
 );
+
 const UnderBanner = () => (
-  <div className="w-full max-w-6xl bg-white p-4  shadow-lg flex items-center justify-between gap-x-4 ml-8.5">
+  <div className="w-full max-w-6xl mx-auto bg-white p-4 shadow-lg flex items-center justify-between gap-x-4">
     {/* Ảnh đại diện */}
     <div className="w-12 h-12 flex-shrink-0">
       <img
@@ -196,7 +280,7 @@ const UnderBanner = () => (
   </div>
 );
 
-const PregnancyPrep = () => {
+const Pregnancy = () => {
   const [posts, setPosts] = useState(INITIAL_POSTS);
   const [showModal, setShowModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -235,8 +319,10 @@ const PregnancyPrep = () => {
       <Banner />
       <UnderBanner />
 
-      <main className="max-w-3xl mx-auto py-8 px-4 flex-grow w-full">
-        <div className="flex items-center justify-between mb-8">
+      {/* Main content with two columns */}
+      <main className="max-w-6xl mx-auto py-8 px-4 flex-grow w-full">
+        <div className="flex justify-between mb-8">
+          {/* Thanh tìm kiếm */}
           <div className="relative w-64">
             <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
             <input
@@ -248,29 +334,55 @@ const PregnancyPrep = () => {
               aria-label="Search posts"
             />
           </div>
-          <button
-            onClick={() => setShowModal(true)}
-            className="fixed bottom-8 right-8 bg-pink-500 text-white p-4 rounded-full shadow-lg hover:bg-pink-600 transition-transform hover:scale-110 z-10"
-            aria-label="Create new post"
-          >
-            <FiPlus size={24} />
-          </button>
         </div>
 
-        {filteredPosts.length === 0 ? (
-          <div className="text-center py-10">
-            <p className="text-gray-500 text-lg">
-              No posts found. Create a new post!
-            </p>
+        {/* Two column layout */}
+        <div className="flex flex-col lg:flex-row gap-6">
+          {/* Left column for posts - takes 2/3 of the space */}
+          <div className="w-full lg:w-2/3">
+            {filteredPosts.length === 0 ? (
+              <div className="text-center py-10">
+                <p className="text-gray-500 text-lg">
+                  No posts found. Create a new post!
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                {filteredPosts.map((post) => (
+                  <PostCard key={post.id} post={post} onLike={handleLike} />
+                ))}
+              </div>
+            )}
           </div>
-        ) : (
-          <div className="space-y-6">
-            {filteredPosts.map((post) => (
-              <PostCard key={post.id} post={post} onLike={handleLike} />
-            ))}
+
+          {/* Right column for community groups - takes 1/3 of the space */}
+          <div className="w-full lg:w-1/3">
+            <TrendingTopics />
+
+            <div className="bg-white rounded-lg shadow-md p-4 mb-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="font-bold text-lg text-gray-800">Cộng đồng</h2>
+                <a href="#" className="text-pink-500 text-sm hover:underline">
+                  Xem tất cả
+                </a>
+              </div>
+
+              {COMMUNITY_GROUPS.map((group) => (
+                <CommunityGroupCard key={group.id} group={group} />
+              ))}
+            </div>
           </div>
-        )}
+        </div>
       </main>
+
+      {/* Nút tạo bài viết */}
+      <button
+        onClick={() => setShowModal(true)}
+        className="fixed bottom-8 right-8 bg-pink-500 text-white p-4 rounded-full shadow-lg hover:bg-pink-600 transition-transform hover:scale-110 z-10"
+        aria-label="Create new post"
+      >
+        <FiPlus size={24} />
+      </button>
 
       <CreatePostModal
         show={showModal}
@@ -282,4 +394,4 @@ const PregnancyPrep = () => {
   );
 };
 
-export default PregnancyPrep;
+export default Pregnancy;
