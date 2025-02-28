@@ -10,9 +10,9 @@ const Header = () => {
   const navigate = useNavigate();
 
   const navItems = [
-    { name: "Home", path: "/" },
-    { name: "Subscription", path: "/subscription" },
-    { name: "Health Check", path: "/health-check" },
+    { name: "Trang chủ", path: "/" },
+    { name: "Gói thành viên", path: "/subscription" },
+    { name: "Công cụ sức khỏe", path: "/health-check" },
   ];
 
   const communityItems = [
@@ -67,7 +67,7 @@ const Header = () => {
             >
               <button className="text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 rounded-md text-sm font-medium">
                 <Space>
-                  Community
+                  Cộng đồng
                   <DownOutlined />
                 </Space>
               </button>
@@ -95,13 +95,13 @@ const Header = () => {
                   onClick={() => navigate("/login")}
                   className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400"
                 >
-                  Sign In
+                  Đăng nhập
                 </button>
                 <button
                   onClick={() => navigate("/register")}
                   className="px-4 py-2 text-sm font-medium text-white bg-pink-600 rounded-md hover:bg-pink-700"
                 >
-                  Sign Up
+                  Đăng kí
                 </button>
               </div>
             )}
@@ -153,13 +153,13 @@ const Header = () => {
                     onClick={() => navigate("/login")}
                     className="w-full px-4 py-2 text-base font-medium text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400"
                   >
-                    Sign In
+                    Đăng nhập
                   </button>
                   <button
                     onClick={() => navigate("/register")}
                     className="w-full px-4 py-2 text-base font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
                   >
-                    Sign Up
+                    Đăng kí
                   </button>
                 </div>
               )}
