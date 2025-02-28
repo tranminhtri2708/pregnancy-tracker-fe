@@ -82,15 +82,15 @@ const LoginPage = () => {
 
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="rounded-md shadow-sm space-y-4">
-            <div>
+            {/* <div>
               <label htmlFor="username" className="sr-only">
                 Username
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <FaUser className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
+                </div> */}
+            {/* <input
                   id="username"
                   name="username"
                   type="text"
@@ -103,14 +103,14 @@ const LoginPage = () => {
                   value={formData.username}
                   onChange={handleChange}
                   aria-invalid={errors.username ? "true" : "false"}
-                />
-              </div>
+                /> */}
+            {/* </div>
               {errors.username && (
                 <p className="mt-2 text-sm text-red-600" role="alert">
                   {errors.username}
                 </p>
               )}
-            </div>
+            </div> */}
 
             <div>
               <label htmlFor="password" className="sr-only">

@@ -13,11 +13,12 @@ import api from "../../config/axios";
 import { toast } from "react-toastify";
 const RegisterPage = () => {
   const [formData, setFormData] = useState({
-    fullName: "",
+    firstName: "",
+    lastName: "",
     email: "",
-    username: "",
     password: "",
-    terms: false,
+    confirmPassword: "",
+    role: 0,
   });
   const navigate = useNavigate();
   const [errors, setErrors] = useState({});
@@ -25,6 +26,7 @@ const RegisterPage = () => {
   const [isLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState(0);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const validatePassword = (password) => {
     let strength = 0;
@@ -54,13 +56,21 @@ const RegisterPage = () => {
     let newErrors = { ...errors };
 
     switch (name) {
-      case "fullName":
-        if (!value) newErrors.fullName = "Full name is required";
+      case "firstName":
+        if (!value) newErrors.firstName = "First Name is required";
         else if (value.length < 2)
-          newErrors.fullName = "Name must be at least 2 characters";
+          newErrors.firstName = "First Name must be at least 2 characters";
         else if (!/^[A-Za-z\s]+$/.test(value))
-          newErrors.fullName = "Only alphabets and spaces allowed";
-        else delete newErrors.fullName;
+          newErrors.firstName = "Only alphabets and spaces allowed";
+        else delete newErrors.firstName;
+        break;
+      case "lastName":
+        if (!value) newErrors.lastName = "Last Name is required";
+        else if (value.length < 2)
+          newErrors.lastName = "Last Name must be at least 2 characters";
+        else if (!/^[A-Za-z\s]+$/.test(value))
+          newErrors.lastName = "Only alphabets and spaces allowed";
+        else delete newErrors.lastName;
         break;
 
       case "email":
@@ -68,17 +78,6 @@ const RegisterPage = () => {
         else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value))
           newErrors.email = "Invalid email format";
         else delete newErrors.email;
-        break;
-
-      case "username":
-        if (!value) newErrors.username = "Username is required";
-        else if (value.length < 4)
-          newErrors.username = "Username must be at least 4 characters";
-        else if (value.length > 20)
-          newErrors.username = "Username must not exceed 20 characters";
-        else if (!/^[a-zA-Z0-9]+$/.test(value))
-          newErrors.username = "Only alphanumeric characters allowed";
-        else delete newErrors.username;
         break;
 
       case "password":
@@ -199,34 +198,67 @@ const RegisterPage = () => {
 
             <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
               <div className="space-y-4">
+                {/*First Name */}
                 <div>
                   <label
-                    htmlFor="fullName"
+                    htmlFor="firstname"
                     className="block text-sm font-medium text-gray-700"
                   >
-                    Full Name
+                    First Name
                   </label>
                   <div className="mt-1 relative">
                     <input
-                      id="fullName"
-                      name="fullName"
+                      id="firstName"
+                      name="firstName"
                       type="text"
-                      value={formData.fullName}
+                      value={formData.firstName}
                       onChange={handleChange}
                       className={`appearance-none block w-full px-3 py-2 border ${
-                        errors.fullName ? "border-red-300" : "border-gray-300"
+                        errors.firstName ? "border-red-300" : "border-gray-300"
                       } rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm`}
                       placeholder="John Doe"
                     />
-                    {errors.fullName && (
+                    {errors.firstName && (
                       <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                         <FaTimesCircle className="h-5 w-5 text-red-500" />
                       </div>
                     )}
                   </div>
-                  {errors.fullName && (
+                  {errors.firstName && (
                     <p className="mt-2 text-sm text-red-600">
-                      {errors.fullName}
+                      {errors.firstName}
+                    </p>
+                  )}
+                </div>
+                {/*Last Name */}
+                <div>
+                  <label
+                    htmlFor="firstname"
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    Last Name
+                  </label>
+                  <div className="mt-1 relative">
+                    <input
+                      id="lastName"
+                      name="lastName"
+                      type="text"
+                      value={formData.lastName}
+                      onChange={handleChange}
+                      className={`appearance-none block w-full px-3 py-2 border ${
+                        errors.lastName ? "border-red-300" : "border-gray-300"
+                      } rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm`}
+                      placeholder="John Doe"
+                    />
+                    {errors.lastName && (
+                      <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                        <FaTimesCircle className="h-5 w-5 text-red-500" />
+                      </div>
+                    )}
+                  </div>
+                  {errors.lastName && (
+                    <p className="mt-2 text-sm text-red-600">
+                      {errors.lastName}
                     </p>
                   )}
                 </div>
@@ -261,7 +293,7 @@ const RegisterPage = () => {
                   )}
                 </div>
 
-                <div>
+                {/* <div>
                   <label
                     htmlFor="username"
                     className="block text-sm font-medium text-gray-700"
@@ -291,7 +323,7 @@ const RegisterPage = () => {
                       {errors.username}
                     </p>
                   )}
-                </div>
+                </div> */}
 
                 <div>
                   <label
@@ -341,13 +373,55 @@ const RegisterPage = () => {
                     </div>
                   </div>
                 </div>
+                {/*Confirm password */}
+                <div className="mt-4">
+                  <label
+                    htmlFor="confirmPassword"
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    Confirm Password
+                  </label>
+                  <div className="mt-1 relative">
+                    <input
+                      id="confirmPassword"
+                      name="confirmPassword"
+                      type={showConfirmPassword ? "text" : "password"}
+                      value={formData.confirmPassword}
+                      onChange={handleChange}
+                      className={`appearance-none block w-full px-3 py-2 border ${
+                        errors.confirmPassword
+                          ? "border-red-300"
+                          : "border-gray-300"
+                      } rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm pr-10`}
+                      placeholder="••••••••"
+                    />
+                    <button
+                      type="button"
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                      onClick={() =>
+                        setShowConfirmPassword(!showConfirmPassword)
+                      }
+                    >
+                      {showConfirmPassword ? (
+                        <FaEyeSlash className="h-5 w-5 text-gray-400" />
+                      ) : (
+                        <FaEye className="h-5 w-5 text-gray-400" />
+                      )}
+                    </button>
+                  </div>
+                  {errors.confirmPassword && (
+                    <p className="mt-2 text-sm text-red-600">
+                      {errors.confirmPassword}
+                    </p>
+                  )}
+                </div>
 
                 <div className="flex items-center">
                   <input
                     id="terms"
                     name="terms"
                     type="checkbox"
-                    checked={formData.terms}
+                    checked={formData}
                     onChange={handleChange}
                     className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
                   />
