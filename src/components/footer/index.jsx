@@ -21,7 +21,7 @@ const Footer = () => {
           <div className="space-y-4">
             <h3 className="text-xl font-semibold text-pink-600 flex items-center gap-2">
               <FaBaby className="text-pink-500" />
-              Quick Links
+              Liên kết nhanh
             </h3>
             <ul className="space-y-2">
               <li>
@@ -30,7 +30,7 @@ const Footer = () => {
                   className="hover:text-pink-500 transition-colors duration-300 flex items-center gap-2"
                 >
                   <FaHeart className="text-pink-400" size={12} />
-                  Pregnancy Stages
+                  Giai đoạn mang thai
                 </a>
               </li>
               <li>
@@ -39,7 +39,7 @@ const Footer = () => {
                   className="hover:text-pink-500 transition-colors duration-300 flex items-center gap-2"
                 >
                   <FaBook className="text-pink-400" size={12} />
-                  Health Resources
+                  Tài nguyên y tế
                 </a>
               </li>
               <li>
@@ -48,7 +48,7 @@ const Footer = () => {
                   className="hover:text-pink-500 transition-colors duration-300 flex items-center gap-2"
                 >
                   <FaHeart className="text-pink-400" size={12} />
-                  Nutrition Guide
+                  Hướng dẫn dinh dưỡng
                 </a>
               </li>
               <li>
@@ -57,7 +57,7 @@ const Footer = () => {
                   className="hover:text-pink-500 transition-colors duration-300 flex items-center gap-2"
                 >
                   <FaUsers className="text-pink-400" size={12} />
-                  Support Groups
+                  Cộng đồng hỗ trợ
                 </a>
               </li>
             </ul>
@@ -65,7 +65,9 @@ const Footer = () => {
 
           {/* Contact Information */}
           <div className="space-y-4">
-            <h3 className="text-xl font-semibold text-pink-600">Contact Us</h3>
+            <h3 className="text-xl font-semibold text-pink-600">
+              Thông tin chúng tôi
+            </h3>
             <ul className="space-y-2">
               <li className="flex items-center gap-2">
                 <FaPhone className="text-pink-400" />
@@ -89,14 +91,14 @@ const Footer = () => {
 
           {/* Resources */}
           <div className="space-y-4">
-            <h3 className="text-xl font-semibold text-pink-600">Resources</h3>
+            <h3 className="text-xl font-semibold text-pink-600">Thông tin</h3>
             <ul className="space-y-2">
               <li>
                 <a
                   href="#"
                   className="hover:text-pink-500 transition-colors duration-300"
                 >
-                  Medical Disclaimer
+                  Điều khoản sử dụng
                 </a>
               </li>
               <li>
@@ -104,7 +106,7 @@ const Footer = () => {
                   href="#"
                   className="hover:text-pink-500 transition-colors duration-300"
                 >
-                  Privacy Policy
+                  Chính sách quyền riêng tư
                 </a>
               </li>
               <li>
@@ -112,7 +114,7 @@ const Footer = () => {
                   href="#"
                   className="hover:text-pink-500 transition-colors duration-300"
                 >
-                  Terms of Service
+                  Tiêu chuẩn cộng đông
                 </a>
               </li>
               <li>
@@ -120,7 +122,7 @@ const Footer = () => {
                   href="#"
                   className="hover:text-pink-500 transition-colors duration-300"
                 >
-                  Pregnancy Counseling
+                  Câu hỏi thường gặp
                 </a>
               </li>
             </ul>
@@ -129,7 +131,7 @@ const Footer = () => {
           {/* Social Media */}
           <div className="space-y-4">
             <h3 className="text-xl font-semibold text-pink-600">
-              Connect With Us
+              Kết nối với chúng tôi
             </h3>
             <div className="flex space-x-4">
               <a
