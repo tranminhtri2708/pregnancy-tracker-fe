@@ -21,6 +21,7 @@ import PregnancyProfile from "./pages/viewprofile";
 import MembershipPackages from "./pages/subscription/SubscriptionUser";
 import PregnancyPrep from "./pages/community";
 import Pregnancy from "./pages/community/index1";
+import EmailVerification from "./pages/verification";
 
 const router = createBrowserRouter([
   {
@@ -46,6 +47,10 @@ const router = createBrowserRouter([
   {
     path: "/homepage",
     element: <PregnancyHomepage />,
+  },
+  {
+    path: "/verification",
+    element: <EmailVerification />,
   },
   {
     path: "*",
