@@ -3,6 +3,11 @@ import { useState, useEffect, useRef } from "react";
 import { FiMail } from "react-icons/fi";
 import { IoReloadOutline } from "react-icons/io5";
 
+
+const savedData = JSON.parse(localStorage.getItem("responseData"));
+console.log("Saved data: ", savedData);
+
+
 const EmailVerification = ({ userId }) => {
   const [verificationCode, setVerificationCode] = useState([
     "",
@@ -19,6 +24,7 @@ const EmailVerification = ({ userId }) => {
   const [attempts, setAttempts] = useState(0);
   const [resendLoading, setResendLoading] = useState(false);
   const inputRefs = useRef([]);
+  
 
   useEffect(() => {
     if (timeLeft > 0) {
@@ -48,24 +54,22 @@ const EmailVerification = ({ userId }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const code = verificationCode.join("");
-
     if (code.length !== 6) {
       setError("Vui lòng nhập đủ mã xác minh");
       return;
     }
-
-    setLoading(true);
-    setError("");
-
+    console.log("api: ");
+    
     try {
-      const response = await axios.post("Verification", {
-        userId,
-        verificationCode: code,
+      const response = await axios.post("http://localhost:5141/api/Auth/Verification", {
+        userId : savedData,
+        verificationCode:  code,
       });
-
+      console.log("error: ", error);
       if (response.status === 200) {
         setIsSuccess(true);
       }
+      setLoading(true);
     } catch (error) {
       setError("Mã xác minh không hợp lệ!");
     } finally {
