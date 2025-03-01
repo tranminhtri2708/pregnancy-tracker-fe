@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({
-    username: "",
+    userEmail: "",
     password: "",
     rememberMe: false,
   });
@@ -17,12 +17,10 @@ const LoginPage = () => {
   const navigate = useNavigate();
   const validateForm = () => {
     const newErrors = {};
-    if (!formData.username.trim()) {
-      newErrors.username = "Username is required";
-    } else if (formData.username.trim().length < 3) {
-      newErrors.username = "Username must be at least 3 characters";
-    } else if (formData.username.trim().length > 50) {
-      newErrors.username = "Username must not exceed 50 characters";
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailRegex.test(formData.userEmail)) {
+      newErrors.userEmail = "Invalid email format";
     }
 
     if (!formData.password) {
@@ -82,35 +80,35 @@ const LoginPage = () => {
 
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="rounded-md shadow-sm space-y-4">
-            {/* <div>
-              <label htmlFor="username" className="sr-only">
-                Username
+            <div>
+              <label htmlFor="userEmail" className="sr-only">
+                User Email
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <FaUser className="h-5 w-5 text-gray-400" />
-                </div> */}
-            {/* <input
-                  id="username"
-                  name="username"
-                  type="text"
-                  autoComplete="username"
+                </div>
+                <input
+                  id="userEmail"
+                  name="userEmail"
+                  type="email"
+                  autoComplete="userEmail"
                   required
                   className={`appearance-none rounded-lg relative block w-full pl-10 pr-3 py-2 border ${
-                    errors.username ? "border-red-300" : "border-gray-300"
+                    errors.userEmail ? "border-red-300" : "border-gray-300"
                   } placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm`}
-                  placeholder="Enter your username"
-                  value={formData.username}
+                  placeholder="Enter your mail"
+                  value={formData.userEmail}
                   onChange={handleChange}
-                  aria-invalid={errors.username ? "true" : "false"}
-                /> */}
-            {/* </div>
-              {errors.username && (
+                  aria-invalid={errors.userEmail ? "true" : "false"}
+                />
+              </div>
+              {errors.userEmail && (
                 <p className="mt-2 text-sm text-red-600" role="alert">
-                  {errors.username}
+                  {errors.userEmail}
                 </p>
               )}
-            </div> */}
+            </div>
 
             <div>
               <label htmlFor="password" className="sr-only">
