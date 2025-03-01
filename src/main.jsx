@@ -22,6 +22,8 @@ import MembershipPackages from "./pages/subscription/SubscriptionUser";
 import PregnancyPrep from "./pages/community";
 import Pregnancy from "./pages/community/index1";
 import EmailVerification from "./pages/verification";
+import { Provider } from "react-redux";
+import { store } from "./redux/store";
 
 const router = createBrowserRouter([
   {
@@ -90,7 +92,9 @@ const router = createBrowserRouter([
 ]);
 createRoot(document.getElementById("root")).render(
   <>
-    <RouterProvider router={router} />
-    <ToastContainer />
+    <Provider store={store}>
+      <RouterProvider router={router} />
+      <ToastContainer />
+    </Provider>
   </>
 );

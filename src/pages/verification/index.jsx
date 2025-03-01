@@ -3,6 +3,9 @@ import { useState, useEffect, useRef } from "react";
 import { FiMail } from "react-icons/fi";
 import { IoReloadOutline } from "react-icons/io5";
 
+const savedData = JSON.parse(localStorage.getItem("responseData"));
+console.log("Saved data: ", savedData);
+
 const EmailVerification = ({ userId }) => {
   const [verificationCode, setVerificationCode] = useState([
     "",
@@ -48,21 +51,18 @@ const EmailVerification = ({ userId }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const code = verificationCode.join("");
-
     if (code.length !== 6) {
       setError("Vui lòng nhập đủ mã xác minh");
       return;
     }
-
+    console.log("api: ");
     setLoading(true);
-    setError("");
-
     try {
       const response = await axios.post("Verification", {
-        userId,
+        userId: savedData,
         verificationCode: code,
       });
-
+      console.log("error: ", error);
       if (response.status === 200) {
         setIsSuccess(true);
       }

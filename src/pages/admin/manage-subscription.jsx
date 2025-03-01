@@ -1,6 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { createProduct, getProduct } from "../../services/api.subscription";
-import { Button, Form, Input, Modal, Select, Table } from "antd";
+import {
+  createProduct,
+  deleteProduct,
+  getProduct,
+  updateProduct,
+} from "../../services/api.subscription";
+import { Button, Form, Input, Modal, Popconfirm, Select, Table } from "antd";
 import FormItem from "antd/es/form/FormItem";
 import { getCategories } from "../../services/api.category";
 import { useForm } from "antd/es/form/Form";
@@ -26,6 +31,7 @@ function ManageProduct() {
     fetchCategories();
   }, []);
   const columns = [
+    // lấy ra được 2 fill trong swagger
     // muốn hiển thị bao nhiêu cột thì thêm bấy nhiêu column dưaj vào be
     {
       title: "Name",
@@ -37,11 +43,76 @@ function ManageProduct() {
       dataIndex: "description", // này phải để chính xác cái be trả về
       key: "description", // này cũng phải giống be
     },
+    {
+      title: "Price", // này thì tự đặt
+      dataIndex: "price", // này phải để chính xác cái be trả về
+      key: "price", // này cũng phải giống be
+    },
+    {
+      title: "Quantity", // này thì tự đặt
+      dataIndex: "quantity", // này phải để chính xác cái be trả về
+      key: "quantity", // này cũng phải giống be
+    },
+    // cần thêm 2 cái action
+    {
+      title: "Action",
+      dataIndex: "id",
+      key: "id",
+      render: (id, record) => {
+        // record là dữ liệu nó trả về từng cái data trên từng hàng
+        return (
+          <>
+            <Button
+              type="primary"
+              onClick={() => {
+                setOpen(true); // mở Modal khi nhấn Update
+                // data sẽ đỗ lên từng fill
+                // cái record trả về object cuar catagori chứ không phải là 1 id
+                form.setFieldsValue({
+                  ...record,
+                  categoryID: record?.categories
+                    ? record?.categories?.map((item) => item.id)
+                    : [],
+                }); // sử lý để fill categoriId đươc đổ ra
+              }}
+            >
+              Update
+            </Button>
+            <Popconfirm
+              title="Delete the product"
+              description="Are you sure to delete this product?"
+              onConfirm={() => handleDeleteProduct(id)}
+            >
+              <Button danger type="primary">
+                Delete
+              </Button>
+            </Popconfirm>
+          </>
+        );
+      },
+    },
   ];
+  const handleDeleteProduct = async (id) => {
+    const response = await deleteProduct(id);
+    if (response) {
+      fetchProduct(); // khi xóa xong gọi lại để refre lại table
+    }
+  };
   const handleSubmit = async (formValues) => {
     formValues.image = "123"; // này set đại Image chưa chính xác
-    const response = await createProduct(formValues);
-    toast.success("Successfull"); // hiển thị thông báo thành công
+    // có id thì update ngược laij không có là post
+    if (formValues.id) {
+      const response = await updateProduct({
+        id: formValues.id,
+        product: formValues,
+      });
+      console.log(response);
+      toast.success("Successfully update product"); // hiển thị thông báo thành công
+    } else {
+      const response = await createProduct(formValues);
+      toast.success("Successfull create new product"); // hiển thị thông báo thành công
+    }
+
     setOpen(false); // tắt modal
     form.resetFields(); // xóa dự liệu bắt đầu lại từ đầu
     fetchProduct();
@@ -57,8 +128,14 @@ function ManageProduct() {
       >
         Create new product
       </Button>
-      <Table dataSource={products} columns={columns} />
+      {/* <Table dataSource={products} columns={columns} /> */}
+      {/*Cái table này là hiển thị tất cả các sản phẩm chưa xóa và đã xóa */}
+      {/*Giờ mình cập nhật thêm tại delete be phải làm ko dc delete hẵn trên database */}
       {/*Modal này có hai trang thái mở lên và ẩn đi */}
+      <Table
+        dataSource={products.filter((product) => !product.deleted)} // đây là lọc lấy những thằng chưa bị xóa
+        columns={columns}
+      />
       <Modal
         title="Product"
         open={open}
@@ -72,6 +149,11 @@ function ManageProduct() {
           form={form}
           onFinish={handleSubmit}
         >
+          <Form.Item label="Id" name="id" hidden>
+            {" "}
+            {/*Dòng này để biết mình đang muốn update thằng nào */}
+            <Input />
+          </Form.Item>
           <Form.Item
             label="Name"
             name="name"

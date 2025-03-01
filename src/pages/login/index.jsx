@@ -4,6 +4,8 @@ import { FcGoogle } from "react-icons/fc";
 import api from "../../config/axios";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import { login } from "../../redux/features/userSlice";
+import { useDispatch } from "react-redux";
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({
@@ -15,6 +17,7 @@ const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const validateForm = () => {
     const newErrors = {};
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -42,6 +45,7 @@ const LoginPage = () => {
         const { token, role } = response.data.data;
         localStorage.setItem("token", token); // để xác định role cho be để thao tác api
         toast.success("Successfully login!");
+        dispatch(login(response.data.data));
         // navigate("/homepage");
         if (role === "ADMIN") {
           navigate("/dashboard");
