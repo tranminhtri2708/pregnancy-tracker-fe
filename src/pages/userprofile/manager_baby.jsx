@@ -5,6 +5,8 @@ import {
   getAllChildren,
   updateChildren,
 } from "../../services/api.children";
+
+import api from "../../config/axios";
 import {
   Button,
   Form,
@@ -18,16 +20,36 @@ import {
 import { useForm } from "antd/es/form/Form";
 import { toast } from "react-toastify";
 import dayjs from "dayjs";
+import axios from "axios";
 
 function ManagerBaby() {
   const [childrens, setChildrens] = useState([]);
   const [open, setOpen] = useState(false);
   const [form] = useForm();
 
+  const getUserID = async() => {
+    try{
+      const response = await api.get("UserAccount/GetUserId");
+      
+      localStorage.setItem(
+        "userId",
+        response.data.result.userId
+      );
+    }catch (error) {
+      console.error("Error fetching children:", error);
+    }
+
+  }
   const fetchChildren = async () => {
     try {
       const data = await getAllChildren();
-      setChildrens(data?.result ?? []);
+      const userId = localStorage.getItem("userId");
+      console.log("userId", userId);
+      const filteredResult = data.result.filter(item => item.accountId === +userId);
+      console.log(filteredResult)
+      setChildrens(filteredResult);
+      // const filteredResult = data.result.filter(item => item.accountId === localStorage.getItem("userId"));
+      
     } catch (error) {
       console.error("Error fetching children:", error);
       setChildrens([]);
@@ -36,6 +58,7 @@ function ManagerBaby() {
 
   useEffect(() => {
     fetchChildren();
+    getUserID();
   }, []);
 
   const formatGender = (value) => {
