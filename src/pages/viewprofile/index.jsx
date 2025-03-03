@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import Header from "../../components/header";
 import Footer from "../../components/footer";
 import {
+  FaBaby,
   FaEye,
   FaEyeSlash,
   FaHeartbeat,
@@ -14,6 +15,7 @@ import {
 } from "react-icons/fa";
 import { FaGear } from "react-icons/fa6";
 import { FaChevronDown, FaChevronUp } from "react-icons/fa";
+import { Outlet, useNavigate } from "react-router-dom";
 const faqData = [
   {
     question: "MomCare là gì?",
@@ -53,6 +55,7 @@ const faqData = [
   },
 ];
 const PregnancyProfile = () => {
+  const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [selectedSection, setSelectedSection] = useState("personal");
   const [selectedSubSection, setSelectedSubSection] = useState(null);
@@ -74,6 +77,10 @@ const PregnancyProfile = () => {
   {
     /*Chi tiết thông tin về sức khỏe */
   }
+  const handleNavigate = (path) => {
+    setSelectedSection(path);
+    navigate(`/viewprofile/${path}`);
+  };
   const [healthMetrics, setHealthMetrics] = useState({
     weight: "65kg",
     bloodPressure: "120/80",
@@ -86,6 +93,7 @@ const PregnancyProfile = () => {
     allergies: ["Penicillin"],
     vaccinations: ["Flu Shot", "Tdap"],
   });
+
   {
     /*hai cái này là của trợ giúp */
   }
@@ -195,7 +203,16 @@ const PregnancyProfile = () => {
               <FaUserFriends className="text-purple-500 text-2xl" />
               <span>Đã tham gia</span>
             </button>
-
+            {/*Thông tin về thai */}
+            <button
+              className={`w-full flex items-center space-x-2 text-left px-4 py-2 rounded-lg ${
+                selectedSection === "numberbaby" ? "bg-pink-200" : "bg-gray-100"
+              }`}
+              onClick={() => handleNavigate("numberbaby")}
+            >
+              <FaBaby className="text-pink-500 text-2xl" />
+              <span>Số lượng em bé</span>
+            </button>
             {/*Nút lịch sư khám bệnh ở đây sẽ thể hiện các lịch hẹn khám sắp tới */}
             <button
               className={`w-full flex items-center space-x-2 text-left px-4 py-2 rounded-lg ${
@@ -351,6 +368,15 @@ const PregnancyProfile = () => {
               <p>Weight: {healthMetrics.weight}</p>
               <p>Blood Pressure: {healthMetrics.bloodPressure}</p>
               <p>Last Checkup: {healthMetrics.lastCheckup}</p>
+            </div>
+          )}
+          {/*Các thông tin về số lượng em bé */}
+          {selectedSection === "numberbaby" && (
+            <div className="bg-white rounded-2xl shadow-lg p-6">
+              <h2 className="text-2xl font-semibold mb-6 text-gray-800">
+                Số lương em bé
+              </h2>
+              <Outlet />
             </div>
           )}
           {selectedSection === "communicate" && (

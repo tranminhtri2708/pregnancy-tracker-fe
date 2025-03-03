@@ -2,11 +2,13 @@ import axios from "axios";
 import { useState, useEffect, useRef } from "react";
 import { FiMail } from "react-icons/fi";
 import { IoReloadOutline } from "react-icons/io5";
+import { useNavigate } from "react-router-dom"; // Thêm import useNavigate
 
 const savedData = JSON.parse(localStorage.getItem("responseData"));
 console.log("Saved data: ", savedData);
 
 const EmailVerification = ({ userId }) => {
+  const navigate = useNavigate(); // Khởi tạo hook useNavigate
   const [verificationCode, setVerificationCode] = useState([
     "",
     "",
@@ -29,6 +31,18 @@ const EmailVerification = ({ userId }) => {
       return () => clearInterval(timer);
     }
   }, [timeLeft]);
+
+  // Thêm useEffect để điều hướng sau khi xác thực thành công
+  useEffect(() => {
+    if (isSuccess) {
+      // Hiển thị thông báo thành công trong 2 giây trước khi chuyển hướng
+      const redirectTimer = setTimeout(() => {
+        navigate("/login"); // Điều hướng đến trang login
+      }, 2000);
+
+      return () => clearTimeout(redirectTimer);
+    }
+  }, [isSuccess, navigate]);
 
   const handleInputChange = (index, value) => {
     if (!/^[0-9]*$/.test(value)) return;
@@ -107,6 +121,9 @@ const EmailVerification = ({ userId }) => {
             </h2>
             <p className="mt-2 text-gray-600">
               Your email has been successfully verified.
+            </p>
+            <p className="mt-4 text-sm text-gray-500">
+              Redirecting to login page...
             </p>
           </div>
         </div>

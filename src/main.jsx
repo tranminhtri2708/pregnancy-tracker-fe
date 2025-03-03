@@ -24,6 +24,7 @@ import Pregnancy from "./pages/community/index1";
 import EmailVerification from "./pages/verification";
 import { Provider } from "react-redux";
 import { store } from "./redux/store";
+import ManagerBaby from "./pages/userprofile/manager_baby";
 
 const router = createBrowserRouter([
   {
@@ -62,10 +63,10 @@ const router = createBrowserRouter([
     path: "/header",
     element: <Header />,
   },
-  {
-    path: "/viewprofile",
-    element: <PregnancyProfile />,
-  },
+  // {
+  //   path: "/viewprofile",
+  //   element: <PregnancyProfile />,
+  // },
   {
     path: "/footer",
     element: <Footer />,
@@ -86,6 +87,17 @@ const router = createBrowserRouter([
       {
         path: "/dashboard/user",
         element: <ManageUser />,
+      },
+    ],
+  },
+  // chuyển trang của viewprofile
+  {
+    path: "/viewprofile",
+    element: <PregnancyProfile />,
+    children: [
+      {
+        path: "numberbaby",
+        element: <ManagerBaby />,
       },
     ],
   },
