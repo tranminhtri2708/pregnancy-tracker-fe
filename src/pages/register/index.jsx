@@ -115,7 +115,7 @@ const RegisterPage = () => {
 
     // promise
     try {
-      const response = await api.post("register", formData);
+      const response = await api.post("Auth/register", formData);
 
       toast.success("Successully create new account!");
       localStorage.setItem(

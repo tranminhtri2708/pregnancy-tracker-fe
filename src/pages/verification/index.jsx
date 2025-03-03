@@ -58,10 +58,13 @@ const EmailVerification = ({ userId }) => {
     console.log("api: ");
     setLoading(true);
     try {
-      const response = await axios.post("Verification", {
-        userId: savedData,
-        verificationCode: code,
-      });
+      const response = await axios.post(
+        "http://localhost:5141/api/Auth/Verification",
+        {
+          userId: savedData,
+          verificationCode: code,
+        }
+      );
       console.log("error: ", error);
       if (response.status === 200) {
         setIsSuccess(true);
