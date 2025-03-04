@@ -6,6 +6,8 @@ import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { login } from "../../redux/features/userSlice";
 import { useDispatch } from "react-redux";
+import { store } from "../../redux/store";
+
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({
@@ -42,7 +44,7 @@ const LoginPage = () => {
       setIsLoading(true);
       try {
         const response = await api.post("Auth/login", formData);
-        console.log("API response:", response); // Để debug
+        console.log("API response:", response.data);  // Để debug
 
         if (response.data.isSuccess && response.data.result) {
           const token = response.data.result;
@@ -54,7 +56,6 @@ const LoginPage = () => {
           const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
           const payload = JSON.parse(window.atob(base64));
           const role = payload.Role; // Lấy role từ JWT
-
           // Dispatch thông tin người dùng từ payload JWT
           dispatch(
             login({

@@ -30,7 +30,6 @@ function ManagerBaby() {
   const getUserID = async() => {
     try{
       const response = await api.get("UserAccount/GetUserId");
-      
       localStorage.setItem(
         "userId",
         response.data.result.userId

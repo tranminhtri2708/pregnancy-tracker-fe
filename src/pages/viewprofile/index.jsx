@@ -81,6 +81,10 @@ const PregnancyProfile = () => {
     setSelectedSection(path);
     navigate(`/viewprofile/${path}`);
   };
+  const handleRedirect = (path) => {
+    setSelectedSection(path);
+    navigate(`/`);
+  };
   const [healthMetrics, setHealthMetrics] = useState({
     weight: "65kg",
     bloodPressure: "120/80",
@@ -198,7 +202,9 @@ const PregnancyProfile = () => {
                   ? "bg-pink-200"
                   : "bg-gray-100"
               }`}
-              onClick={() => setSelectedSection("communicate")}
+              onClick={() => setSelectedSection("communicate")
+                
+              }
             >
               <FaUserFriends className="text-purple-500 text-2xl" />
               <span>Đã tham gia</span>
@@ -218,7 +224,9 @@ const PregnancyProfile = () => {
               className={`w-full flex items-center space-x-2 text-left px-4 py-2 rounded-lg ${
                 selectedSection === "calendar" ? "bg-pink-200" : "bg-gray-100"
               }`}
-              onClick={() => setSelectedSection("calendar")}
+              onClick={() => {setSelectedSection("calendar")
+                handleNavigate("calendar")
+              }}
             >
               <FaRegCalendarCheck className="text-green-500 text-2xl" />
               <span>Lịch sử lịch hẹn</span>
@@ -320,7 +328,12 @@ const PregnancyProfile = () => {
                       <button
                         onClick={() => {
                           console.log("Đăng xuất...");
+                          localStorage.removeItem("token");
+                          localStorage.removeItem("expiration");
+                          localStorage.clear();
                           setIsOpen(false);
+                          handleRedirect()
+                          
                         }}
                         className="px-4 py-2 border border-pink-500 text-pink-500 rounded-md hover:bg-pink-100 transition w-1/2 ml-2"
                       >
@@ -567,7 +580,7 @@ const PregnancyProfile = () => {
               <p>Last Checkup: {healthMetrics.lastCheckup}</p>
             </div>
           )}
-
+          
           {selectedSection === "save" && (
             <div className="bg-white rounded-2xl shadow-lg p-6">
               <h2 className="text-2xl font-semibold mb-6 text-gray-800">
