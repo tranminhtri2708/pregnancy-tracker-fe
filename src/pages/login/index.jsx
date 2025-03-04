@@ -1,25 +1,31 @@
 import { useState } from "react";
 import { FaEye, FaEyeSlash, FaLock, FaUser } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
+import api from "../../config/axios";
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
+import { login } from "../../redux/features/userSlice";
+import { useDispatch } from "react-redux";
+import { store } from "../../redux/store";
+
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({
-    username: "",
+    userEmail: "",
     password: "",
     rememberMe: false,
   });
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
   const validateForm = () => {
     const newErrors = {};
-    if (!formData.username.trim()) {
-      newErrors.username = "Username is required";
-    } else if (formData.username.trim().length < 3) {
-      newErrors.username = "Username must be at least 3 characters";
-    } else if (formData.username.trim().length > 50) {
-      newErrors.username = "Username must not exceed 50 characters";
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailRegex.test(formData.userEmail)) {
+      newErrors.userEmail = "Invalid email format";
     }
 
     if (!formData.password) {
@@ -37,11 +43,42 @@ const LoginPage = () => {
     if (validateForm()) {
       setIsLoading(true);
       try {
-        // Simulate API call
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-        console.log("Login successful", formData);
-      } catch (error) {
-        console.error("Login failed", error);
+        const response = await api.post("Auth/login", formData);
+        console.log("API response:", response.data);  // Để debug
+
+        if (response.data.isSuccess && response.data.result) {
+          const token = response.data.result;
+          localStorage.setItem("token", token);
+          toast.success("Successfully login!");
+
+          // Giải mã JWT để lấy thông tin role
+          const base64Url = token.split(".")[1];
+          const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+          const payload = JSON.parse(window.atob(base64));
+          const role = payload.Role; // Lấy role từ JWT
+          // Dispatch thông tin người dùng từ payload JWT
+          dispatch(
+            login({
+              token,
+              role,
+              email: payload.Email,
+              userId: payload.UserId,
+              fullName: payload.FullName,
+            })
+          );
+
+          // Điều hướng dựa trên role
+          if (role === "Admin" || role === "ADMIN") {
+            navigate("/dashboard");
+          } else {
+            navigate("/homepage");
+          }
+        } else {
+          toast.error(response.data.errorMessage || "Invalid credentials");
+        }
+      } catch (err) {
+        console.error("Login error:", err);
+        toast.error(err.response?.data?.errorMessage || "Login failed!");
       } finally {
         setIsLoading(false);
       }
@@ -57,7 +94,7 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 to-pink-200 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-rose-50 to-rose-200 flex items-center justify-center p-4">
       <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-lg">
         <div>
           <img
@@ -66,38 +103,38 @@ const LoginPage = () => {
             alt="Logo"
           />
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Sign in to your account
+            Welcome back!
           </h2>
         </div>
 
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="rounded-md shadow-sm space-y-4">
             <div>
-              <label htmlFor="username" className="sr-only">
-                Username
+              <label htmlFor="userEmail" className="sr-only">
+                User Email
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <FaUser className="h-5 w-5 text-gray-400" />
                 </div>
                 <input
-                  id="username"
-                  name="username"
-                  type="text"
-                  autoComplete="username"
+                  id="userEmail"
+                  name="userEmail"
+                  type="email"
+                  autoComplete="userEmail"
                   required
                   className={`appearance-none rounded-lg relative block w-full pl-10 pr-3 py-2 border ${
-                    errors.username ? "border-red-300" : "border-gray-300"
+                    errors.userEmail ? "border-red-300" : "border-gray-300"
                   } placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm`}
-                  placeholder="Enter your username"
-                  value={formData.username}
+                  placeholder="Enter your mail"
+                  value={formData.userEmail}
                   onChange={handleChange}
-                  aria-invalid={errors.username ? "true" : "false"}
+                  aria-invalid={errors.userEmail ? "true" : "false"}
                 />
               </div>
-              {errors.username && (
+              {errors.userEmail && (
                 <p className="mt-2 text-sm text-red-600" role="alert">
-                  {errors.username}
+                  {errors.userEmail}
                 </p>
               )}
             </div>
@@ -165,7 +202,7 @@ const LoginPage = () => {
 
             <div className="text-sm">
               <a
-                href="#"
+                href="/forget"
                 className="font-medium text-blue-600 hover:text-blue-500"
               >
                 Forgot your password?
@@ -177,7 +214,7 @@ const LoginPage = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-pink-600 hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 transition-colors duration-200"
             >
               {isLoading ? (
                 <svg

@@ -1,14 +1,46 @@
-import { Button, Form, Input, Modal, Popconfirm, Table } from "antd";
+import { Button, Form, Input, Modal, Popconfirm, Table, Select } from "antd";
 import { useForm } from "antd/es/form/Form";
+import { Image, Upload } from "antd";
 import FormItem from "antd/es/form/FormItem";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
+import { PlusOutlined } from "@ant-design/icons";
+import uploadFile from "../../utils/upload";
 
 const SubcriptionManagement = () => {
   const [subcriptionList, setSubcriptionList] = useState([]);
   const [isOpen, setOpen] = useState(false); // mặc định Modal đóng
   const [form] = useForm();
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewImage, setPreviewImage] = useState("");
+  const [fileList, setFileList] = useState([]);
+  const handlePreview = async (file) => {
+    if (!file.url && !file.preview) {
+      file.preview = await getBase64(file.originFileObj);
+    }
+    setPreviewImage(file.url || file.preview);
+    setPreviewOpen(true);
+  };
+  const handleChange = ({ fileList: newFileList }) => setFileList(newFileList);
+  const uploadButton = (
+    <button
+      style={{
+        border: 0,
+        background: "none",
+      }}
+      type="button"
+    >
+      <PlusOutlined />
+      <div
+        style={{
+          marginTop: 8,
+        }}
+      >
+        Upload
+      </div>
+    </button>
+  );
   const columns = [
     // {
     //   title: "ID",
@@ -53,6 +85,12 @@ const SubcriptionManagement = () => {
       render: (isDeleted) => (isDeleted ? "Đã xóa" : "Chưa xóa"),
     },
     {
+      title: "Avatar",
+      dataIndex: "avatar",
+      key: "avatar",
+      render: (avatar) => <Image src={avatar} width={100} />,
+    },
+    {
       title: "Action",
       dataIndex: "PlanID",
       key: "PlanID",
@@ -82,6 +120,13 @@ const SubcriptionManagement = () => {
       },
     },
   ];
+  const getBase64 = (file) =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = (error) => reject(error);
+    });
   const handleDeleteSubscription = async (PlanID) => {
     await axios.delete(
       `https://67a3896d31d0d3a6b783e6ab.mockapi.io/Subcription/${PlanID}`
@@ -115,6 +160,10 @@ const SubcriptionManagement = () => {
   };
   const handleSubmitForm = async (values) => {
     console.log(values);
+    if (values.avatar) {
+      const url = await uploadFile(values.avatar.file.originFileObj);
+      values.avatar = url;
+    }
     if (values.PlanID) {
       // update
       await axios.put(
@@ -208,6 +257,7 @@ const SubcriptionManagement = () => {
           <FormItem
             label="isActive"
             name="isActive"
+
             rules={[
               {
                 required: true,
@@ -215,7 +265,10 @@ const SubcriptionManagement = () => {
               },
             ]}
           >
-            <Input />
+            <Select>
+              <Option value={true}>Active</Option>
+              <Option value={false}>Inactive</Option>
+            </Select>
           </FormItem>
           <FormItem
             label="CreatedTime"
@@ -232,6 +285,7 @@ const SubcriptionManagement = () => {
           <FormItem
             label="isDeleted"
             name="isDeleted"
+            initialValue={false}
             rules={[
               {
                 required: true,
@@ -239,10 +293,37 @@ const SubcriptionManagement = () => {
               },
             ]}
           >
-            <Input />
+            <Select>
+              <Option value={true}>Active</Option>
+              <Option value={false}>Inactive</Option>
+            </Select>
+          </FormItem>
+          <FormItem label="Avatar" name="avatar">
+            <Upload
+              action="https://660d2bd96ddfa2943b33731c.mockapi.io/api/upload"
+              listType="picture-card"
+              fileList={fileList}
+              onPreview={handlePreview}
+              onChange={handleChange}
+            >
+              {fileList.length >= 8 ? null : uploadButton}
+            </Upload>
           </FormItem>
         </Form>
       </Modal>
+      {previewImage && (
+        <Image
+          wrapperStyle={{
+            display: "none",
+          }}
+          preview={{
+            visible: previewOpen,
+            onVisibleChange: (visible) => setPreviewOpen(visible),
+            afterOpenChange: (visible) => !visible && setPreviewImage(""),
+          }}
+          src={previewImage}
+        />
+      )}
     </div>
   );
 };
