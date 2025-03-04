@@ -23,8 +23,9 @@ import PregnancyPrep from "./pages/community";
 import Pregnancy from "./pages/community/index1";
 import EmailVerification from "./pages/verification";
 import { Provider } from "react-redux";
-import { store } from "./redux/store";
+import { persistor, store } from "./redux/store";
 import ManagerBaby from "./pages/userprofile/manager_baby";
+import { PersistGate } from "redux-persist/integration/react";
 
 const router = createBrowserRouter([
   {
@@ -56,7 +57,7 @@ const router = createBrowserRouter([
     element: <EmailVerification />,
   },
   {
-    path: "*",
+    path: "/",
     element: <PregnancyHomepage />,
   },
   {
@@ -109,8 +110,10 @@ const router = createBrowserRouter([
 createRoot(document.getElementById("root")).render(
   <>
     <Provider store={store}>
-      <RouterProvider router={router} />
-      <ToastContainer />
+      <PersistGate loading={null} persistor={persistor}>
+        <RouterProvider router={router} />
+        <ToastContainer />
+      </PersistGate>
     </Provider>
   </>
 );

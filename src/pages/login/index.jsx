@@ -8,7 +8,6 @@ import { login } from "../../redux/features/userSlice";
 import { useDispatch } from "react-redux";
 import { store } from "../../redux/store";
 
-
 const LoginPage = () => {
   const [formData, setFormData] = useState({
     userEmail: "",
@@ -44,7 +43,7 @@ const LoginPage = () => {
       setIsLoading(true);
       try {
         const response = await api.post("Auth/login", formData);
-        console.log("API response:", response.data);  // Để debug
+        console.log("API response:", response.data); // Để debug
 
         if (response.data.isSuccess && response.data.result) {
           const token = response.data.result;
@@ -68,7 +67,7 @@ const LoginPage = () => {
           );
 
           // Điều hướng dựa trên role
-          if (role === "Admin" || role === "ADMIN") {
+          if (role === "Manager" || role === "MANAGER") {
             navigate("/dashboard");
           } else {
             navigate("/homepage");
