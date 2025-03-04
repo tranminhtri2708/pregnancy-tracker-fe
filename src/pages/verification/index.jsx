@@ -4,8 +4,7 @@ import { FiMail } from "react-icons/fi";
 import { IoReloadOutline } from "react-icons/io5";
 import { useNavigate } from "react-router-dom"; // Thêm import useNavigate
 
-const savedData = JSON.parse(localStorage.getItem("responseData"));
-console.log("Saved data: ", savedData);
+
 
 const EmailVerification = ({ userId }) => {
   const navigate = useNavigate(); // Khởi tạo hook useNavigate
@@ -65,20 +64,22 @@ const EmailVerification = ({ userId }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const code = verificationCode.join("");
+    const savedData = JSON.parse(localStorage.getItem("responseData"));
     if (code.length !== 6) {
       setError("Vui lòng nhập đủ mã xác minh");
       return;
     }
-    console.log("api: ");
+    console.log("userId: ", savedData," code: ", code);
     setLoading(true);
     try {
       const response = await axios.post(
         "http://localhost:5141/api/Auth/Verification",
         {
-          userId: savedData,
+          userId: +savedData,
           verificationCode: code,
         }
       );
+     
       console.log("error: ", error);
       if (response.status === 200) {
         setIsSuccess(true);

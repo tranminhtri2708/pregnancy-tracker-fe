@@ -99,6 +99,10 @@ const router = createBrowserRouter([
         path: "numberbaby",
         element: <ManagerBaby />,
       },
+      {
+        path: "*",
+        element: <PregnancyProfile />,
+      },
     ],
   },
 ]);

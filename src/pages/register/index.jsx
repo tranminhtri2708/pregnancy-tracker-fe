@@ -122,6 +122,7 @@ const RegisterPage = () => {
         "responseData",
         JSON.stringify(response.data.result)
       );
+      console.log(response.data.result)
       navigate("/verification"); // nếu thành công sẽ chuyển sang trang verification để nhập code gửi về email
     } catch (err) {
       // bị lỗi =>show ra message lỗi
