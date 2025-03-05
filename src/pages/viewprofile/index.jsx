@@ -16,6 +16,8 @@ import {
 import { FaGear } from "react-icons/fa6";
 import { FaChevronDown, FaChevronUp } from "react-icons/fa";
 import { Outlet, useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { logout } from "../../redux/features/userSlice";
 const faqData = [
   {
     question: "MomCare là gì?",
@@ -59,6 +61,7 @@ const PregnancyProfile = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedSection, setSelectedSection] = useState("personal");
   const [selectedSubSection, setSelectedSubSection] = useState(null);
+  const dispatch = useDispatch();
   useEffect(() => {
     setSelectedSubSection(null);
   }, [selectedSection]);
@@ -202,9 +205,7 @@ const PregnancyProfile = () => {
                   ? "bg-pink-200"
                   : "bg-gray-100"
               }`}
-              onClick={() => setSelectedSection("communicate")
-                
-              }
+              onClick={() => setSelectedSection("communicate")}
             >
               <FaUserFriends className="text-purple-500 text-2xl" />
               <span>Đã tham gia</span>
@@ -217,15 +218,16 @@ const PregnancyProfile = () => {
               onClick={() => handleNavigate("numberbaby")}
             >
               <FaBaby className="text-pink-500 text-2xl" />
-              <span>Số lượng em bé</span>
+              <span>Thông tin bé</span>
             </button>
             {/*Nút lịch sư khám bệnh ở đây sẽ thể hiện các lịch hẹn khám sắp tới */}
             <button
               className={`w-full flex items-center space-x-2 text-left px-4 py-2 rounded-lg ${
                 selectedSection === "calendar" ? "bg-pink-200" : "bg-gray-100"
               }`}
-              onClick={() => {setSelectedSection("calendar")
-                handleNavigate("calendar")
+              onClick={() => {
+                setSelectedSection("calendar");
+                handleNavigate("calendar");
               }}
             >
               <FaRegCalendarCheck className="text-green-500 text-2xl" />
@@ -331,9 +333,9 @@ const PregnancyProfile = () => {
                           localStorage.removeItem("token");
                           localStorage.removeItem("expiration");
                           localStorage.clear();
+                          dispatch(logout());
                           setIsOpen(false);
-                          handleRedirect()
-                          
+                          handleRedirect();
                         }}
                         className="px-4 py-2 border border-pink-500 text-pink-500 rounded-md hover:bg-pink-100 transition w-1/2 ml-2"
                       >
@@ -387,7 +389,7 @@ const PregnancyProfile = () => {
           {selectedSection === "numberbaby" && (
             <div className="bg-white rounded-2xl shadow-lg p-6">
               <h2 className="text-2xl font-semibold mb-6 text-gray-800">
-                Số lương em bé
+                Thông tin bé
               </h2>
               <Outlet />
             </div>
@@ -580,7 +582,7 @@ const PregnancyProfile = () => {
               <p>Last Checkup: {healthMetrics.lastCheckup}</p>
             </div>
           )}
-          
+
           {selectedSection === "save" && (
             <div className="bg-white rounded-2xl shadow-lg p-6">
               <h2 className="text-2xl font-semibold mb-6 text-gray-800">

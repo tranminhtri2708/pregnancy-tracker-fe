@@ -46,13 +46,6 @@ const Header = () => {
     navigate("/");
   };
 
-  const userDropdownItems = [
-    {
-      label: <button onClick={handleLogout}>Đăng xuất</button>,
-      key: "logout",
-    },
-  ];
-
   return (
     <header className="bg-white dark:bg-gray-900 fixed w-full top-0 left-0 z-50 transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -96,10 +89,38 @@ const Header = () => {
                   className="px-2 py-1 rounded-full border border-gray-300 dark:border-gray-700 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 w-40"
                 />
                 <Dropdown
-                  menu={{ items: userDropdownItems }}
+                  menu={{
+                    items: [
+                      {
+                        label: (
+                          <button
+                            onClick={() => navigate("/profile")}
+                            className="block text-left w-full px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md"
+                          >
+                            Xem hồ sơ
+                          </button>
+                        ),
+                        key: "profile",
+                      },
+                      {
+                        label: (
+                          <button
+                            onClick={handleLogout}
+                            className="block text-left w-full px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md"
+                          >
+                            Đăng xuất
+                          </button>
+                        ),
+                        key: "logout",
+                      },
+                    ],
+                  }}
                   trigger={["click"]}
                 >
-                  <button className="flex items-center space-x-2 text-gray-700 dark:text-gray-200">
+                  <button
+                    className="flex items-center space-x-2 text-gray-700 dark:text-gray-200"
+                    onClick={() => navigate("/viewprofile")}
+                  >
                     <img
                       className="h-8 w-8 rounded-full"
                       src={FIXED_AVATAR}
@@ -128,7 +149,7 @@ const Header = () => {
 
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="md:hidden p-2 rounded-md text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400"
+              className="md:hidden p-2 rounded-md text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover't:blue-400"
             >
               {isMenuOpen ? (
                 <FiX className="h-6 w-6" />

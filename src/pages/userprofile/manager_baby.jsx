@@ -27,28 +27,25 @@ function ManagerBaby() {
   const [open, setOpen] = useState(false);
   const [form] = useForm();
 
-  const getUserID = async() => {
-    try{
+  const getUserID = async () => {
+    try {
       const response = await api.get("UserAccount/GetUserId");
-      localStorage.setItem(
-        "userId",
-        response.data.result.userId
-      );
-    }catch (error) {
+      localStorage.setItem("userId", response.data.result.userId);
+    } catch (error) {
       console.error("Error fetching children:", error);
     }
-
-  }
+  };
   const fetchChildren = async () => {
     try {
       const data = await getAllChildren();
       const userId = localStorage.getItem("userId");
       console.log("userId", userId);
-      const filteredResult = data.result.filter(item => item.accountId === +userId);
-      console.log(filteredResult)
+      const filteredResult = data.result.filter(
+        (item) => item.accountId === +userId
+      );
+      console.log(filteredResult);
       setChildrens(filteredResult);
       // const filteredResult = data.result.filter(item => item.accountId === localStorage.getItem("userId"));
-      
     } catch (error) {
       console.error("Error fetching children:", error);
       setChildrens([]);
@@ -105,15 +102,15 @@ function ManagerBaby() {
                 });
               }}
             >
-              Edit
+              Chỉnh sửa
             </Button>
             <Popconfirm
               title="Delete the children"
-              description="Bạn có chắc chắn xóa tên này?"
+              description="Bạn có chắc chắn xóa thông tin bé?"
               onConfirm={() => handleDeleteProduct(id)}
             >
               <Button danger type="primary">
-                Delete
+                Xóa
               </Button>
             </Popconfirm>
           </>
@@ -173,7 +170,7 @@ function ManagerBaby() {
   return (
     <div>
       <Button type="primary" onClick={() => setOpen(true)}>
-        Create new children
+        Thêm bé mới
       </Button>
       <Table dataSource={childrens} columns={columns} rowKey="id" />
       <Modal
