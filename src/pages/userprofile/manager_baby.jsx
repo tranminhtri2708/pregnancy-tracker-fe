@@ -26,29 +26,72 @@ function ManagerBaby() {
   const [open, setOpen] = useState(false);
   const [form] = useForm();
   const [loading, setLoading] = useState(false);
+  const [userId, setUserId] = useState(null);
 
   const getUserID = async () => {
     try {
       const response = await api.get("UserAccount/GetUserId");
-      localStorage.setItem("userId", response.data.result.userId);
-      return response.data.result.userId;
+      console.log("GetUserId response:", response.data);
+
+      if (
+        response.data &&
+        response.data.result &&
+        response.data.result.userId
+      ) {
+        const userId = response.data.result.userId;
+        localStorage.setItem("userId", userId);
+        setUserId(userId);
+        return userId;
+      } else {
+        console.error("Invalid user ID response format:", response.data);
+        toast.error("Không thể lấy thông tin người dùng");
+        return null;
+      }
     } catch (error) {
       console.error("Error fetching user ID:", error);
+      toast.error(
+        "Lỗi khi lấy thông tin người dùng: " +
+          (error.message || "Không xác định")
+      );
       return null;
     }
   };
 
-  const fetchChildren = async (userId) => {
+  const fetchChildren = async (userIdParam) => {
     try {
       setLoading(true);
       const data = await getAllChildren();
-      const filteredResult = data.result.filter(
-        (item) => item.accountId === +userId
-      );
+      console.log("getAllChildren response:", data);
+
+      if (!data || !data.result) {
+        console.error("Invalid children data format:", data);
+        toast.error("Định dạng dữ liệu trẻ em không hợp lệ");
+        setChildrens([]);
+        return;
+      }
+
+      // Kiểm tra cấu trúc dữ liệu và in ra console để debug
+      console.log("Children data structure sample:", data.result[0]);
+
+      // Kiểm tra cả accountId và userId để phù hợp với dữ liệu API
+      const filteredResult = data.result.filter((item) => {
+        // Kiểm tra xem đối tượng có accountId hoặc userId không
+        const matchesUserId =
+          (item.accountId !== undefined &&
+            item.accountId === Number(userIdParam)) ||
+          (item.userId !== undefined && item.userId === Number(userIdParam));
+
+        return matchesUserId;
+      });
+
       console.log("Filtered children:", filteredResult);
+      console.log("Current userId for filtering:", userIdParam);
       setChildrens(filteredResult);
     } catch (error) {
       console.error("Error fetching children:", error);
+      toast.error(
+        "Lỗi khi lấy danh sách trẻ: " + (error.message || "Không xác định")
+      );
       setChildrens([]);
     } finally {
       setLoading(false);
@@ -57,20 +100,29 @@ function ManagerBaby() {
 
   useEffect(() => {
     const initData = async () => {
-      const userId = await getUserID(); // Đợi lấy userId trước
+      // Thử dùng userId từ state trước
       if (userId) {
-        fetchChildren(userId); // Sau đó mới gọi fetchChildren với userId
-      } else {
-        // Thử dùng userId từ localStorage nếu đã có
-        const storedUserId = localStorage.getItem("userId");
-        if (storedUserId) {
-          fetchChildren(storedUserId);
-        }
+        fetchChildren(userId);
+        return;
+      }
+      getUserID();
+      // Thử dùng userId từ localStorage nếu đã có
+      const storedUserId = localStorage.getItem("userId");
+      if (storedUserId) {
+        setUserId(storedUserId);
+        fetchChildren(storedUserId);
+        return;
+      }
+
+      // Cuối cùng thử lấy userId mới
+      const newUserId = await getUserID();
+      if (newUserId) {
+        fetchChildren(newUserId);
       }
     };
 
     initData();
-  }, []);
+  }, [userId]);
 
   const formatGender = (value) => {
     return value === 0 || value === "0" ? "Nam" : "Nữ";
@@ -84,8 +136,8 @@ function ManagerBaby() {
   const columns = [
     {
       title: "Tên",
-      dataIndex: "name",
-      key: "name",
+      dataIndex: "fullName",
+      key: "fullName",
     },
     {
       title: "Giới tính",
@@ -143,8 +195,9 @@ function ManagerBaby() {
       const response = await deleteChildren(id);
       if (response && response.isSuccess) {
         toast.success("Xóa thành công");
-        const userId = localStorage.getItem("userId");
-        fetchChildren(userId);
+        fetchChildren(userId || localStorage.getItem("userId"));
+      } else {
+        toast.error(response?.errorMessage || "Xóa thất bại");
       }
     } catch (error) {
       toast.error("Xóa thất bại: " + (error.message || "Lỗi không xác định"));
@@ -153,14 +206,24 @@ function ManagerBaby() {
 
   const handleSubmit = async (formValues) => {
     const formattedDate = formValues.birth?.format("YYYY-MM-DD");
+    const currentUserId = userId || localStorage.getItem("userId");
+
+    if (!currentUserId) {
+      toast.error(
+        "Không tìm thấy thông tin người dùng, vui lòng tải lại trang"
+      );
+      return;
+    }
+
     const dataToSubmit = {
-      name: formValues.name,
-      nickName: formValues.nickName, // Thêm nickName vào data
+      fullname: formValues.fullName || formValues.name, // Sửa để phù hợp với cả hai trường
+      nickName: formValues.nickName,
       birth: formattedDate,
       gender: parseInt(formValues.gender, 10),
-      userId: localStorage.getItem("userId"),
     };
+
     console.log("Data gửi lên API:", dataToSubmit);
+
     try {
       if (formValues.id) {
         // Update existing child
@@ -172,8 +235,7 @@ function ManagerBaby() {
           toast.success("Cập nhật thành công");
           setOpen(false);
           form.resetFields();
-          const userId = localStorage.getItem("userId");
-          fetchChildren(userId);
+          fetchChildren(currentUserId);
         } else {
           toast.error(response?.errorMessage || "Có lỗi xảy ra!");
         }
@@ -184,8 +246,7 @@ function ManagerBaby() {
           toast.success("Thêm mới thành công");
           setOpen(false);
           form.resetFields();
-          const userId = localStorage.getItem("userId");
-          fetchChildren(userId);
+          fetchChildren(currentUserId);
         } else {
           toast.error(response?.errorMessage || "Có lỗi xảy ra!");
         }
