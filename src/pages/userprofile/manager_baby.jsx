@@ -26,72 +26,29 @@ function ManagerBaby() {
   const [open, setOpen] = useState(false);
   const [form] = useForm();
   const [loading, setLoading] = useState(false);
-  const [userId, setUserId] = useState(null);
 
   const getUserID = async () => {
     try {
       const response = await api.get("UserAccount/GetUserId");
-      console.log("GetUserId response:", response.data);
-
-      if (
-        response.data &&
-        response.data.result &&
-        response.data.result.userId
-      ) {
-        const userId = response.data.result.userId;
-        localStorage.setItem("userId", userId);
-        setUserId(userId);
-        return userId;
-      } else {
-        console.error("Invalid user ID response format:", response.data);
-        toast.error("Không thể lấy thông tin người dùng");
-        return null;
-      }
+      localStorage.setItem("userId", response.data.result.userId);
+      return response.data.result.userId;
     } catch (error) {
       console.error("Error fetching user ID:", error);
-      toast.error(
-        "Lỗi khi lấy thông tin người dùng: " +
-          (error.message || "Không xác định")
-      );
       return null;
     }
   };
 
-  const fetchChildren = async (userIdParam) => {
+  const fetchChildren = async (userId) => {
     try {
       setLoading(true);
       const data = await getAllChildren();
-      console.log("getAllChildren response:", data);
-
-      if (!data || !data.result) {
-        console.error("Invalid children data format:", data);
-        toast.error("Định dạng dữ liệu trẻ em không hợp lệ");
-        setChildrens([]);
-        return;
-      }
-
-      // Kiểm tra cấu trúc dữ liệu và in ra console để debug
-      console.log("Children data structure sample:", data.result[0]);
-
-      // Kiểm tra cả accountId và userId để phù hợp với dữ liệu API
-      const filteredResult = data.result.filter((item) => {
-        // Kiểm tra xem đối tượng có accountId hoặc userId không
-        const matchesUserId =
-          (item.accountId !== undefined &&
-            item.accountId === Number(userIdParam)) ||
-          (item.userId !== undefined && item.userId === Number(userIdParam));
-
-        return matchesUserId;
-      });
-
+      const filteredResult = data.result.filter(
+        (item) => item.accountId === +userId
+      );
       console.log("Filtered children:", filteredResult);
-      console.log("Current userId for filtering:", userIdParam);
       setChildrens(filteredResult);
     } catch (error) {
       console.error("Error fetching children:", error);
-      toast.error(
-        "Lỗi khi lấy danh sách trẻ: " + (error.message || "Không xác định")
-      );
       setChildrens([]);
     } finally {
       setLoading(false);
@@ -100,29 +57,20 @@ function ManagerBaby() {
 
   useEffect(() => {
     const initData = async () => {
-      // Thử dùng userId từ state trước
+      const userId = await getUserID(); // Đợi lấy userId trước
       if (userId) {
-        fetchChildren(userId);
-        return;
-      }
-
-      // Thử dùng userId từ localStorage nếu đã có
-      const storedUserId = localStorage.getItem("userId");
-      if (storedUserId) {
-        setUserId(storedUserId);
-        fetchChildren(storedUserId);
-        return;
-      }
-
-      // Cuối cùng thử lấy userId mới
-      const newUserId = await getUserID();
-      if (newUserId) {
-        fetchChildren(newUserId);
+        fetchChildren(userId); // Sau đó mới gọi fetchChildren với userId
+      } else {
+        // Thử dùng userId từ localStorage nếu đã có
+        const storedUserId = localStorage.getItem("userId");
+        if (storedUserId) {
+          fetchChildren(storedUserId);
+        }
       }
     };
 
     initData();
-  }, [userId]);
+  }, []);
 
   const formatGender = (value) => {
     return value === 0 || value === "0" ? "Nam" : "Nữ";
@@ -195,9 +143,8 @@ function ManagerBaby() {
       const response = await deleteChildren(id);
       if (response && response.isSuccess) {
         toast.success("Xóa thành công");
-        fetchChildren(userId || localStorage.getItem("userId"));
-      } else {
-        toast.error(response?.errorMessage || "Xóa thất bại");
+        const userId = localStorage.getItem("userId");
+        fetchChildren(userId);
       }
     } catch (error) {
       toast.error("Xóa thất bại: " + (error.message || "Lỗi không xác định"));
@@ -206,26 +153,14 @@ function ManagerBaby() {
 
   const handleSubmit = async (formValues) => {
     const formattedDate = formValues.birth?.format("YYYY-MM-DD");
-    const currentUserId = userId || localStorage.getItem("userId");
-
-    if (!currentUserId) {
-      toast.error(
-        "Không tìm thấy thông tin người dùng, vui lòng tải lại trang"
-      );
-      return;
-    }
-
     const dataToSubmit = {
-      name: formValues.fullName || formValues.name, // Sửa để phù hợp với cả hai trường
-      nickName: formValues.nickName,
+      name: formValues.name,
+      nickName: formValues.nickName, // Thêm nickName vào data
       birth: formattedDate,
       gender: parseInt(formValues.gender, 10),
-      userId: currentUserId,
-      accountId: currentUserId, // Thêm accountId để đảm bảo tương thích
+      userId: localStorage.getItem("userId"),
     };
-
     console.log("Data gửi lên API:", dataToSubmit);
-
     try {
       if (formValues.id) {
         // Update existing child
@@ -237,7 +172,8 @@ function ManagerBaby() {
           toast.success("Cập nhật thành công");
           setOpen(false);
           form.resetFields();
-          fetchChildren(currentUserId);
+          const userId = localStorage.getItem("userId");
+          fetchChildren(userId);
         } else {
           toast.error(response?.errorMessage || "Có lỗi xảy ra!");
         }
@@ -248,7 +184,8 @@ function ManagerBaby() {
           toast.success("Thêm mới thành công");
           setOpen(false);
           form.resetFields();
-          fetchChildren(currentUserId);
+          const userId = localStorage.getItem("userId");
+          fetchChildren(userId);
         } else {
           toast.error(response?.errorMessage || "Có lỗi xảy ra!");
         }
