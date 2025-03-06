@@ -7,6 +7,7 @@ import api from "../config/axios";
 export const getAllChildren = async () => {
   try {
     const response = await api.get("Children/GetAllChildren");
+    console.log(response);
     return response.data; // trả về danh sách đứa con
   } catch (error) {
     toast.error(error.response.data); // lấy bị lỗi thì sẽ show ra lỗi

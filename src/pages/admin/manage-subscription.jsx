@@ -6,7 +6,7 @@ import {
   updateProduct,
 } from "../../services/api.subscription";
 import { Button, Form, Input, Modal, Popconfirm, Select, Table } from "antd";
-import FormItem from "antd/es/form/FormItem";
+
 import { getCategories } from "../../services/api.category";
 import { useForm } from "antd/es/form/Form";
 import { toast } from "react-toastify";

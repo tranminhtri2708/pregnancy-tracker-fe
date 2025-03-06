@@ -59,7 +59,7 @@ const faqData = [
 const PregnancyProfile = () => {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedSection, setSelectedSection] = useState("personal");
+  const [selectedSection, setSelectedSection] = useState(null);
   const [selectedSubSection, setSelectedSubSection] = useState(null);
   const dispatch = useDispatch();
   useEffect(() => {
@@ -173,10 +173,10 @@ const PregnancyProfile = () => {
               className={`w-full flex items-center space-x-2 text-left px-4 py-2 rounded-lg ${
                 selectedSection === "personal" ? "bg-pink-200" : "bg-gray-100"
               }`}
-              onClick={() => setSelectedSection("personal")}
+              onClick={() => handleNavigate("personal")}
             >
-              <FaUserCircle className="text-blue-500 text-2xl " />
-              <span>Xem hồ sơ của tôi</span>
+              <FaUserCircle className="text-pink-500 text-2xl" />
+              <span>Hồ sơ của tôi</span>
             </button>
             {/*Nút xem sức khỏe thai nhi của từng user */}
             <button
@@ -355,23 +355,7 @@ const PregnancyProfile = () => {
               <h2 className="text-2xl font-semibold mb-6 text-gray-800">
                 Hồ sơ của tôi
               </h2>
-              <div className="space-y-4">
-                <div className="flex items-center space-x-4">
-                  <img
-                    src={personalInfo.profileImage}
-                    alt="Profile"
-                    className="w-24 h-24 rounded-full object-cover border-4 border-pink-200"
-                  />
-                  <button className="bg-pink-500 text-white px-4 py-2 rounded-full hover:bg-pink-600 shadow-md">
-                    ✏ Edit Profile
-                  </button>
-                </div>
-
-                <p>FullName: {personalInfo.fullname}</p>
-                <p>Phone: {personalInfo.phone}</p>
-                <p>Address: {personalInfo.address}</p>
-                <p>Date Of Birth: {personalInfo.birth}</p>
-              </div>
+              <Outlet />
             </div>
           )}
 

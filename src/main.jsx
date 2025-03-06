@@ -26,6 +26,7 @@ import { Provider } from "react-redux";
 import { persistor, store } from "./redux/store";
 import ManagerBaby from "./pages/userprofile/manager_baby";
 import { PersistGate } from "redux-persist/integration/react";
+import ManagerProfile from "./pages/userprofile/manager_profile";
 
 const router = createBrowserRouter([
   {
@@ -103,6 +104,10 @@ const router = createBrowserRouter([
       {
         path: "*",
         element: <PregnancyProfile />,
+      },
+      {
+        path: "personal",
+        element: <ManagerProfile />,
       },
     ],
   },
