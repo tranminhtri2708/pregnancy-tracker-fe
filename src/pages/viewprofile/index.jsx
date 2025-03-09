@@ -225,12 +225,9 @@ const PregnancyProfile = () => {
               className={`w-full flex items-center space-x-2 text-left px-4 py-2 rounded-lg ${
                 selectedSection === "calendar" ? "bg-pink-200" : "bg-gray-100"
               }`}
-              onClick={() => {
-                setSelectedSection("calendar");
-                handleNavigate("calendar");
-              }}
+              onClick={() => handleNavigate("calendar")}
             >
-              <FaRegCalendarCheck className="text-green-500 text-2xl" />
+              <FaRegCalendarCheck className="text-pink-500 text-2xl" />
               <span>Lịch sử lịch hẹn</span>
             </button>
             {/*Nút thiết lâp tài khoản ở đây có hai cái là mật khẩu và vô hiệu hóa tài khoản */}
@@ -522,11 +519,9 @@ const PregnancyProfile = () => {
           {selectedSection === "calendar" && (
             <div className="bg-white rounded-2xl shadow-lg p-6">
               <h2 className="text-2xl font-semibold mb-6 text-gray-800">
-                Sức khỏe của tôi
+                Lịch hẹn khám
               </h2>
-              <p>Weight: {healthMetrics.weight}</p>
-              <p>Blood Pressure: {healthMetrics.bloodPressure}</p>
-              <p>Last Checkup: {healthMetrics.lastCheckup}</p>
+              <Outlet />
             </div>
           )}
           {selectedSection === "help" && (

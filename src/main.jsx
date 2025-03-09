@@ -27,6 +27,7 @@ import { persistor, store } from "./redux/store";
 import ManagerBaby from "./pages/userprofile/manager_baby";
 import { PersistGate } from "redux-persist/integration/react";
 import ManagerProfile from "./pages/userprofile/manager_profile";
+import ManageSchedule from "./pages/userprofile/manage_schedule";
 
 const router = createBrowserRouter([
   {
@@ -108,6 +109,10 @@ const router = createBrowserRouter([
       {
         path: "personal",
         element: <ManagerProfile />,
+      },
+      {
+        path: "calendar",
+        element: <ManageSchedule />,
       },
     ],
   },
