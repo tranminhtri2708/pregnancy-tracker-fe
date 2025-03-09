@@ -1,15 +1,25 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { getUser } from "../../services/api.user";
-import { Button, Table } from "antd";
+import { getUser, updateRoleUser } from "../../services/api.user";
+import { Button, Table, Modal, Select, message, Form, Input } from "antd";
 
-// CRUD function
 function ManageUser() {
   const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [form] = Form.useForm();
 
   const fetchUser = async () => {
-    const data = await getUser(); // call api
-    setUsers(data);
+    setLoading(true);
+    try {
+      const data = await getUser();
+      setUsers(data);
+    } catch (error) {
+      message.error("Failed to fetch users");
+    } finally {
+      setLoading(false);
+    }
   };
 
   // get user
@@ -17,31 +27,86 @@ function ManageUser() {
     fetchUser();
   }, []);
 
+  const handleEdit = (user) => {
+    setSelectedUser(user);
+    setEditModalVisible(true);
+
+    // Set initial form values
+    form.setFieldsValue({
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      phoneNumber: user.phoneNumber,
+      role: user.role,
+    });
+  };
+
+  const handleCancel = () => {
+    setEditModalVisible(false);
+    setSelectedUser(null);
+    form.resetFields();
+  };
+
+  const handleSave = async () => {
+    try {
+      const values = await form.validateFields();
+
+      setLoading(true);
+
+      // Create the payload with only the role field
+      const personal = {
+        role: values.role,
+        // Không thêm các trường khác vì chúng ta chỉ cho phép sửa role
+      };
+
+      await updateRoleUser({
+        customerId: selectedUser.id,
+        personal,
+      });
+
+      message.success("User role updated successfully");
+
+      // Update the local state to reflect the change
+      setUsers(
+        users.map((user) =>
+          user.id === selectedUser.id ? { ...user, role: values.role } : user
+        )
+      );
+
+      setEditModalVisible(false);
+      form.resetFields();
+    } catch (error) {
+      console.error("Error updating role:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // định nghĩa các cột của table
   const columns = [
     {
       title: "Tên đầu",
-      dataIndex: "firstName", // mapping vs be trả về
+      dataIndex: "firstName",
       key: "firstName",
     },
     {
       title: "Tên cuối",
-      dataIndex: "lastName", // mapping vs be trả về
+      dataIndex: "lastName",
       key: "lastName",
     },
     {
       title: "Email",
-      dataIndex: "email", // mapping vs be trả về
+      dataIndex: "email",
       key: "email",
     },
     {
       title: "Số điện thoại",
-      dataIndex: "phoneNumber", // mapping vs be trả về
+      dataIndex: "phoneNumber",
       key: "phoneNumber",
     },
     {
       title: "Role",
-      dataIndex: "role", // mapping vs be trả về
+      dataIndex: "role",
       key: "role",
       render: (role) => {
         return role === 0 ? "Customer" : "Admin";
@@ -57,7 +122,15 @@ function ManageUser() {
       dataIndex: "id",
       key: "id",
       render: (id, record) => {
-        return <Button type="primary">Chỉnh sửa</Button>;
+        return (
+          <Button
+            type="primary"
+            onClick={() => handleEdit(record)}
+            loading={loading && selectedUser?.id === id}
+          >
+            Chỉnh sửa
+          </Button>
+        );
       },
     },
   ];
@@ -67,8 +140,51 @@ function ManageUser() {
       <h1 className="text-3xl font-bold mb-4 text-blue-500">
         Quản Lý Người Dùng
       </h1>
-      <Table dataSource={users} columns={columns} />
-      {/*dataSource nguồn dữ liệu nằm trong biến users */}
+      <Table
+        dataSource={users}
+        columns={columns}
+        rowKey="id"
+        loading={loading && !selectedUser}
+      />
+
+      <Modal
+        title="Chỉnh sửa người dùng"
+        open={editModalVisible}
+        onOk={handleSave}
+        onCancel={handleCancel}
+        confirmLoading={loading}
+      >
+        <Form form={form} layout="vertical" initialValues={{ remember: true }}>
+          <Form.Item label="Tên đầu" name="firstName">
+            <Input disabled />
+          </Form.Item>
+
+          <Form.Item label="Tên cuối" name="lastName">
+            <Input disabled />
+          </Form.Item>
+
+          <Form.Item label="Email" name="email">
+            <Input disabled />
+          </Form.Item>
+
+          <Form.Item label="Số điện thoại" name="phoneNumber">
+            <Input disabled />
+          </Form.Item>
+
+          <Form.Item
+            label="Vai trò"
+            name="role"
+            rules={[{ required: true, message: "Vui lòng chọn vai trò!" }]}
+          >
+            <Select
+              options={[
+                { value: 0, label: "Customer" },
+                { value: 1, label: "Admin" },
+              ]}
+            />
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   );
 }

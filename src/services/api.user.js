@@ -11,3 +11,14 @@ export const getUser = async () => {
     toast.error(error.response.data);
   }
 };
+export const updateRoleUser = async ({ customerId, personal }) => {
+  try {
+    const response = await api.put(
+      `UserAccount/UpdateUserRoleProfile/${customerId}`,
+      personal
+    );
+    return response.data; // trả về danh sách đứa con
+  } catch (error) {
+    toast.error(error.response.data); // lấy bị lỗi thì sẽ show ra lỗi
+  }
+};
