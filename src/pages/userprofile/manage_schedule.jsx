@@ -61,19 +61,58 @@ const ManageSchedule = () => {
     return `${day}/${month}/${year}`;
   };
 
-  // Format date as ISO string for API
-  const formatApiDate = (date, timeString) => {
+  // FIX: Improved time format to correctly handle hours
+  const formatTimeFromDate = (date) => {
     if (!date) return "";
-    const [hours, minutes] = timeString.split(":");
-    const newDate = new Date(date);
-    newDate.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
-    return newDate.toISOString();
+
+    // Get UTC time components to avoid timezone issues
+    const hours = date.getUTCHours().toString().padStart(2, "0");
+    const minutes = date.getUTCMinutes().toString().padStart(2, "0");
+
+    return `${hours}:${minutes}`;
   };
 
-  // Parse API date to Date object
+  // FIX: Improved date handling for API - preserve local time when sending to API
+  // Sửa hàm formatApiDate để cộng thêm 7 tiếng
+  const formatApiDate = (date, timeString) => {
+    if (!date) return "";
+
+    // Get the date parts
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    const day = date.getDate();
+
+    // Get the time parts
+    const [hours, minutes] = timeString.split(":");
+
+    // Tạo ngày ở định dạng UTC, cộng thêm 7 tiếng cho múi giờ Việt Nam
+    const dateTime = new Date(
+      Date.UTC(
+        year,
+        month,
+        day,
+        parseInt(hours, 10) + 7, // Cộng thêm 7 tiếng
+        parseInt(minutes, 10),
+        0,
+        0
+      )
+    );
+
+    // Format as ISO string
+    return dateTime.toISOString();
+  };
+
+  // FIX: Parse API date properly preserving the correct time
   const parseApiDate = (dateString) => {
     try {
-      return new Date(dateString);
+      // Create a new Date object from the ISO string
+      const date = new Date(dateString);
+
+      // For debugging if needed
+      // console.log("Original API date:", dateString);
+      // console.log("Parsed date hours:", date.getHours(), "UTC hours:", date.getUTCHours());
+
+      return date;
     } catch (error) {
       console.error("Invalid date format:", dateString);
       return new Date();
@@ -97,12 +136,15 @@ const ManageSchedule = () => {
   const handleEditAppointment = (appointment, e) => {
     e.stopPropagation(); // Prevent event bubbling
     setSelectedAppointment(appointment);
-    setSelectedDate(appointment.date);
+    setSelectedDate(new Date(appointment.date));
+
+    // FIX: Set time correctly from the appointment date using the fixed formatTimeFromDate function
     setFormValues({
-      time: appointment.time,
+      time: formatTimeFromDate(appointment.date),
       description: appointment.description,
       notify: appointment.notify,
     });
+
     setIsEditMode(true);
     setIsModalVisible(true);
   };
@@ -135,18 +177,15 @@ const ManageSchedule = () => {
         return;
       }
 
-      // Format the dates from API response to our appointment format
+      // FIX: Format the dates from API response using the corrected functions
       const formattedAppointments = response.result.map((item) => {
         const dateObj = parseApiDate(item.appointmentDate);
+
         return {
           id: item.id,
           date: dateObj,
-          time: `${dateObj.getHours().toString().padStart(2, "0")}:${dateObj
-            .getMinutes()
-            .toString()
-            .padStart(2, "0")}`,
           description: item.description,
-          notify: item.isNoti, // Fixed property name to match API
+          notify: item.isNoti,
           appointmentDate: item.appointmentDate,
         };
       });
@@ -182,11 +221,11 @@ const ManageSchedule = () => {
     setIsLoading(true);
 
     try {
-      // Format the data according to the backend requirements
+      // FIX: Format the data with proper time handling
       const appointmentData = {
         description: formValues.description,
         appointmentDate: formatApiDate(selectedDate, formValues.time),
-        isNoti: formValues.notify, // Fixed property name to match API
+        isNoti: formValues.notify,
       };
 
       let response;
@@ -352,7 +391,8 @@ const ManageSchedule = () => {
               className="text-xs mt-1 truncate text-blue-600 group flex justify-between items-center"
             >
               <span className="truncate">
-                {appointment.time} - {appointment.description.substring(0, 8)}
+                {formatTimeFromDate(appointment.date)} -{" "}
+                {appointment.description.substring(0, 8)}
                 {appointment.description.length > 8 ? "..." : ""}
                 {appointment.notify && (
                   <Bell className="inline-block w-3 h-3 ml-1 text-green-600" />
@@ -393,27 +433,12 @@ const ManageSchedule = () => {
     const now = new Date();
     return appointments
       .filter((a) => {
-        const appointmentDateTime = new Date(a.date);
-        appointmentDateTime.setHours(
-          parseInt(a.time.split(":")[0], 10),
-          parseInt(a.time.split(":")[1], 10)
-        );
-        return appointmentDateTime >= now;
+        // FIX: Use the date object directly for comparison
+        return a.date >= now;
       })
       .sort((a, b) => {
-        const dateTimeA = new Date(a.date);
-        dateTimeA.setHours(
-          parseInt(a.time.split(":")[0], 10),
-          parseInt(a.time.split(":")[1], 10)
-        );
-
-        const dateTimeB = new Date(b.date);
-        dateTimeB.setHours(
-          parseInt(b.time.split(":")[0], 10),
-          parseInt(b.time.split(":")[1], 10)
-        );
-
-        return dateTimeA - dateTimeB;
+        // FIX: Use the date object directly for sorting
+        return a.date - b.date;
       })
       .slice(0, 5); // Show more upcoming appointments
   };
@@ -623,7 +648,8 @@ const ManageSchedule = () => {
                   {formatDisplayDate(selectedAppointment.date)}
                 </div>
                 <div>
-                  <strong>Thời gian:</strong> {selectedAppointment.time}
+                  <strong>Thời gian:</strong>{" "}
+                  {formatTimeFromDate(selectedAppointment.date)}
                 </div>
                 <div>
                   <strong>Nội dung:</strong> {selectedAppointment.description}
@@ -698,7 +724,8 @@ const ManageSchedule = () => {
               >
                 <div className="flex justify-between">
                   <div className="font-semibold">
-                    {formatDisplayDate(appointment.date)} - {appointment.time}
+                    {formatDisplayDate(appointment.date)} -{" "}
+                    {formatTimeFromDate(appointment.date)}
                   </div>
                   <div className="flex items-center">
                     {appointment.notify ? (

@@ -22,29 +22,39 @@ import { useForm } from "antd/es/form/Form";
 
 function ManageSubscription() {
   const [subscriptionPlan, setSubscriptionPlan] = useState([]);
-  const [open, setOpen] = useState(false); // trạng thái ban đầu là đóng
+  const [open, setOpen] = useState(false);
   const [form] = useForm();
-  const [filterStatus, setFilterStatus] = useState(null); // null để hiển thị tất cả ban đầu
-  const [isUpdateMode, setIsUpdateMode] = useState(false); // Thêm state để theo dõi chế độ cập nhật
+  const [filterStatus, setFilterStatus] = useState(null);
+  const [isUpdateMode, setIsUpdateMode] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false); // Add state to track submission status
   const { Title } = Typography;
 
   //CRUD
   const fetchSubscriptionPlan = async () => {
     try {
       const data = await getSubscriptionPlan();
-      setSubscriptionPlan(data); //
+      // Ensure we're working with unique plans by ID
+      const uniquePlans = [];
+      const planIds = new Set();
+
+      data.forEach((plan) => {
+        if (!planIds.has(plan.id)) {
+          planIds.add(plan.id);
+          uniquePlans.push(plan);
+        }
+      });
+
+      setSubscriptionPlan(uniquePlans);
     } catch (error) {
       console.error("Lỗi khi lấy dữ liệu:", error);
       toast.error("Không thể lấy danh sách gói thành viên");
     }
   };
 
-  //get product được sài nhiều chỗ, nhiều lần và dùng nguyên tắc DRY
   useEffect(() => {
     fetchSubscriptionPlan();
   }, []);
 
-  // Lọc dữ liệu dựa trên trạng thái đã chọn
   const filteredData =
     filterStatus === null
       ? subscriptionPlan
@@ -107,10 +117,11 @@ function ManageSubscription() {
             <Button
               type="primary"
               onClick={() => {
-                setIsUpdateMode(true); // Đánh dấu là đang ở chế độ cập nhật
+                setIsUpdateMode(true);
                 setOpen(true);
                 form.setFieldsValue(record);
               }}
+              style={{ marginRight: "8px" }}
             >
               Update
             </Button>
@@ -133,7 +144,10 @@ function ManageSubscription() {
     try {
       const response = await deleteSubscriptionPlan(id);
       if (response) {
-        fetchSubscriptionPlan(); // refresh lại table
+        // Remove the plan from local state instead of re-fetching
+        setSubscriptionPlan((prevPlans) =>
+          prevPlans.filter((plan) => plan.id !== id)
+        );
         toast.success("Xóa gói thành công");
       }
     } catch (error) {
@@ -143,11 +157,14 @@ function ManageSubscription() {
   };
 
   const handleSubmit = async (formValues) => {
+    if (isSubmitting) return; // Prevent duplicate submissions
+
+    setIsSubmitting(true);
     try {
       console.log("Form values:", formValues);
 
       if (formValues.id) {
-        // Trường hợp UPDATE - chỉ gửi những trường cần thiết
+        // UPDATE case
         const subscriptionData = {
           price: Number(formValues.price),
           description: formValues.description,
@@ -160,50 +177,67 @@ function ManageSubscription() {
           subscriptionPlan: subscriptionData,
         });
 
-        // Xử lý update - Chỉ gửi những trường cần thiết
         const response = await updateSubscriptionPlan({
           planId: formValues.id,
           subscriptionPlan: subscriptionData,
         });
 
         console.log("Kết quả update:", response);
+
+        // Update the local state directly
+        setSubscriptionPlan((prevPlans) =>
+          prevPlans.map((plan) =>
+            plan.id === formValues.id ? { ...plan, ...subscriptionData } : plan
+          )
+        );
+
         toast.success("Cập nhật gói thành công");
       } else {
-        // Trường hợp CREATE - gửi toàn bộ formValues
-        console.log("Dữ liệu create gửi đến BE:", formValues);
+        // CREATE case
+        // Make sure we're sending correct data types
+        const newPlan = {
+          ...formValues,
+          price: Number(formValues.price),
+          durationInMonths: Number(formValues.durationInMonths),
+          isActive: true,
+        };
 
-        // Xử lý tạo mới - gửi toàn bộ formValues
-        const response = await createSubscriptionPlan(formValues);
+        console.log("Dữ liệu create gửi đến BE:", newPlan);
+
+        const response = await createSubscriptionPlan(newPlan);
         console.log("Kết quả tạo mới:", response);
+
+        // Add the new plan to the state only if we have a response with ID
+        if (response && response.id) {
+          setSubscriptionPlan((prevPlans) => [...prevPlans, response]);
+        } else {
+          // If no valid response, fetch all plans to ensure consistency
+          await fetchSubscriptionPlan();
+        }
+
         toast.success("Tạo gói thành công");
       }
 
       setOpen(false);
       form.resetFields();
-      fetchSubscriptionPlan(); // Refresh lại dữ liệu
     } catch (error) {
       console.error("Lỗi khi xử lý:", error);
       toast.error(
         "Thao tác thất bại: " + (error.message || "Lỗi không xác định")
       );
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  // Xử lý thay đổi bộ lọc trạng thái
-  // const handleStatusFilterChange = (value) => {
-  //   setFilterStatus(value);
-  // };
-
-  // Xử lý khi đóng modal
   const handleCloseModal = () => {
     setOpen(false);
-    setIsUpdateMode(false); // Reset lại chế độ khi đóng modal
-    form.resetFields(); // Xóa dữ liệu form khi đóng
+    setIsUpdateMode(false);
+    form.resetFields();
   };
 
   return (
     <div>
-      {/* Thêm header trước table */}
       <h1 className="text-3xl font-bold mb-4 text-blue-500">
         Quản Lý Gói Thành Viên
       </h1>
@@ -218,10 +252,10 @@ function ManageSubscription() {
         <Button
           type="primary"
           onClick={() => {
-            setIsUpdateMode(false); // Đánh dấu là đang ở chế độ tạo mới
+            setIsUpdateMode(false);
             setOpen(true);
-            form.resetFields(); // Reset form khi tạo mới
-            form.setFieldsValue({ isActive: true }); // Mặc định active
+            form.resetFields();
+            form.setFieldsValue({ isActive: true });
           }}
         >
           Tạo gói thành viên
@@ -230,13 +264,18 @@ function ManageSubscription() {
         <div></div>
       </div>
 
-      <Table dataSource={filteredData} columns={columns} />
+      <Table
+        dataSource={filteredData}
+        columns={columns}
+        rowKey="id" // Add rowKey to ensure each row has a unique key
+      />
 
       <Modal
         title={isUpdateMode ? "Cập nhật gói thành viên" : "Tạo gói thành viên"}
         open={open}
         onCancel={handleCloseModal}
         onOk={() => form.submit()}
+        confirmLoading={isSubmitting} // Disable the OK button during submission
       >
         <Form
           labelCol={{
@@ -304,7 +343,6 @@ function ManageSubscription() {
             <Input />
           </Form.Item>
 
-          {/* Chỉ hiển thị trường isActive khi đang ở chế độ cập nhật */}
           {isUpdateMode && (
             <Form.Item label="Trạng thái" name="isActive" initialValue={true}>
               <Select
