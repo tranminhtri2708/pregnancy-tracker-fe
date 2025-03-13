@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 import Header from "../../components/header";
 import Footer from "../../components/footer";
+import { getProfile, updateProfile } from "../../services/api.getprofile";
 import {
   FaBaby,
   FaEye,
@@ -59,24 +61,89 @@ const faqData = [
 ];
 const PregnancyProfile = () => {
   const navigate = useNavigate();
+  const [fileList, setFileList] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
   const [selectedSection, setSelectedSection] = useState(null);
   const [selectedSubSection, setSelectedSubSection] = useState(null);
   const dispatch = useDispatch();
+  const [profileData, setProfileData] = useState({
+    firstName: "",
+    lastName: "",
+    phoneNumber: "",
+    email: "",
+    imgUrl: "",
+  });
+  const [editData, setEditData] = useState({
+    firstName: "",
+    lastName: "",
+    phoneNumber: "",
+    email: "",
+    imgUrl: "",
+  });
+
+  const fetchProfile = async () => {
+    try {
+      setLoading(true);
+      const response = await getProfile();
+      console.log("Profile response:", response);
+
+      if (response && response.isSuccess && response.result) {
+        const data = response.result;
+        console.log("Profile response:", data);
+
+        const profileInfo = {
+          firstName: data.firstName || "",
+          lastName: data.lastName || "",
+          phoneNumber: data.phoneNumber || "",
+          email: data.email || "",
+          imgUrl: data.imgUrl || "",
+        };
+
+        setProfileData(profileInfo);
+        setEditData(profileInfo);
+
+        // Initialize fileList if imgUrl exists
+        if (data.imgUrl) {
+          setFileList([
+            {
+              uid: "-1",
+              name: "profile-image.png",
+              status: "done",
+              url: data.imgUrl,
+            },
+          ]);
+        }
+      } else {
+        if (response && response.errorMessage) {
+          toast.error(response.errorMessage);
+        } else {
+          toast.error("Không thể tải thông tin hồ sơ");
+        }
+      }
+    } catch (error) {
+      toast.error("Không thể tải thông tin hồ sơ");
+      console.error("Lỗi khi tải hồ sơ:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
+    fetchProfile();
     setSelectedSubSection(null);
   }, [selectedSection]);
 
   {
     /*Các thông tin về Chi tiết thông tin của tôi */
   }
-  const [personalInfo, setPersonalInfo] = useState({
-    fullname: "Nguyễn Thị Hồng Ngọc",
+  // const [personalInfo, setPersonalInfo] = useState({
+  //   fullname: "Nguyễn Thị Hồng Ngọc",
 
-    email: "nguyenngocdh04@gmail.com",
+  //   email: "nguyenngocdh04@gmail.com",
 
-    profileImage: "https://nguoinoitieng.tv/images/nnt/105/0/bibl.jpg",
-  });
+  //   profileImage: "https://nguoinoitieng.tv/images/nnt/105/0/bibl.jpg",
+  // });
   {
     /*Chi tiết thông tin về sức khỏe */
   }
@@ -107,7 +174,7 @@ const PregnancyProfile = () => {
     password: "",
     confirmPassword: "",
   });
-
+  const fullname = profileData.firstName + " " + profileData.lastName;
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errors, setErrors] = useState({});
@@ -148,12 +215,12 @@ const PregnancyProfile = () => {
         <div className="w-1/4 bg-white rounded-2xl shadow-lg p-6">
           <div className="flex flex-col items-center">
             <img
-              src={personalInfo.profileImage}
+              src={profileData.imgUrl}
               alt="Profile"
               className="w-24 h-24 rounded-full object-cover border-4 border-pink-200"
             />
-            <h2 className="text-xl font-bold mt-4">{personalInfo.fullname}</h2>
-            <p className="text-gray-600"> {personalInfo.email}</p>
+            <h2 className="text-xl font-bold mt-4">{fullname} </h2>
+            <p className="text-gray-600"> {profileData.email}</p>
           </div>
           <div className="mt-6 space-y-4">
             {/*Nút xem hồ sơ của tôi */}
