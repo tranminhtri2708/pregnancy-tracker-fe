@@ -8,6 +8,7 @@ import RegisterPage from "./pages/register";
 import LoginPage from "./pages/login";
 
 import Header from "./components/header";
+import WhoStandard from "./pages/admin/whostandard";
 import Footer from "./components/footer";
 // import SubcriptionManagement from "./pages/subscription/SubscriptionManagement";
 import PregnancyHomepage from "./pages/homepage";
@@ -28,9 +29,26 @@ import ManagerBaby from "./pages/userprofile/manager_baby";
 import { PersistGate } from "redux-persist/integration/react";
 import ManagerProfile from "./pages/userprofile/manager_profile";
 import ManageSchedule from "./pages/userprofile/manage_schedule";
+import Baby from "./pages/healthmetric/sidebar";
+import BabyDetail from "./pages/healthmetric/rightpanel";
 import ManageSubscriptionUser from "./pages/userprofile/manage_subscription";
+import WhoStandardView from "./pages/homepage/whostandard";
 
 const router = createBrowserRouter([
+  {
+    path: "whostandard",
+    element: <WhoStandardView />,
+  },
+  {
+    path: "/baby",
+    element: <Baby />,
+    children: [
+      {
+        path: "/baby/babydetail/:id",
+        element: <BabyDetail />,
+      },
+    ],
+  },
   {
     path: "/login",
     element: <LoginPage />,
@@ -91,6 +109,10 @@ const router = createBrowserRouter([
       {
         path: "/dashboard/user",
         element: <ManageUser />,
+      },
+      {
+        path: "/dashboard/whostandard",
+        element: <WhoStandard />,
       },
     ],
   },

@@ -26,6 +26,7 @@
     "react-router-dom": "^7.1.5",
     "react-toastify": "^11.0.3",
     "react-tooltip": "^5.28.0",
+    "recharts": "^2.15.1",
     "redux-persist": "^6.0.0"
   },
   "devDependencies": {

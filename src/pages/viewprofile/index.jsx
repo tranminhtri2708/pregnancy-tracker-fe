@@ -67,6 +67,7 @@ const PregnancyProfile = () => {
   const [selectedSection, setSelectedSection] = useState(null);
   const [selectedSubSection, setSelectedSubSection] = useState(null);
   const dispatch = useDispatch();
+  const [imageError, setImageError] = useState(false);
   const [profileData, setProfileData] = useState({
     firstName: "",
     lastName: "",
@@ -206,6 +207,26 @@ const PregnancyProfile = () => {
     setErrors(newErrors);
   };
 
+  const renderProfileImage = () => {
+    if (!profileData.imgUrl || imageError) {
+      // Hiển thị avatar mặc định (có thể là chữ cái đầu của tên)
+      const initial = fullname ? fullname.charAt(0).toUpperCase() : "?";
+      return (
+        <div className="w-full h-full bg-pink-300 flex items-center justify-center text-white text-4xl font-bold">
+          {initial}
+        </div>
+      );
+    }
+
+    return (
+      <img
+        src={profileData.imgUrl}
+        alt="Profile"
+        className="w-full h-full object-cover"
+        onError={() => setImageError(true)}
+      />
+    );
+  };
   return (
     <div className="flex flex-col min-h-screen bg-pink-50">
       <Header />
@@ -214,11 +235,9 @@ const PregnancyProfile = () => {
         {/*do header fixed cứng nên này tôi phải đẩy nó xuống 80px nếu không nó bị header bị che  */}
         <div className="w-1/4 bg-white rounded-2xl shadow-lg p-6">
           <div className="flex flex-col items-center">
-            <img
-              src={profileData.imgUrl}
-              alt="Profile"
-              className="w-24 h-24 rounded-full object-cover border-4 border-pink-200"
-            />
+            <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-pink-200">
+              {renderProfileImage()}
+            </div>
             <h2 className="text-xl font-bold mt-4">{fullname} </h2>
             <p className="text-gray-600"> {profileData.email}</p>
           </div>
