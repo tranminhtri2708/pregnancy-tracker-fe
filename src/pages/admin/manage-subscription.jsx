@@ -1,87 +1,134 @@
 import React, { useEffect, useState } from "react";
 import {
-  createProduct,
-  deleteProduct,
-  getProduct,
-  updateProduct,
+  createSubscriptionPlan,
+  deleteSubscriptionPlan,
+  getSubscriptionPlan,
+  updateSubscriptionPlan,
 } from "../../services/api.subscription";
-import { Button, Form, Input, Modal, Popconfirm, Select, Table } from "antd";
-import FormItem from "antd/es/form/FormItem";
-import { getCategories } from "../../services/api.category";
-import { useForm } from "antd/es/form/Form";
-import { toast } from "react-toastify";
+import {
+  Button,
+  Form,
+  Input,
+  InputNumber,
+  Modal,
+  Popconfirm,
+  Table,
+  Select,
+  Typography,
+} from "antd";
 
-function ManageProduct() {
-  const [products, setProducts] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [open, setOpen] = useState(false); // lưu trang thái biến Modal
+import { toast } from "react-toastify";
+import { useForm } from "antd/es/form/Form";
+
+function ManageSubscription() {
+  const [subscriptionPlan, setSubscriptionPlan] = useState([]);
+  const [open, setOpen] = useState(false);
   const [form] = useForm();
+  const [filterStatus, setFilterStatus] = useState(null);
+  const [isUpdateMode, setIsUpdateMode] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false); // Add state to track submission status
+  const { Title } = Typography;
+
   //CRUD
-  const fetchProduct = async () => {
-    const data = await getProduct();
-    setProducts(data); //
+  const fetchSubscriptionPlan = async () => {
+    try {
+      const data = await getSubscriptionPlan();
+      // Ensure we're working with unique plans by ID
+      const uniquePlans = [];
+      const planIds = new Set();
+
+      data.forEach((plan) => {
+        if (!planIds.has(plan.id)) {
+          planIds.add(plan.id);
+          uniquePlans.push(plan);
+        }
+      });
+
+      setSubscriptionPlan(uniquePlans);
+    } catch (error) {
+      console.error("Lỗi khi lấy dữ liệu:", error);
+      toast.error("Không thể lấy danh sách gói thành viên");
+    }
   };
-  const fetchCategories = async () => {
-    const data = await getCategories();
-    setCategories(data); //
-  };
-  //get product được sài nhiều chỗ, nhiều lần và dùng nguyên tắc DRY
+
   useEffect(() => {
-    fetchProduct();
-    fetchCategories();
+    fetchSubscriptionPlan();
   }, []);
+
+  const filteredData =
+    filterStatus === null
+      ? subscriptionPlan
+      : subscriptionPlan.filter((plan) => plan.isActive === filterStatus);
+
   const columns = [
-    // lấy ra được 2 fill trong swagger
-    // muốn hiển thị bao nhiêu cột thì thêm bấy nhiêu column dưaj vào be
     {
-      title: "Name",
-      dataIndex: "name", // này phải để chính xác cái be trả về
-      key: "name", // này cũng phải giống be
+      title: "Tên",
+      dataIndex: "name",
+      key: "name",
     },
     {
-      title: "Description", // này thì tự đặt
-      dataIndex: "description", // này phải để chính xác cái be trả về
-      key: "description", // này cũng phải giống be
+      title: "Giá",
+      dataIndex: "price",
+      key: "price",
     },
     {
-      title: "Price", // này thì tự đặt
-      dataIndex: "price", // này phải để chính xác cái be trả về
-      key: "price", // này cũng phải giống be
+      title: "Thời hạn sử dụng",
+      dataIndex: "durationInMonths",
+      key: "durationInMonths",
     },
     {
-      title: "Quantity", // này thì tự đặt
-      dataIndex: "quantity", // này phải để chính xác cái be trả về
-      key: "quantity", // này cũng phải giống be
+      title: "Miêu tả",
+      dataIndex: "description",
+      key: "description",
     },
-    // cần thêm 2 cái action
+    {
+      title: "Chức năng",
+      dataIndex: "feature",
+      key: "feature",
+    },
+    {
+      title: "Trạng thái",
+      dataIndex: "isActive",
+      key: "isActive",
+      render: (isActive) =>
+        isActive ? (
+          <span style={{ color: "#52c41a" }}>Đang hoạt động</span>
+        ) : (
+          <span style={{ color: "#ff4d4f" }}>Dừng hoạt động</span>
+        ),
+      filters: [
+        { text: "Đang hoạt động", value: true },
+        { text: "Dừng hoạt động", value: false },
+      ],
+      onFilter: (value, record) => record.isActive === value,
+    },
+    {
+      title: "Số lượng người đăng kí",
+      dataIndex: "activeSubscribersCount",
+      key: "activeSubscribersCount",
+    },
     {
       title: "Action",
       dataIndex: "id",
       key: "id",
       render: (id, record) => {
-        // record là dữ liệu nó trả về từng cái data trên từng hàng
         return (
           <>
             <Button
               type="primary"
               onClick={() => {
-                setOpen(true); // mở Modal khi nhấn Update
-                // data sẽ đỗ lên từng fill
-                // cái record trả về object cuar catagori chứ không phải là 1 id
-                form.setFieldsValue({
-                  ...record,
-                  categoryID: record?.categories
-                    ? record?.categories?.map((item) => item.id)
-                    : [],
-                }); // sử lý để fill categoriId đươc đổ ra
+                setIsUpdateMode(true);
+                setOpen(true);
+                form.setFieldsValue(record);
               }}
+              style={{ marginRight: "8px" }}
             >
               Update
             </Button>
             <Popconfirm
-              title="Delete the product"
-              description="Are you sure to delete this product?"
-              onConfirm={() => handleDeleteProduct(id)}
+              title="Xóa gói thành viên"
+              description="Bạn có chắc muốn xóa gói này?"
+              onConfirm={() => handleDeleteSubscription(id)}
             >
               <Button danger type="primary">
                 Delete
@@ -92,55 +139,143 @@ function ManageProduct() {
       },
     },
   ];
-  const handleDeleteProduct = async (id) => {
-    const response = await deleteProduct(id);
-    if (response) {
-      fetchProduct(); // khi xóa xong gọi lại để refre lại table
+
+  const handleDeleteSubscription = async (id) => {
+    try {
+      const response = await deleteSubscriptionPlan(id);
+      if (response) {
+        // Remove the plan from local state instead of re-fetching
+        setSubscriptionPlan((prevPlans) =>
+          prevPlans.filter((plan) => plan.id !== id)
+        );
+        toast.success("Xóa gói thành công");
+      }
+    } catch (error) {
+      console.error("Lỗi khi xóa:", error);
+      toast.error("Xóa gói thất bại");
     }
   };
-  const handleSubmit = async (formValues) => {
-    formValues.image = "123"; // này set đại Image chưa chính xác
-    // có id thì update ngược laij không có là post
-    if (formValues.id) {
-      const response = await updateProduct({
-        id: formValues.id,
-        product: formValues,
-      });
-      console.log(response);
-      toast.success("Successfully update product"); // hiển thị thông báo thành công
-    } else {
-      const response = await createProduct(formValues);
-      toast.success("Successfull create new product"); // hiển thị thông báo thành công
-    }
 
-    setOpen(false); // tắt modal
-    form.resetFields(); // xóa dự liệu bắt đầu lại từ đầu
-    fetchProduct();
-  }; // khi mình bấm submit thì dữ liệu phải collect thành một cục
+  const handleSubmit = async (formValues) => {
+    if (isSubmitting) return; // Prevent duplicate submissions
+
+    setIsSubmitting(true);
+    try {
+      console.log("Form values:", formValues);
+
+      if (formValues.id) {
+        // UPDATE case
+        const subscriptionData = {
+          price: Number(formValues.price),
+          description: formValues.description,
+          feature: formValues.feature,
+          isActive: Boolean(formValues.isActive),
+        };
+
+        console.log("Dữ liệu update gửi đến BE:", {
+          planId: formValues.id,
+          subscriptionPlan: subscriptionData,
+        });
+
+        const response = await updateSubscriptionPlan({
+          planId: formValues.id,
+          subscriptionPlan: subscriptionData,
+        });
+
+        console.log("Kết quả update:", response);
+
+        // Update the local state directly
+        setSubscriptionPlan((prevPlans) =>
+          prevPlans.map((plan) =>
+            plan.id === formValues.id ? { ...plan, ...subscriptionData } : plan
+          )
+        );
+
+        toast.success("Cập nhật gói thành công");
+      } else {
+        // CREATE case
+        // Make sure we're sending correct data types
+        const newPlan = {
+          ...formValues,
+          price: Number(formValues.price),
+          durationInMonths: Number(formValues.durationInMonths),
+          isActive: true,
+        };
+
+        console.log("Dữ liệu create gửi đến BE:", newPlan);
+
+        const response = await createSubscriptionPlan(newPlan);
+        console.log("Kết quả tạo mới:", response);
+
+        // Add the new plan to the state only if we have a response with ID
+        if (response && response.id) {
+          setSubscriptionPlan((prevPlans) => [...prevPlans, response]);
+        } else {
+          // If no valid response, fetch all plans to ensure consistency
+          await fetchSubscriptionPlan();
+        }
+
+        toast.success("Tạo gói thành công");
+      }
+
+      setOpen(false);
+      form.resetFields();
+    } catch (error) {
+      console.error("Lỗi khi xử lý:", error);
+      toast.error(
+        "Thao tác thất bại: " + (error.message || "Lỗi không xác định")
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleCloseModal = () => {
+    setOpen(false);
+    setIsUpdateMode(false);
+    form.resetFields();
+  };
 
   return (
     <div>
-      <Button
-        type="primary"
-        onClick={() => {
-          setOpen(true); // khi click vào button này sẽ setOpen là true modal mở
+      <h1 className="text-3xl font-bold mb-4 text-blue-500">
+        Quản Lý Gói Thành Viên
+      </h1>
+
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          marginBottom: "16px",
         }}
       >
-        Create new product
-      </Button>
-      {/* <Table dataSource={products} columns={columns} /> */}
-      {/*Cái table này là hiển thị tất cả các sản phẩm chưa xóa và đã xóa */}
-      {/*Giờ mình cập nhật thêm tại delete be phải làm ko dc delete hẵn trên database */}
-      {/*Modal này có hai trang thái mở lên và ẩn đi */}
+        <Button
+          type="primary"
+          onClick={() => {
+            setIsUpdateMode(false);
+            setOpen(true);
+            form.resetFields();
+            form.setFieldsValue({ isActive: true });
+          }}
+        >
+          Tạo gói thành viên
+        </Button>
+
+        <div></div>
+      </div>
+
       <Table
-        dataSource={products.filter((product) => !product.deleted)} // đây là lọc lấy những thằng chưa bị xóa
+        dataSource={filteredData}
         columns={columns}
+        rowKey="id" // Add rowKey to ensure each row has a unique key
       />
+
       <Modal
-        title="Product"
+        title={isUpdateMode ? "Cập nhật gói thành viên" : "Tạo gói thành viên"}
         open={open}
-        onCancel={() => setOpen(false)}
+        onCancel={handleCloseModal}
         onOk={() => form.submit()}
+        confirmLoading={isSubmitting} // Disable the OK button during submission
       >
         <Form
           labelCol={{
@@ -150,82 +285,78 @@ function ManageProduct() {
           onFinish={handleSubmit}
         >
           <Form.Item label="Id" name="id" hidden>
-            {" "}
-            {/*Dòng này để biết mình đang muốn update thằng nào */}
             <Input />
           </Form.Item>
           <Form.Item
-            label="Name"
+            label="Tên gói"
             name="name"
             rules={[
               {
                 required: true,
-                message: "Name is required!",
+                message: "Tên gói bắt buộc nhập!",
               },
+            ]}
+          >
+            <InputNumber style={{ width: "100%" }} disabled={isUpdateMode} />
+          </Form.Item>
+
+          <Form.Item
+            label="Giá"
+            name="price"
+            rules={[
               {
-                min: 3,
-                message: "Name must be at least 3 characters!",
+                required: true,
+                message: "Giá bắt buộc nhập!",
+              },
+            ]}
+          >
+            <InputNumber style={{ width: "100%" }} />
+          </Form.Item>
+
+          <Form.Item
+            label="Thời gian sử dụng"
+            name="durationInMonths"
+            rules={[
+              {
+                required: true,
+                message: "Thời gian sử dụng bắt buộc nhập!",
+              },
+            ]}
+          >
+            <InputNumber style={{ width: "100%" }} disabled={isUpdateMode} />
+          </Form.Item>
+
+          <Form.Item
+            label="Miêu tả về gói"
+            name="description"
+            rules={[
+              {
+                required: true,
+                message: "Miêu tả về gói bắt buộc nhập!",
               },
             ]}
           >
             <Input />
           </Form.Item>
 
-          <Form.Item label="Price" name="price" required>
-            <Input type="number" />
+          <Form.Item label="Chức năng của gói" name="feature">
+            <Input />
           </Form.Item>
 
-          <Form.Item
-            label="Quantity"
-            name="quantity"
-            rules={[
-              {
-                required: true,
-                message: "Quantity is required!",
-              },
-            ]}
-          >
-            <Input type="number" />
-          </Form.Item>
-
-          <Form.Item
-            label="Category ID"
-            name="categoryID"
-            rules={[
-              {
-                required: true,
-                message: "At least one category must be selected!",
-              },
-            ]}
-          >
-            <Select mode="multiple">
-              {categories.map((category) => (
-                <Select.Option value={category.id} key={category.id}>
-                  {category.name}
-                </Select.Option>
-              ))}
-            </Select>
-          </Form.Item>
-          <Form.Item
-            label="Description"
-            name="description"
-            rules={[
-              {
-                required: true,
-                message: "Description is required!",
-              },
-              {
-                min: 5,
-                message: "Description must be at least 5 characters!",
-              },
-            ]}
-          >
-            <Input.TextArea />
-          </Form.Item>
+          {isUpdateMode && (
+            <Form.Item label="Trạng thái" name="isActive" initialValue={true}>
+              <Select
+                options={[
+                  { value: true, label: "Đang hoạt động" },
+                  { value: false, label: "Dừng hoạt động" },
+                ]}
+              />
+            </Form.Item>
+          )}
         </Form>
       </Modal>
     </div>
   );
 }
 
-export default ManageProduct;
+export default ManageSubscription;

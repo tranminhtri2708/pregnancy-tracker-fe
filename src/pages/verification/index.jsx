@@ -6,6 +6,11 @@ import { useNavigate } from "react-router-dom"; // Thêm import useNavigate
 
 
 
+
+const savedData = JSON.parse(localStorage.getItem("responseData"));
+console.log("Saved data: ", savedData);
+
+
 const EmailVerification = ({ userId }) => {
   const navigate = useNavigate(); // Khởi tạo hook useNavigate
   const [verificationCode, setVerificationCode] = useState([
@@ -23,6 +28,7 @@ const EmailVerification = ({ userId }) => {
   const [attempts, setAttempts] = useState(0);
   const [resendLoading, setResendLoading] = useState(false);
   const inputRefs = useRef([]);
+  
 
   useEffect(() => {
     if (timeLeft > 0) {
@@ -64,11 +70,9 @@ const EmailVerification = ({ userId }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const code = verificationCode.join("");
+
     const savedData = JSON.parse(localStorage.getItem("responseData"));
-    if (code.length !== 6) {
-      setError("Vui lòng nhập đủ mã xác minh");
-      return;
-    }
+
     console.log("userId: ", savedData," code: ", code);
     setLoading(true);
     try {
@@ -84,6 +88,7 @@ const EmailVerification = ({ userId }) => {
       if (response.status === 200) {
         setIsSuccess(true);
       }
+      setLoading(true);
     } catch (error) {
       setError("Mã xác minh không hợp lệ!");
     } finally {

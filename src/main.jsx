@@ -8,6 +8,7 @@ import RegisterPage from "./pages/register";
 import LoginPage from "./pages/login";
 
 import Header from "./components/header";
+import WhoStandard from "./pages/admin/whostandard";
 import Footer from "./components/footer";
 // import SubcriptionManagement from "./pages/subscription/SubscriptionManagement";
 import PregnancyHomepage from "./pages/homepage";
@@ -23,10 +24,31 @@ import PregnancyPrep from "./pages/community";
 import Pregnancy from "./pages/community/index1";
 import EmailVerification from "./pages/verification";
 import { Provider } from "react-redux";
-import { store } from "./redux/store";
+import { persistor, store } from "./redux/store";
 import ManagerBaby from "./pages/userprofile/manager_baby";
+import { PersistGate } from "redux-persist/integration/react";
+import ManagerProfile from "./pages/userprofile/manager_profile";
+import ManageSchedule from "./pages/userprofile/manage_schedule";
+import Baby from "./pages/healthmetric/sidebar";
+import BabyDetail from "./pages/healthmetric/rightpanel";
+import ManageSubscriptionUser from "./pages/userprofile/manage_subscription";
+import WhoStandardView from "./pages/homepage/whostandard";
 
 const router = createBrowserRouter([
+  {
+    path: "whostandard",
+    element: <WhoStandardView />,
+  },
+  {
+    path: "/baby",
+    element: <Baby />,
+    children: [
+      {
+        path: "/baby/babydetail/:id",
+        element: <BabyDetail />,
+      },
+    ],
+  },
   {
     path: "/login",
     element: <LoginPage />,
@@ -56,7 +78,7 @@ const router = createBrowserRouter([
     element: <EmailVerification />,
   },
   {
-    path: "*",
+    path: "/",
     element: <PregnancyHomepage />,
   },
   {
@@ -88,6 +110,10 @@ const router = createBrowserRouter([
         path: "/dashboard/user",
         element: <ManageUser />,
       },
+      {
+        path: "/dashboard/whostandard",
+        element: <WhoStandard />,
+      },
     ],
   },
   // chuyển trang của viewprofile
@@ -103,14 +129,28 @@ const router = createBrowserRouter([
         path: "*",
         element: <PregnancyProfile />,
       },
+      {
+        path: "personal",
+        element: <ManagerProfile />,
+      },
+      {
+        path: "calendar",
+        element: <ManageSchedule />,
+      },
+      {
+        path: "subscription",
+        element: <ManageSubscriptionUser />,
+      },
     ],
   },
 ]);
 createRoot(document.getElementById("root")).render(
   <>
     <Provider store={store}>
-      <RouterProvider router={router} />
-      <ToastContainer />
+      <PersistGate loading={null} persistor={persistor}>
+        <RouterProvider router={router} />
+        <ToastContainer />
+      </PersistGate>
     </Provider>
   </>
 );

@@ -6,6 +6,7 @@ import {
   PieChartOutlined,
   TeamOutlined,
   UserOutlined,
+  InfoCircleOutlined,
 } from "@ant-design/icons";
 import { Breadcrumb, Layout, Menu, theme } from "antd";
 import { Outlet, Link } from "react-router-dom";
@@ -22,6 +23,7 @@ const items = [
   getItem("overview", "overview", <PieChartOutlined />),
   getItem("subscription", "subscription", <DesktopOutlined />),
   getItem("user", "user", <DesktopOutlined />),
+  getItem("whostandard", "whostandard", <InfoCircleOutlined />),
   //   getItem("User", "sub1", <UserOutlined />, [
   //     getItem("Tom", "3"),
   //     getItem("Bill", "4"),
@@ -85,9 +87,7 @@ const AdminLayout = () => {
           style={{
             textAlign: "center",
           }}
-        >
-          Ant Design ©{new Date().getFullYear()} Created by Ant UED
-        </Footer>
+        ></Footer>
       </Layout>
     </Layout>
   );
