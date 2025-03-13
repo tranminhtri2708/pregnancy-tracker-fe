@@ -3,11 +3,18 @@ import { FiMenu, FiX } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import { Dropdown, Space } from "antd";
 import { DownOutlined } from "@ant-design/icons";
+import { useSelector, useDispatch } from "react-redux";
+import { logout } from "../../redux/features/userSlice";
+
+// Fixed avatar URL
+const FIXED_AVATAR =
+  "https://i.pinimg.com/736x/5f/91/41/5f91413c8a9e766a5139c6cfe5caa837.jpg";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isLoggedIn] = useState(false);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const user = useSelector((state) => state.user);
 
   const navItems = [
     { name: "Trang chủ", path: "/" },
@@ -34,6 +41,11 @@ const Header = () => {
     key: item.key,
   }));
 
+  const handleLogout = () => {
+    dispatch(logout());
+    navigate("/");
+  };
+
   return (
     <header className="bg-white dark:bg-gray-900 fixed w-full top-0 left-0 z-50 transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -47,24 +59,18 @@ const Header = () => {
             </h1>
           </div>
 
-          {/* Desktop Navigation */}
           <nav className="hidden md:flex space-x-8">
             {navItems.map((item) => (
               <button
                 key={item.name}
                 onClick={() => navigate(item.path)}
-                className="text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+                className="text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 rounded-md text-sm font-medium"
               >
                 {item.name}
               </button>
             ))}
 
-            {/* Dropdown Community */}
-            <Dropdown
-              menu={{ items: communityItems }}
-              trigger={["click"]}
-              getPopupContainer={(trigger) => trigger.parentElement} // Fix dropdown bị nhảy khi cuộn
-            >
+            <Dropdown menu={{ items: communityItems }} trigger={["click"]}>
               <button className="text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 rounded-md text-sm font-medium">
                 <Space>
                   Cộng đồng
@@ -74,21 +80,56 @@ const Header = () => {
             </Dropdown>
           </nav>
 
-          {/* Right Section */}
           <div className="flex items-center space-x-4">
-            {/* Authentication */}
-            {isLoggedIn ? (
-              <button
-                onClick={() => navigate("/profile")}
-                className="flex items-center space-x-2 text-gray-700 dark:text-gray-200"
-              >
-                <img
-                  className="h-8 w-8 rounded-full"
-                  src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e"
-                  alt="User avatar"
+            {user ? (
+              <>
+                <input
+                  type="text"
+                  placeholder="Tìm kiếm..."
+                  className="px-2 py-1 rounded-full border border-gray-300 dark:border-gray-700 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 w-40"
                 />
-                <span className="hidden md:inline">John Doe</span>
-              </button>
+                <Dropdown
+                  menu={{
+                    items: [
+                      {
+                        label: (
+                          <button
+                            onClick={() => navigate("/profile")}
+                            className="block text-left w-full px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md"
+                          >
+                            Xem hồ sơ
+                          </button>
+                        ),
+                        key: "profile",
+                      },
+                      {
+                        label: (
+                          <button
+                            onClick={handleLogout}
+                            className="block text-left w-full px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md"
+                          >
+                            Đăng xuất
+                          </button>
+                        ),
+                        key: "logout",
+                      },
+                    ],
+                  }}
+                  trigger={["click"]}
+                >
+                  <button
+                    className="flex items-center space-x-2 text-gray-700 dark:text-gray-200"
+                    onClick={() => navigate("/viewprofile")}
+                  >
+                    <img
+                      className="h-8 w-8 rounded-full"
+                      src={FIXED_AVATAR}
+                      alt="User avatar"
+                    />
+                    <span className="hidden md:inline">{user.name}</span>
+                  </button>
+                </Dropdown>
+              </>
             ) : (
               <div className="hidden md:flex space-x-4">
                 <button
@@ -106,10 +147,9 @@ const Header = () => {
               </div>
             )}
 
-            {/* Mobile menu button */}
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="md:hidden p-2 rounded-md text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400"
+              className="md:hidden p-2 rounded-md text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover't:blue-400"
             >
               {isMenuOpen ? (
                 <FiX className="h-6 w-6" />
@@ -119,53 +159,6 @@ const Header = () => {
             </button>
           </div>
         </div>
-
-        {/* Mobile Navigation */}
-        {isMenuOpen && (
-          <div className="md:hidden py-4">
-            <div className="flex flex-col space-y-2">
-              {navItems.map((item) => (
-                <button
-                  key={item.name}
-                  onClick={() => {
-                    navigate(item.path);
-                    setIsMenuOpen(false);
-                  }}
-                  className="text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 rounded-md text-base font-medium"
-                >
-                  {item.name}
-                </button>
-              ))}
-
-              {/* Community Dropdown trên mobile */}
-              <Dropdown menu={{ items: communityItems }} trigger={["click"]}>
-                <button className="text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 rounded-md text-base font-medium">
-                  <Space>
-                    Community
-                    <DownOutlined />
-                  </Space>
-                </button>
-              </Dropdown>
-
-              {!isLoggedIn && (
-                <div className="space-y-2 pt-4">
-                  <button
-                    onClick={() => navigate("/login")}
-                    className="w-full px-4 py-2 text-base font-medium text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400"
-                  >
-                    Đăng nhập
-                  </button>
-                  <button
-                    onClick={() => navigate("/register")}
-                    className="w-full px-4 py-2 text-base font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
-                  >
-                    Đăng kí
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
       </div>
     </header>
   );

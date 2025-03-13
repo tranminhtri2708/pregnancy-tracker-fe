@@ -4,6 +4,9 @@ import { FcGoogle } from "react-icons/fc";
 import api from "../../config/axios";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import { login } from "../../redux/features/userSlice";
+import { useDispatch } from "react-redux";
+import { store } from "../../redux/store";
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({
@@ -15,6 +18,7 @@ const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const validateForm = () => {
     const newErrors = {};
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -38,18 +42,42 @@ const LoginPage = () => {
     if (validateForm()) {
       setIsLoading(true);
       try {
-        const response = await api.post("login", formData);
-        const { token, role } = response.data.data;
-        localStorage.setItem("token", token); // để xác định role cho be để thao tác api
-        toast.success("Successfully login!");
-        // navigate("/homepage");
-        if (role === "ADMIN") {
-          navigate("/dashboard");
-        } else if (role === "CUSTOMER") {
-          navigate("/homepage");
+        const response = await api.post("Auth/login", formData);
+        console.log("API response:", response.data); // Để debug
+
+        if (response.data.isSuccess && response.data.result) {
+          const token = response.data.result;
+          localStorage.setItem("token", token);
+          toast.success("Successfully login!");
+
+          // Giải mã JWT để lấy thông tin role
+          const base64Url = token.split(".")[1];
+          const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+          const payload = JSON.parse(window.atob(base64));
+          const role = payload.Role; // Lấy role từ JWT
+          // Dispatch thông tin người dùng từ payload JWT
+          dispatch(
+            login({
+              token,
+              role,
+              email: payload.Email,
+              userId: payload.UserId,
+              fullName: payload.FullName,
+            })
+          );
+
+          // Điều hướng dựa trên role
+          if (role === "Manager" || role === "MANAGER") {
+            navigate("/dashboard");
+          } else {
+            navigate("/homepage");
+          }
+        } else {
+          toast.error(response.data.errorMessage || "Invalid credentials");
         }
       } catch (err) {
-        toast.error(err.response.data);
+        console.error("Login error:", err);
+        toast.error(err.response?.data?.errorMessage || "Login failed!");
       } finally {
         setIsLoading(false);
       }

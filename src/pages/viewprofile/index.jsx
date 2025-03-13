@@ -1,10 +1,14 @@
 import React, { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 import Header from "../../components/header";
 import Footer from "../../components/footer";
+import { getProfile, updateProfile } from "../../services/api.getprofile";
 import {
+  FaBaby,
   FaEye,
   FaEyeSlash,
   FaHeartbeat,
+  FaIdCard,
   FaQuestionCircle,
   FaRegCalendarCheck,
   FaSave,
@@ -14,6 +18,9 @@ import {
 } from "react-icons/fa";
 import { FaGear } from "react-icons/fa6";
 import { FaChevronDown, FaChevronUp } from "react-icons/fa";
+import { Outlet, useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { logout } from "../../redux/features/userSlice";
 const faqData = [
   {
     question: "MomCare là gì?",
@@ -53,39 +60,102 @@ const faqData = [
   },
 ];
 const PregnancyProfile = () => {
+  const navigate = useNavigate();
+  const [fileList, setFileList] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedSection, setSelectedSection] = useState("personal");
+  const [selectedSection, setSelectedSection] = useState(null);
   const [selectedSubSection, setSelectedSubSection] = useState(null);
+  const dispatch = useDispatch();
+  const [profileData, setProfileData] = useState({
+    firstName: "",
+    lastName: "",
+    phoneNumber: "",
+    email: "",
+    imgUrl: "",
+  });
+  const [editData, setEditData] = useState({
+    firstName: "",
+    lastName: "",
+    phoneNumber: "",
+    email: "",
+    imgUrl: "",
+  });
+
+  const fetchProfile = async () => {
+    try {
+      setLoading(true);
+      const response = await getProfile();
+      console.log("Profile response:", response);
+
+      if (response && response.isSuccess && response.result) {
+        const data = response.result;
+        console.log("Profile response:", data);
+
+        const profileInfo = {
+          firstName: data.firstName || "",
+          lastName: data.lastName || "",
+          phoneNumber: data.phoneNumber || "",
+          email: data.email || "",
+          imgUrl: data.imgUrl || "",
+        };
+
+        setProfileData(profileInfo);
+        setEditData(profileInfo);
+
+        // Initialize fileList if imgUrl exists
+        if (data.imgUrl) {
+          setFileList([
+            {
+              uid: "-1",
+              name: "profile-image.png",
+              status: "done",
+              url: data.imgUrl,
+            },
+          ]);
+        }
+      } else {
+        if (response && response.errorMessage) {
+          toast.error(response.errorMessage);
+        } else {
+          toast.error("Không thể tải thông tin hồ sơ");
+        }
+      }
+    } catch (error) {
+      toast.error("Không thể tải thông tin hồ sơ");
+      console.error("Lỗi khi tải hồ sơ:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
+    fetchProfile();
     setSelectedSubSection(null);
   }, [selectedSection]);
 
   {
     /*Các thông tin về Chi tiết thông tin của tôi */
   }
-  const [personalInfo, setPersonalInfo] = useState({
-    fullname: "Nguyễn Thị Hồng Ngọc",
-    address: "TPHCM",
-    email: "nguyenngocdh04@gmail.com",
-    birth: "21-11-2004",
-    phone: "0916693077",
-    profileImage: "https://nguoinoitieng.tv/images/nnt/105/0/bibl.jpg",
-  });
+  // const [personalInfo, setPersonalInfo] = useState({
+  //   fullname: "Nguyễn Thị Hồng Ngọc",
+
+  //   email: "nguyenngocdh04@gmail.com",
+
+  //   profileImage: "https://nguoinoitieng.tv/images/nnt/105/0/bibl.jpg",
+  // });
   {
     /*Chi tiết thông tin về sức khỏe */
   }
-  const [healthMetrics, setHealthMetrics] = useState({
-    weight: "65kg",
-    bloodPressure: "120/80",
-    lastCheckup: "2024-01-15",
-  });
+  const handleNavigate = (path) => {
+    setSelectedSection(path);
+    navigate(`/viewprofile/${path}`);
+  };
+  const handleRedirect = (path) => {
+    setSelectedSection(path);
+    navigate(`/`);
+  };
 
-  const [medicalHistory, setMedicalHistory] = useState({
-    conditions: ["None"],
-    medications: ["Prenatal Vitamins"],
-    allergies: ["Penicillin"],
-    vaccinations: ["Flu Shot", "Tdap"],
-  });
   {
     /*hai cái này là của trợ giúp */
   }
@@ -104,7 +174,7 @@ const PregnancyProfile = () => {
     password: "",
     confirmPassword: "",
   });
-
+  const fullname = profileData.firstName + " " + profileData.lastName;
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errors, setErrors] = useState({});
@@ -145,12 +215,12 @@ const PregnancyProfile = () => {
         <div className="w-1/4 bg-white rounded-2xl shadow-lg p-6">
           <div className="flex flex-col items-center">
             <img
-              src={personalInfo.profileImage}
+              src={profileData.imgUrl}
               alt="Profile"
               className="w-24 h-24 rounded-full object-cover border-4 border-pink-200"
             />
-            <h2 className="text-xl font-bold mt-4">{personalInfo.fullname}</h2>
-            <p className="text-gray-600"> {personalInfo.email}</p>
+            <h2 className="text-xl font-bold mt-4">{fullname} </h2>
+            <p className="text-gray-600"> {profileData.email}</p>
           </div>
           <div className="mt-6 space-y-4">
             {/*Nút xem hồ sơ của tôi */}
@@ -158,10 +228,22 @@ const PregnancyProfile = () => {
               className={`w-full flex items-center space-x-2 text-left px-4 py-2 rounded-lg ${
                 selectedSection === "personal" ? "bg-pink-200" : "bg-gray-100"
               }`}
-              onClick={() => setSelectedSection("personal")}
+              onClick={() => handleNavigate("personal")}
             >
-              <FaUserCircle className="text-blue-500 text-2xl " />
-              <span>Xem hồ sơ của tôi</span>
+              <FaUserCircle className="text-pink-500 text-2xl" />
+              <span>Hồ sơ của tôi</span>
+            </button>
+            {/*Nút xem danh sách các gói đã và đang đăng kí */}
+            <button
+              className={`w-full flex items-center space-x-2 text-left px-4 py-2 rounded-lg ${
+                selectedSection === "subscription"
+                  ? "bg-pink-200"
+                  : "bg-gray-100"
+              }`}
+              onClick={() => handleNavigate("subscription")}
+            >
+              <FaIdCard className="text-pink-500 text-2xl" />
+              <span>Gói thành viên của tôi</span>
             </button>
             {/*Nút xem sức khỏe thai nhi của từng user */}
             <button
@@ -195,17 +277,27 @@ const PregnancyProfile = () => {
               <FaUserFriends className="text-purple-500 text-2xl" />
               <span>Đã tham gia</span>
             </button>
-
+            {/*Thông tin về thai */}
+            <button
+              className={`w-full flex items-center space-x-2 text-left px-4 py-2 rounded-lg ${
+                selectedSection === "numberbaby" ? "bg-pink-200" : "bg-gray-100"
+              }`}
+              onClick={() => handleNavigate("numberbaby")}
+            >
+              <FaBaby className="text-pink-500 text-2xl" />
+              <span>Thông tin bé</span>
+            </button>
             {/*Nút lịch sư khám bệnh ở đây sẽ thể hiện các lịch hẹn khám sắp tới */}
             <button
               className={`w-full flex items-center space-x-2 text-left px-4 py-2 rounded-lg ${
                 selectedSection === "calendar" ? "bg-pink-200" : "bg-gray-100"
               }`}
-              onClick={() => setSelectedSection("calendar")}
+              onClick={() => handleNavigate("calendar")}
             >
-              <FaRegCalendarCheck className="text-green-500 text-2xl" />
+              <FaRegCalendarCheck className="text-pink-500 text-2xl" />
               <span>Lịch sử lịch hẹn</span>
             </button>
+
             {/*Nút thiết lâp tài khoản ở đây có hai cái là mật khẩu và vô hiệu hóa tài khoản */}
             <div>
               {/* Nút Thiết lập tài khoản */}
@@ -303,7 +395,12 @@ const PregnancyProfile = () => {
                       <button
                         onClick={() => {
                           console.log("Đăng xuất...");
+                          localStorage.removeItem("token");
+                          localStorage.removeItem("expiration");
+                          localStorage.clear();
+                          dispatch(logout());
                           setIsOpen(false);
+                          handleRedirect();
                         }}
                         className="px-4 py-2 border border-pink-500 text-pink-500 rounded-md hover:bg-pink-100 transition w-1/2 ml-2"
                       >
@@ -323,23 +420,7 @@ const PregnancyProfile = () => {
               <h2 className="text-2xl font-semibold mb-6 text-gray-800">
                 Hồ sơ của tôi
               </h2>
-              <div className="space-y-4">
-                <div className="flex items-center space-x-4">
-                  <img
-                    src={personalInfo.profileImage}
-                    alt="Profile"
-                    className="w-24 h-24 rounded-full object-cover border-4 border-pink-200"
-                  />
-                  <button className="bg-pink-500 text-white px-4 py-2 rounded-full hover:bg-pink-600 shadow-md">
-                    ✏ Edit Profile
-                  </button>
-                </div>
-
-                <p>FullName: {personalInfo.fullname}</p>
-                <p>Phone: {personalInfo.phone}</p>
-                <p>Address: {personalInfo.address}</p>
-                <p>Date Of Birth: {personalInfo.birth}</p>
-              </div>
+              <Outlet />
             </div>
           )}
 
@@ -351,6 +432,24 @@ const PregnancyProfile = () => {
               <p>Weight: {healthMetrics.weight}</p>
               <p>Blood Pressure: {healthMetrics.bloodPressure}</p>
               <p>Last Checkup: {healthMetrics.lastCheckup}</p>
+            </div>
+          )}
+          {/*Các thông tin về số lượng em bé */}
+          {selectedSection === "numberbaby" && (
+            <div className="bg-white rounded-2xl shadow-lg p-6">
+              <h2 className="text-2xl font-semibold mb-6 text-gray-800">
+                Thông tin bé
+              </h2>
+              <Outlet />
+            </div>
+          )}
+          {/*Các thông tin về các gói thành viên đã và đăng kí  */}
+          {selectedSection === "subscription" && (
+            <div className="bg-white rounded-2xl shadow-lg p-6">
+              <h2 className="text-2xl font-semibold mb-6 text-gray-800">
+                Các gói thành viên
+              </h2>
+              <Outlet />
             </div>
           )}
           {selectedSection === "communicate" && (
@@ -497,11 +596,9 @@ const PregnancyProfile = () => {
           {selectedSection === "calendar" && (
             <div className="bg-white rounded-2xl shadow-lg p-6">
               <h2 className="text-2xl font-semibold mb-6 text-gray-800">
-                Sức khỏe của tôi
+                Lịch hẹn khám
               </h2>
-              <p>Weight: {healthMetrics.weight}</p>
-              <p>Blood Pressure: {healthMetrics.bloodPressure}</p>
-              <p>Last Checkup: {healthMetrics.lastCheckup}</p>
+              <Outlet />
             </div>
           )}
           {selectedSection === "help" && (

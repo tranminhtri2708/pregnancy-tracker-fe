@@ -1,34 +1,119 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { FiCheck } from "react-icons/fi";
 import { BiStar } from "react-icons/bi";
 import Header from "../../components/header";
+import { getSubscriptionPlan } from "../../services/api.subscription";
+import { createSubscription } from "../../services/api.subscriptionuser";
+import { toast } from "react-toastify";
+import { createOrder } from "../../services/api.order";
+import { createPayment } from "../../services/api.payment";
 
 const MembershipPackages = () => {
-  // các dữ liệu cứng
-  const packages = [
-    {
-      id: 1,
-      name: "Bronze",
-      price: 29,
-      duration: "3 tháng",
-      description: "Trải nghiệm ngay! Hoàn hảo để bắt đầu hành trình của bạn.",
-    },
-    {
-      id: 2,
-      name: "Silver",
-      price: 59,
-      duration: "10 tháng",
-      description: "Gói linh hoạt, đồng hành cùng bạn trong suốt thai kỳ.",
-    },
-    {
-      id: 3,
-      name: "Gold",
-      price: 99,
-      duration: "Vĩnh viễn",
-      description: "Đồng hành mãi mãi – Một lần đăng ký, hưởng lợi ích mãi mãi",
-      popular: true,
-    },
-  ];
+  const [packages, setPackages] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  function getFormattedCurrentTime() {
+    const now = new Date();
+    return now.toISOString(); // Use ISO format for API input
+  }
+
+  const fetchPackages = async () => {
+    try {
+      setLoading(true);
+      const data = await getSubscriptionPlan();
+
+      const activePackages = data.filter((plan) => plan.isActive);
+      if (activePackages.length > 0) {
+        const sortedPackages = [...activePackages].sort(
+          (a, b) => b.price - a.price
+        );
+        const enhancedPackages = activePackages.map((pkg) => ({
+          ...pkg,
+          popular: pkg.id === sortedPackages[0].id,
+        }));
+        setPackages(enhancedPackages);
+      } else {
+        setPackages([]);
+      }
+    } catch (error) {
+      console.error("Lỗi khi lấy dữ liệu gói thành viên:", error);
+      toast.error("Không thể tải danh sách gói thành viên");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const status = params.get("status");
+    if (status === "success") {
+      toast.success("Transaction successful! Thank you for your purchase!");
+    } else if (status === "failure") {
+      toast.error("Transaction failed. Please try again.");
+    }
+
+    fetchPackages();
+  }, []);
+
+  function formatPrice(price) {
+    return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") + " VNĐ";
+  }
+
+  const formatDuration = (months) => {
+    if (months === 0) return "Vĩnh viễn";
+    if (months === 1) return "1 tháng";
+    if (months >= 120) return "Vĩnh viễn";
+    return `${months} tháng`;
+  };
+
+  function formatPackageName(name) {
+    const nameMapping = {
+      0: "Bronze",
+      1: "Silver",
+      2: "Gold",
+    };
+    return nameMapping[name] || "unknown";
+  }
+
+  // Handle "Trải nghiệm ngay" button click
+  const handleSubscription = async (pkgId) => {
+    const startDate = getFormattedCurrentTime();
+    const data = {
+      planId: pkgId,
+      startDate: startDate,
+    };
+
+    try {
+      // Disable the button while processing
+      setLoading(true);
+
+      // ng dung đăng ký gói thành viên
+      const result = await createSubscription(data);
+      console.log("Subscription created:", result);
+
+      // tạo order
+      const result2 = await createOrder(result);
+      console.log("Order created:", result2);
+
+      // tạo payment
+      const finalResult = await createPayment(result2.id);
+      console.log("Payment created:", finalResult);
+
+      // Check for valid finalResult and redirect
+      if (finalResult) {
+        // Redirect user to the payment URL
+        window.location.href = finalResult;
+      } else {
+        toast.error("Unable to create payment.");
+      }
+    } catch (error) {
+      console.error("Error during subscription process:", error);
+      toast.error("An error occurred. Please try again.");
+    } finally {
+      // Re-enable the button after processing is complete
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-pink-50 to-pink-100 py-16 px-6">
@@ -43,47 +128,78 @@ const MembershipPackages = () => {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
-        {packages.map((pkg, index) => {
-          const colors = [
-            "from-pink-400 to-rose-500",
-            "from-rose-400 to-fuchsia-500",
-            "from-fuchsia-400 to-purple-500",
-          ];
-          const color = colors[index % colors.length];
-
-          return (
-            <div
-              key={pkg.id}
-              className={`relative rounded-3xl bg-white shadow-2xl p-8 border-t-8 border-transparent hover:border-opacity-100 hover:border-gradient-to-r ${color} transition-all duration-300 hover:scale-105`}
-            >
-              {pkg.popular && (
-                <div className="absolute -top-4 right-4 bg-yellow-400 text-white text-sm font-semibold px-4 py-1 rounded-full flex items-center shadow-lg">
-                  <BiStar className="mr-1" /> Most Popular
-                </div>
-              )}
-
-              <div className="text-center mb-6">
-                <h3 className="text-2xl font-bold text-gray-900">{pkg.name}</h3>
-                <p className="mt-2 text-gray-500">{pkg.description}</p>
-              </div>
-
-              <div className="text-center mb-8">
-                <p className="text-5xl font-extrabold text-gray-900">
-                  ${pkg.price}
-                </p>
-                <span className="text-gray-500">{pkg.duration}</span>
-              </div>
-
-              <button
-                className={`w-full bg-gradient-to-r ${color} text-white py-3 px-6 rounded-lg font-semibold text-lg shadow-md hover:shadow-lg transition duration-300`}
+      {loading ? (
+        <div className="text-center py-10">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-pink-500 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Đang tải dữ liệu...</p>
+        </div>
+      ) : packages.length === 0 ? (
+        <div className="text-center py-10">
+          <p className="text-xl text-gray-600">
+            Hiện tại chưa có gói thành viên nào.
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+          {packages.map((pkg, index) => {
+            const colors = [
+              "from-pink-400 to-rose-500",
+              "from-rose-400 to-fuchsia-500",
+              "from-fuchsia-400 to-purple-500",
+            ];
+            const color = colors[index % colors.length];
+            return (
+              <div
+                key={pkg.id}
+                className={`relative rounded-3xl bg-white shadow-2xl p-8 border-t-8 border-transparent hover:border-opacity-100 hover:border-gradient-to-r ${color} transition-all duration-300 hover:scale-105`}
               >
-                Trải nghiệm ngay
-              </button>
-            </div>
-          );
-        })}
-      </div>
+                {pkg.popular && (
+                  <div className="absolute -top-4 right-4 bg-yellow-400 text-white text-sm font-semibold px-4 py-1 rounded-full flex items-center shadow-lg">
+                    <BiStar className="mr-1" /> Most Popular
+                  </div>
+                )}
+                <div className="text-center mb-6">
+                  <h3 className="text-2xl font-bold text-gray-900">
+                    {`Gói ${formatPackageName(pkg.name)}`}
+                  </h3>
+                  <p className="mt-2 text-gray-500">{pkg.description}</p>
+                </div>
+                <div className="text-center mb-8">
+                  <p className="text-5xl font-extrabold text-gray-900">
+                    {formatPrice(pkg.price)}
+                  </p>
+                  <span className="text-gray-500">
+                    {formatDuration(pkg.durationInMonths)}
+                  </span>
+                </div>
+                {pkg.feature && (
+                  <div className="mb-6">
+                    <ul className="space-y-2">
+                      {pkg.feature.split(",").map((feature, idx) => (
+                        <li key={idx} className="flex items-center">
+                          <FiCheck className="text-green-500 mr-2" />
+                          <span className="text-gray-700">
+                            {feature.trim()}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                <button
+                  disabled={loading}
+                  className={`w-full bg-gradient-to-r ${color} text-white py-3 px-6 rounded-lg font-semibold text-lg shadow-md hover:shadow-lg transition duration-300 ${
+                    loading ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
+                  onClick={() => handleSubscription(pkg.id)}
+                >
+                  {loading ? "Processing..." : "Trải nghiệm ngay"}
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 };

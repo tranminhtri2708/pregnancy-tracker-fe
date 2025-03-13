@@ -115,10 +115,14 @@ const RegisterPage = () => {
 
     // promise
     try {
-      const response = await api.post("register", formData);
+      const response = await api.post("Auth/register", formData);
+
       toast.success("Successully create new account!");
-      localStorage.setItem("responseData", JSON.stringify(response.data.result));
-      console.log(response.data.result);
+      localStorage.setItem(
+        "responseData",
+        JSON.stringify(response.data.result)
+      );
+      console.log(response.data.result)
       navigate("/verification"); // nếu thành công sẽ chuyển sang trang verification để nhập code gửi về email
     } catch (err) {
       // bị lỗi =>show ra message lỗi

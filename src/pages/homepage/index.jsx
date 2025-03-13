@@ -292,17 +292,18 @@ const PregnancyHomepage = () => {
 
   const healthTips = [
     {
-      title: "Nutrition",
-      content: "Eat a balanced diet rich in folic acid and vitamins",
+      title: "Dinh dưỡng thai kì",
+      content: "Ăn chế độ ăn cân bằng giàu axit folic và vitamin",
     },
     {
-      title: "Exercise",
-      content: "Regular gentle exercise like walking and prenatal yoga",
+      title: "Thể dục",
+      content:
+        "Tập thể dục nhẹ nhàng thường xuyên như đi bộ và yoga trước sinh",
     },
-    { title: "Rest", content: "Ensure 8 hours of quality sleep each night" },
+    { title: "Nghỉ ngơi", content: " Đảm bảo ngủ đủ 8 giờ chất lượng mỗi đêm" },
     {
-      title: "Hydration",
-      content: "Drink at least 8-10 glasses of water daily",
+      title: "Cung cấp đủ nước",
+      content: "Uống ít nhất 8-10 ly nước mỗi ngày",
     },
   ];
 
