@@ -6,6 +6,7 @@ import {
   FaEye,
   FaEyeSlash,
   FaHeartbeat,
+  FaIdCard,
   FaQuestionCircle,
   FaRegCalendarCheck,
   FaSave,
@@ -71,10 +72,9 @@ const PregnancyProfile = () => {
   }
   const [personalInfo, setPersonalInfo] = useState({
     fullname: "Nguyễn Thị Hồng Ngọc",
-    address: "TPHCM",
+
     email: "nguyenngocdh04@gmail.com",
-    birth: "21-11-2004",
-    phone: "0916693077",
+
     profileImage: "https://nguoinoitieng.tv/images/nnt/105/0/bibl.jpg",
   });
   {
@@ -88,18 +88,6 @@ const PregnancyProfile = () => {
     setSelectedSection(path);
     navigate(`/`);
   };
-  const [healthMetrics, setHealthMetrics] = useState({
-    weight: "65kg",
-    bloodPressure: "120/80",
-    lastCheckup: "2024-01-15",
-  });
-
-  const [medicalHistory, setMedicalHistory] = useState({
-    conditions: ["None"],
-    medications: ["Prenatal Vitamins"],
-    allergies: ["Penicillin"],
-    vaccinations: ["Flu Shot", "Tdap"],
-  });
 
   {
     /*hai cái này là của trợ giúp */
@@ -178,6 +166,18 @@ const PregnancyProfile = () => {
               <FaUserCircle className="text-pink-500 text-2xl" />
               <span>Hồ sơ của tôi</span>
             </button>
+            {/*Nút xem danh sách các gói đã và đang đăng kí */}
+            <button
+              className={`w-full flex items-center space-x-2 text-left px-4 py-2 rounded-lg ${
+                selectedSection === "subscription"
+                  ? "bg-pink-200"
+                  : "bg-gray-100"
+              }`}
+              onClick={() => handleNavigate("subscription")}
+            >
+              <FaIdCard className="text-pink-500 text-2xl" />
+              <span>Gói thành viên của tôi</span>
+            </button>
             {/*Nút xem sức khỏe thai nhi của từng user */}
             <button
               className={`w-full flex items-center space-x-2 text-left px-4 py-2 rounded-lg ${
@@ -230,6 +230,7 @@ const PregnancyProfile = () => {
               <FaRegCalendarCheck className="text-pink-500 text-2xl" />
               <span>Lịch sử lịch hẹn</span>
             </button>
+
             {/*Nút thiết lâp tài khoản ở đây có hai cái là mật khẩu và vô hiệu hóa tài khoản */}
             <div>
               {/* Nút Thiết lập tài khoản */}
@@ -371,6 +372,15 @@ const PregnancyProfile = () => {
             <div className="bg-white rounded-2xl shadow-lg p-6">
               <h2 className="text-2xl font-semibold mb-6 text-gray-800">
                 Thông tin bé
+              </h2>
+              <Outlet />
+            </div>
+          )}
+          {/*Các thông tin về các gói thành viên đã và đăng kí  */}
+          {selectedSection === "subscription" && (
+            <div className="bg-white rounded-2xl shadow-lg p-6">
+              <h2 className="text-2xl font-semibold mb-6 text-gray-800">
+                Các gói thành viên
               </h2>
               <Outlet />
             </div>
