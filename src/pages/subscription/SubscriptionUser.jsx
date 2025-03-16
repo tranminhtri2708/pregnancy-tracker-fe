@@ -3,51 +3,116 @@ import { FiCheck } from "react-icons/fi";
 import { BiStar } from "react-icons/bi";
 import Header from "../../components/header";
 import { getSubscriptionPlan } from "../../services/api.subscription";
+import { createSubscription } from "../../services/api.subscriptionuser";
 import { toast } from "react-toastify";
+import { createOrder } from "../../services/api.order";
+import { createPayment } from "../../services/api.payment";
 
 const MembershipPackages = () => {
   const [packages, setPackages] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchPackages = async () => {
-      try {
-        setLoading(true);
-        const data = await getSubscriptionPlan();
+  function getFormattedCurrentTime() {
+    const now = new Date();
+    return now.toISOString(); // Use ISO format for API input
+  }
 
-        // Chỉ hiển thị các gói đang hoạt động
-        const activePackages = data.filter((plan) => plan.isActive);
+  const fetchPackages = async () => {
+    try {
+      setLoading(true);
+      const data = await getSubscriptionPlan();
 
-        // Đánh dấu gói cao cấp nhất (giá cao nhất) là "popular"
-        if (activePackages.length > 0) {
-          const sortedPackages = [...activePackages].sort(
-            (a, b) => b.price - a.price
-          );
-          const enhancedPackages = activePackages.map((pkg) => ({
-            ...pkg,
-            popular: pkg.id === sortedPackages[0].id,
-          }));
-          setPackages(enhancedPackages);
-        } else {
-          setPackages([]);
-        }
-      } catch (error) {
-        console.error("Lỗi khi lấy dữ liệu gói thành viên:", error);
-        toast.error("Không thể tải danh sách gói thành viên");
-      } finally {
-        setLoading(false);
+      const activePackages = data.filter((plan) => plan.isActive);
+      if (activePackages.length > 0) {
+        const sortedPackages = [...activePackages].sort(
+          (a, b) => b.price - a.price
+        );
+        const enhancedPackages = activePackages.map((pkg) => ({
+          ...pkg,
+          popular: pkg.id === sortedPackages[0].id,
+        }));
+        setPackages(enhancedPackages);
+      } else {
+        setPackages([]);
       }
-    };
+    } catch (error) {
+      console.error("Lỗi khi lấy dữ liệu gói thành viên:", error);
+      toast.error("Không thể tải danh sách gói thành viên");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const status = params.get("status");
+    if (status === "success") {
+      toast.success("Transaction successful! Thank you for your purchase!");
+    } else if (status === "failure") {
+      toast.error("Transaction failed. Please try again.");
+    }
 
     fetchPackages();
   }, []);
 
-  // Hàm chuyển đổi thời hạn từ số tháng thành chuỗi hiển thị
+  function formatPrice(price) {
+    return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") + " VNĐ";
+  }
+
   const formatDuration = (months) => {
     if (months === 0) return "Vĩnh viễn";
     if (months === 1) return "1 tháng";
-    if (months >= 120) return "Vĩnh viễn"; // Giả sử 10 năm trở lên là "vĩnh viễn"
+    if (months >= 120) return "Vĩnh viễn";
     return `${months} tháng`;
+  };
+
+  function formatPackageName(name) {
+    const nameMapping = {
+      0: "Bronze",
+      1: "Silver",
+      2: "Gold",
+    };
+    return nameMapping[name] || "unknown";
+  }
+
+  // Handle "Trải nghiệm ngay" button click
+  const handleSubscription = async (pkgId) => {
+    const startDate = getFormattedCurrentTime();
+    const data = {
+      planId: pkgId,
+      startDate: startDate,
+    };
+
+    try {
+      // Disable the button while processing
+      setLoading(true);
+
+      // ng dung đăng ký gói thành viên
+      const result = await createSubscription(data);
+      console.log("Subscription created:", result);
+
+      // tạo order
+      const result2 = await createOrder(result);
+      console.log("Order created:", result2);
+
+      // tạo payment
+      const finalResult = await createPayment(result2.id);
+      console.log("Payment created:", finalResult);
+
+      // Check for valid finalResult and redirect
+      if (finalResult) {
+        // Redirect user to the payment URL
+        window.location.href = finalResult;
+      } else {
+        toast.error("Unable to create payment.");
+      }
+    } catch (error) {
+      console.error("Error during subscription process:", error);
+      toast.error("An error occurred. Please try again.");
+    } finally {
+      // Re-enable the button after processing is complete
+      setLoading(false);
+    }
   };
 
   return (
@@ -95,13 +160,13 @@ const MembershipPackages = () => {
                 )}
                 <div className="text-center mb-6">
                   <h3 className="text-2xl font-bold text-gray-900">
-                    {`Gói ${pkg.name}`}
+                    {`Gói ${formatPackageName(pkg.name)}`}
                   </h3>
                   <p className="mt-2 text-gray-500">{pkg.description}</p>
                 </div>
                 <div className="text-center mb-8">
                   <p className="text-5xl font-extrabold text-gray-900">
-                    {pkg.price}
+                    {formatPrice(pkg.price)}
                   </p>
                   <span className="text-gray-500">
                     {formatDuration(pkg.durationInMonths)}
@@ -122,9 +187,13 @@ const MembershipPackages = () => {
                   </div>
                 )}
                 <button
-                  className={`w-full bg-gradient-to-r ${color} text-white py-3 px-6 rounded-lg font-semibold text-lg shadow-md hover:shadow-lg transition duration-300`}
+                  disabled={loading}
+                  className={`w-full bg-gradient-to-r ${color} text-white py-3 px-6 rounded-lg font-semibold text-lg shadow-md hover:shadow-lg transition duration-300 ${
+                    loading ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
+                  onClick={() => handleSubscription(pkg.id)}
                 >
-                  Trải nghiệm ngay
+                  {loading ? "Processing..." : "Trải nghiệm ngay"}
                 </button>
               </div>
             );

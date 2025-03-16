@@ -4,9 +4,19 @@ import api from "../config/axios";
 export const getAllSubscriptionPlanUser = async () => {
   try {
     const response = await api.get("Subscription/my-subscriptions");
-    console.log(response);
     return response.data.result;
   } catch (error) {
     toast.error(error.response.data); // lấy bị lỗi thì sẽ show ra lỗi
   }
 };
+
+export const createSubscription = async (id) =>{
+  try{
+    const response = await api.post("Subscription", id); 
+    
+    return response.data.result.id;
+  }
+  catch (error) {
+    toast.error(error.response.data); // lấy bị lỗi thì sẽ show ra lỗi
+  }
+}
