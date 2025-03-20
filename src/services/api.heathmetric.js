@@ -13,9 +13,11 @@ export const getHealthMetricsByChild = async (childId) => {
     try {
       const response = await api.get(`/HealthMetric/GetAllHealthMetric`);
       // Filter the response by childrenId
+      console.log("response", response.data.result);
       const filteredData = response.data.result.filter(
         (metric) => metric.childrentId === childId
       );
+      console.log("filteredData", filteredData);
       return filteredData; // Return only the filtered data
     } catch (error) {
       console.error("Error fetching health metrics:", error);

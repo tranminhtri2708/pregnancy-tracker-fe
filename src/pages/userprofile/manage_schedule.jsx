@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Bell, Calendar, Plus, Trash2, AlertCircle, Edit } from "lucide-react";
 import { toast } from "react-toastify";
+import api from "../../config/axios";
+import { getClosestSchedule } from "../../services/api.notification";
 import {
   createSchedule,
   getSchedule,
@@ -39,6 +41,34 @@ const ManageSchedule = () => {
     "Tháng 11",
     "Tháng 12",
   ];
+
+  const getUserID = async () => {
+    try {
+      const response = await api.get("UserAccount/GetUserId");
+      console.log("GetUserId response:", response.data);
+
+      if (
+        response.data &&
+        response.data.result &&
+        response.data.result.userId
+      ) {
+        const userId = response.data.result.userId;
+        localStorage.setItem("userId", userId);
+        return userId;
+      } else {
+        console.error("Invalid user ID response format:", response.data);
+        toast.error("Không thể lấy thông tin người dùng");
+        return null;
+      }
+    } catch (error) {
+      console.error("Error fetching user ID:", error);
+      toast.error(
+        "Lỗi khi lấy thông tin người dùng: " +
+          (error.message || "Không xác định")
+      );
+      return null;
+    }
+  };
 
   // Day names in Vietnamese
   const dayNames = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"];
@@ -144,7 +174,7 @@ const ManageSchedule = () => {
       description: appointment.description,
       notify: appointment.notify,
     });
-
+    console.log("123", formValues);
     setIsEditMode(true);
     setIsModalVisible(true);
   };
@@ -168,29 +198,24 @@ const ManageSchedule = () => {
   // Fetch appointments from API
   const fetchAppointments = async () => {
     setIsLoading(true);
-
+    const accountId = localStorage.getItem("userId");
     try {
-      const response = await getSchedule();
-
-      if (!response || !response.result) {
-        toast.error("Không nhận được dữ liệu từ máy chủ");
-        return;
-      }
+      const response = await getSchedule(accountId);
+      console.log("GetAllSchedule response:", response);
 
       // FIX: Format the dates from API response using the corrected functions
-      const formattedAppointments = response.result.map((item) => {
-        const dateObj = parseApiDate(item.appointmentDate);
+      // const formattedAppointments = response.result.map((item) => {
+      //   const dateObj = parseApiDate(item.appointmentDate);
 
-        return {
-          id: item.id,
-          date: dateObj,
-          description: item.description,
-          notify: item.isNoti,
-          appointmentDate: item.appointmentDate,
-        };
-      });
-
-      setAppointments(formattedAppointments);
+      //   return {
+      //     id: item.id,
+      //     date: dateObj,
+      //     description: item.description,
+      //     notify: item.isNoti,
+      //     appointmentDate: item.appointmentDate,
+      //   };
+      // });
+      setAppointments(response);
     } catch (error) {
       console.error("Error fetching appointments:", error);
       toast.error("Không thể tải lịch khám. Vui lòng thử lại sau.");
@@ -201,7 +226,9 @@ const ManageSchedule = () => {
 
   // Load appointments on component mount
   useEffect(() => {
+    getUserID();
     fetchAppointments();
+    getClosestSchedule();
   }, []);
 
   // Save or update appointment
@@ -444,7 +471,7 @@ const ManageSchedule = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-4">
+    <div className="max-w-4xl mx-auto p-4 h-fit">
       {isLoading && appointments.length === 0 && (
         <div className="text-center py-4 text-gray-600">
           <div className="animate-pulse">Đang tải lịch khám...</div>
@@ -556,21 +583,23 @@ const ManageSchedule = () => {
                 />
               </div>
 
-              <div className="mb-6">
-                <label className="flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    name="notify"
-                    checked={formValues.notify}
-                    onChange={handleInputChange}
-                    className="mr-2"
-                  />
-                  <div className="flex items-center">
-                    <Bell className="w-4 h-4 mr-2 text-green-600" />
-                    Nhận thông báo trước khi đến lịch khám
-                  </div>
-                </label>
-              </div>
+              {false && (
+                <div className="mb-6">
+                  <label className="flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      name="notify"
+                      checked={formValues.notify}
+                      onChange={handleInputChange}
+                      className="mr-2"
+                    />
+                    <div className="flex items-center">
+                      <Bell className="w-4 h-4 mr-2 text-green-600" />
+                      Nhận thông báo trước khi đến lịch khám
+                    </div>
+                  </label>
+                </div>
+              )}
 
               <div className="flex justify-end">
                 <button

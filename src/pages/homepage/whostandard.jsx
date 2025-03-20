@@ -216,38 +216,39 @@ const WhoStandardView = () => {
       title: "Chu vi vòng đầu",
       dataIndex: "headCircumference",
       key: "headCircumference",
-      align: "center", // Center horizontally
+      align: "center",
       render: (_, record) => {
         const min = record.headCircumferenceMin || "";
         const max = record.headCircumferenceMax || "";
-        return min || max ? (
+        return min && max ? (
           `${min}mm - ${max}mm`
+        ) : min || max ? (
+          `${min || max}mm`
         ) : (
           <span className="bg-gray-200 text-gray-500"></span>
         );
       },
     },
     {
-      title: "Cân nặng ",
+      title: "Cân nặng",
       dataIndex: "weight",
       key: "weight",
       align: "center",
       render: (_, record) => {
         const min = record.weightMin || "";
         const max = record.weightMax || "";
-
-        // Convert values over 1000 to kilograms
         const formatWeight = (value) => {
           if (value && value > 1000) {
-            return `${(value / 1000).toFixed(1)} kg`; // Convert to kg and keep 1 decimal place
+            return `${(value / 1000).toFixed(1)} kg`;
           }
-          return `${value} gram`; // Keep as gram
+          return `${value} gram`;
         };
-
-        return min || max ? (
-          `${formatWeight(min)} - ${formatWeight(max)}` // Format both min and max
+        return min && max ? (
+          `${formatWeight(min)} - ${formatWeight(max)}`
+        ) : min || max ? (
+          formatWeight(min || max)
         ) : (
-          <span className="bg-gray-200 text-gray-500"></span> // Display placeholder if no data
+          <span className="bg-gray-200 text-gray-500"></span>
         );
       },
     },
@@ -259,8 +260,10 @@ const WhoStandardView = () => {
       render: (_, record) => {
         const min = record.lenghtMin || "";
         const max = record.lenghtMax || "";
-        return min || max ? (
+        return min && max ? (
           `${min} cm - ${max} cm`
+        ) : min || max ? (
+          `${min || max} cm`
         ) : (
           <span className="bg-gray-200 text-gray-500"></span>
         );
@@ -274,8 +277,10 @@ const WhoStandardView = () => {
       render: (_, record) => {
         const min = record.bpdMin || "";
         const max = record.bpdMax || "";
-        return min || max ? (
+        return min && max ? (
           `${min} mm - ${max} mm`
+        ) : min || max ? (
+          `${min || max} mm`
         ) : (
           <span className="bg-gray-200 text-gray-500"></span>
         );
@@ -289,8 +294,10 @@ const WhoStandardView = () => {
       render: (_, record) => {
         const min = record.acMin || "";
         const max = record.acMax || "";
-        return min || max ? (
+        return min && max ? (
           `${min} mm - ${max} mm`
+        ) : min || max ? (
+          `${min || max} mm`
         ) : (
           <span className="bg-gray-200 text-gray-500"></span>
         );
@@ -304,8 +311,10 @@ const WhoStandardView = () => {
       render: (_, record) => {
         const min = record.flMin || "";
         const max = record.flMax || "";
-        return min || max ? (
+        return min && max ? (
           `${min} mm - ${max} mm`
+        ) : min || max ? (
+          `${min || max} mm`
         ) : (
           <span className="bg-gray-200 text-gray-500"></span>
         );
@@ -319,38 +328,12 @@ const WhoStandardView = () => {
       render: (_, record) => {
         const min = record.hearRateMin || "";
         const max = record.hearRateMax || "";
-        return min || max ? (
+        return min && max ? (
           `${min} - ${max}`
+        ) : min || max ? (
+          `${min || max}`
         ) : (
           <span className="bg-gray-200 text-gray-500"></span>
-        );
-      },
-    },
-    {
-      title: "Chỉnh sửa",
-      key: "actions",
-      align: "center",
-      render: (_, row) => {
-        // Check if row has any non-null or non-empty value
-        const menu = (
-          <Menu>
-            <Menu.Item key="edit" onClick={() => handleEdit(row)}>
-              Chỉnh sửa
-            </Menu.Item>
-            <Menu.Item key="delete" danger onClick={() => handleDelete(row.id)}>
-              Xóa
-            </Menu.Item>
-            <Menu.Item key="create" onClick={() => handleCreateForWeek(row)}>
-              Tạo Mới
-            </Menu.Item>
-          </Menu>
-        );
-        return (
-          <Dropdown overlay={menu} trigger={["click"]}>
-            <button className="text-white bg-blue-500 hover:bg-blue-600 py-2 px-4 rounded inline-flex items-center">
-              Actions <DownOutlined className="ml-2" />
-            </button>
-          </Dropdown>
         );
       },
     },

@@ -12,6 +12,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import api from "../../config/axios";
+import { getHealthMetricsByChild } from "../../services/api.heathmetric";
 
 const GrowthChart = ({ childId }) => {
   const navigate = useNavigate();
@@ -26,10 +27,9 @@ const GrowthChart = ({ childId }) => {
   const fetchHealthMetrics = async () => {
     try {
       setLoading(true);
-      const response = await api.get(`HealthMetric/GetAllHealthMetric`);
-      const data = response.data.result || [];
-      console.log("Health Metrics", data);
-      setHealthMetrics(data);
+      const response = await getHealthMetricsByChild(childId);
+      console.log("Health Metrics", response);
+      setHealthMetrics(response);
     } catch (error) {
       message.error("Cannot fetch health metrics! Please try again.");
     } finally {
@@ -42,7 +42,6 @@ const GrowthChart = ({ childId }) => {
     try {
       const response = await api.get("WHOStandard/GetAllWHOStatistics");
       const data = response.data.result || [];
-      console.log("WHO?", data);
       setWhoStandards(data);
     } catch (error) {
       message.error("Cannot fetch WHO standards! Please try again.");
@@ -52,6 +51,7 @@ const GrowthChart = ({ childId }) => {
   useEffect(() => {
     fetchHealthMetrics();
     fetchWHOStandards();
+    console.log("alo", childId);
   }, [childId]);
 
   // Merge Data for Each Chart

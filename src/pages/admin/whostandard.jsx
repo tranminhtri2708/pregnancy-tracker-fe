@@ -33,25 +33,54 @@ const WhoStandard = () => {
   const defaultRows = Array.from({ length: 42 }, (_, index) => ({
     key: index + 1,
     week: index + 1,
-    weightMin: "",
-    weightMax: "",
-    lenghtMin: "",
-    lenghtMax: "",
-    bpdMin: "",
-    bpdMax: "",
-    acMin: "",
-    acMax: "",
-    hearRateMin: "",
-    hearRateMax: "",
-    flMin: "",
-    flMax: "",
-    headCircumferenceMin: "",
-    headCircumferenceMax: "",
+    weightMin: null,
+    weightMax: null,
+    lenghtMin: null,
+    lenghtMax: null,
+    bpdMin: null,
+    bpdMax: null,
+    acMin: null,
+    acMax: null,
+    hearRateMin: null,
+    hearRateMax: null,
+    flMin: null,
+    flMax: null,
+    headCircumferenceMin: null,
+    headCircumferenceMax: null,
   }));
 
   const handleCreateForWeek = (row) => {
     setEditingRow(row);
     setIsCreateModalVisible(true);
+  };
+
+  const testEdit = async () => {
+    try {
+      const updatedRecord = {
+        pregnancyWeek: 9,
+        weightMax: 3,
+        weightMin: 2,
+        // ...values,
+      };
+      // Use the id from the editing row
+      await UpdateWHOStandard(9, updatedRecord);
+
+      // Update local state with the new values
+      const updatedData = data.map((row) =>
+        row.id === editingRow.id ? { ...row, ...values } : row
+      );
+      setData(updatedData);
+
+      // Close the modal and show success notification
+      form.resetFields();
+      setIsModalVisible(false);
+
+      message.success(
+        `Successfully updated record for week ${editingRow?.week}!`
+      );
+    } catch (error) {
+      message.error("Failed to update WHO Standard record.");
+    }
   };
 
   const handleCreate = async (values) => {
@@ -75,8 +104,8 @@ const WhoStandard = () => {
         ...values,
       };
       console.log(pregnancyWeek);
-      const createdRecord = await AddWHOStandard(newRecord); // Add API call
-      form.resetFields();
+      await AddWHOStandard(newRecord); // Add API call
+
       // Add the new record to local state
       fetchData();
 
@@ -89,6 +118,7 @@ const WhoStandard = () => {
 
       // Close the modal
       setIsCreateModalVisible(false);
+      form.resetFields();
     } catch (error) {
       message.error("Failed to add new WHO Standard record.");
     }
@@ -107,20 +137,20 @@ const WhoStandard = () => {
           ? {
               ...defaultRow,
               id: matchedRow.id, // Include the id from the API response
-              headCircumferenceMin: matchedRow.headCircumferenceMin || "",
-              headCircumferenceMax: matchedRow.headCircumferenceMax || "",
-              weightMin: matchedRow.weightMin || "",
-              weightMax: matchedRow.weightMax || "",
-              lenghtMin: matchedRow.lenghtMin || "",
-              lenghtMax: matchedRow.lenghtMax || "",
-              bpdMin: matchedRow.bpdMin || "",
-              bpdMax: matchedRow.bpdMax || "",
-              acMin: matchedRow.acMin || "",
-              acMax: matchedRow.acMax || "",
-              flMin: matchedRow.flMin || "",
-              flMax: matchedRow.flMax || "",
-              hearRateMin: matchedRow.hearRateMin || "",
-              hearRateMax: matchedRow.hearRateMax || "",
+              headCircumferenceMin: +matchedRow.headCircumferenceMin || null,
+              headCircumferenceMax: +matchedRow.headCircumferenceMax || null,
+              weightMin: +matchedRow.weightMin || null,
+              weightMax: +matchedRow.weightMax || null,
+              lenghtMin: +matchedRow.lenghtMin || null,
+              lenghtMax: +matchedRow.lenghtMax || null,
+              bpdMin: +matchedRow.bpdMin || null,
+              bpdMax: +matchedRow.bpdMax || null,
+              acMin: +matchedRow.acMin || null,
+              acMax: +matchedRow.acMax || null,
+              flMin: +matchedRow.flMin || null,
+              flMax: +matchedRow.flMax || null,
+              hearRateMin: +matchedRow.hearRateMin || null,
+              hearRateMax: +matchedRow.hearRateMax || null,
             }
           : defaultRow;
       });
@@ -136,6 +166,7 @@ const WhoStandard = () => {
 
   useEffect(() => {
     fetchData();
+    // testEdit();
   }, []);
 
   const handleDelete = async (id) => {
@@ -164,24 +195,25 @@ const WhoStandard = () => {
   const handleSave = async (values) => {
     try {
       const updatedRecord = {
-        pregnancyWeek: editingRow.week,
-        headCircumferenceMin: editingRow.headCircumferenceMin || "",
-        headCircumferenceMax: editingRow.headCircumferenceMax || "",
-        weightMin: editingRow.weightMin || "",
-        weightMax: editingRow.weightMax || "",
-        lenghtMin: editingRow.lenghtMin || "",
-        lenghtMax: editingRow.lenghtMax || "",
-        bpdMin: editingRow.bpdMin || "",
-        bpdMax: editingRow.bpdMax || "",
-        acMin: editingRow.acMin || "",
-        acMax: editingRow.acMax || "",
-        flMin: editingRow.flMin || "",
-        flMax: editingRow.flMax || "",
-        hearRateMin: editingRow.hearRateMin || "",
-        hearRateMax: editingRow.hearRateMax || "",
+        pregnancyWeek: +editingRow.week,
+        headCircumferenceMin: +editingRow.headCircumferenceMin || null,
+        headCircumferenceMax: +editingRow.headCircumferenceMax || null,
+        weightMin: +editingRow.weightMin || null,
+        weightMax: Number(editingRow.weightMax) || null,
+        lenghtMin: +editingRow.lenghtMin || null,
+        lenghtMax: +editingRow.lenghtMax || null,
+        bpdMin: +editingRow.bpdMin || null,
+        bpdMax: +editingRow.bpdMax || null,
+        acMin: +editingRow.acMin || null,
+        acMax: +editingRow.acMax || null,
+        flMin: +editingRow.flMin || null,
+        flMax: +editingRow.flMax || null,
+        hearRateMin: +editingRow.hearRateMin || null,
+        hearRateMax: +editingRow.hearRateMax || null,
         ...values,
       };
       // Use the id from the editing row
+      console.log("nam mo", +editingRow.id, updatedRecord);
       await UpdateWHOStandard(+editingRow.id, updatedRecord);
 
       // Update local state with the new values
@@ -191,9 +223,9 @@ const WhoStandard = () => {
       setData(updatedData);
 
       // Close the modal and show success notification
-      form.resetFields();
-      setIsModalVisible(false);
 
+      setIsModalVisible(false);
+      form.resetFields();
       message.success(
         `Successfully updated record for week ${editingRow?.week}!`
       );
@@ -213,38 +245,39 @@ const WhoStandard = () => {
       title: "Chu vi vòng đầu",
       dataIndex: "headCircumference",
       key: "headCircumference",
-      align: "center", // Center horizontally
+      align: "center",
       render: (_, record) => {
         const min = record.headCircumferenceMin || "";
         const max = record.headCircumferenceMax || "";
-        return min || max ? (
+        return min && max ? (
           `${min}mm - ${max}mm`
+        ) : min || max ? (
+          `${min || max}mm`
         ) : (
           <span className="bg-gray-200 text-gray-500"></span>
         );
       },
     },
     {
-      title: "Cân nặng ",
+      title: "Cân nặng",
       dataIndex: "weight",
       key: "weight",
       align: "center",
       render: (_, record) => {
         const min = record.weightMin || "";
         const max = record.weightMax || "";
-
-        // Convert values over 1000 to kilograms
         const formatWeight = (value) => {
           if (value && value > 1000) {
-            return `${(value / 1000).toFixed(1)} kg`; // Convert to kg and keep 1 decimal place
+            return `${(value / 1000).toFixed(1)} kg`;
           }
-          return `${value} gram`; // Keep as gram
+          return `${value} gram`;
         };
-
-        return min || max ? (
-          `${formatWeight(min)} - ${formatWeight(max)}` // Format both min and max
+        return min && max ? (
+          `${formatWeight(min)} - ${formatWeight(max)}`
+        ) : min || max ? (
+          formatWeight(min || max)
         ) : (
-          <span className="bg-gray-200 text-gray-500"></span> // Display placeholder if no data
+          <span className="bg-gray-200 text-gray-500"></span>
         );
       },
     },
@@ -256,8 +289,10 @@ const WhoStandard = () => {
       render: (_, record) => {
         const min = record.lenghtMin || "";
         const max = record.lenghtMax || "";
-        return min || max ? (
+        return min && max ? (
           `${min} cm - ${max} cm`
+        ) : min || max ? (
+          `${min || max} cm`
         ) : (
           <span className="bg-gray-200 text-gray-500"></span>
         );
@@ -271,8 +306,10 @@ const WhoStandard = () => {
       render: (_, record) => {
         const min = record.bpdMin || "";
         const max = record.bpdMax || "";
-        return min || max ? (
+        return min && max ? (
           `${min} mm - ${max} mm`
+        ) : min || max ? (
+          `${min || max} mm`
         ) : (
           <span className="bg-gray-200 text-gray-500"></span>
         );
@@ -286,8 +323,10 @@ const WhoStandard = () => {
       render: (_, record) => {
         const min = record.acMin || "";
         const max = record.acMax || "";
-        return min || max ? (
+        return min && max ? (
           `${min} mm - ${max} mm`
+        ) : min || max ? (
+          `${min || max} mm`
         ) : (
           <span className="bg-gray-200 text-gray-500"></span>
         );
@@ -301,8 +340,10 @@ const WhoStandard = () => {
       render: (_, record) => {
         const min = record.flMin || "";
         const max = record.flMax || "";
-        return min || max ? (
+        return min && max ? (
           `${min} mm - ${max} mm`
+        ) : min || max ? (
+          `${min || max} mm`
         ) : (
           <span className="bg-gray-200 text-gray-500"></span>
         );
@@ -316,8 +357,10 @@ const WhoStandard = () => {
       render: (_, record) => {
         const min = record.hearRateMin || "";
         const max = record.hearRateMax || "";
-        return min || max ? (
+        return min && max ? (
           `${min} - ${max}`
+        ) : min || max ? (
+          `${min || max}`
         ) : (
           <span className="bg-gray-200 text-gray-500"></span>
         );
@@ -328,7 +371,6 @@ const WhoStandard = () => {
       key: "actions",
       align: "center",
       render: (_, row) => {
-        // Check if row has any non-null or non-empty value
         const menu = (
           <Menu>
             <Menu.Item key="edit" onClick={() => handleEdit(row)}>
@@ -353,53 +395,81 @@ const WhoStandard = () => {
     },
   ];
 
-  const MinMaxInputGroup = ({ field, label, disabled, getFieldValue }) => (
-    <Form.Item label={label} style={{ marginBottom: "16px" }}>
-      <Input.Group compact>
-        <Form.Item name={field.min} noStyle>
-          <Input
-            placeholder="Min"
-            style={{
-              width: "48%",
-              marginRight: "4%",
-              borderRadius: "12px",
-            }}
-            disabled={disabled}
-          />
-        </Form.Item>
-        <Form.Item
-          name={field.max}
-          noStyle
-          rules={[
-            ({ getFieldValue }) => ({
-              validator(_, value) {
-                const min = getFieldValue(field.min);
-                if (min !== undefined && value < min) {
-                  return Promise.reject(
-                    new Error(
-                      `${label.split(" ")[0]} tối đa không được nhỏ hơn ${
-                        label.split(" ")[0]
-                      } tối thiểu!`
-                    )
-                  );
-                }
-                return Promise.resolve();
+  const MinMaxInputGroup = ({ field, label, disabled, getFieldValue }) => {
+    // Remove the last word from the label
+    const adjustedLabel = label.split(" ").slice(0, -1).join(" ");
+
+    return (
+      <Form.Item label={adjustedLabel} style={{ marginBottom: "16px" }}>
+        <Input.Group compact>
+          {/* Min Field Validation */}
+          <Form.Item
+            name={field.min}
+            noStyle
+            rules={[
+              {
+                validator(_, value) {
+                  if (+value < 0) {
+                    return Promise.reject(
+                      new Error(
+                        `${adjustedLabel} tối thiểu không được là số âm!`
+                      )
+                    );
+                  }
+                  return Promise.resolve();
+                },
               },
-            }),
-          ]}
-        >
-          <Input
-            placeholder="Max"
-            style={{
-              width: "48%",
-              borderRadius: "12px",
-            }}
-            disabled={disabled}
-          />
-        </Form.Item>
-      </Input.Group>
-    </Form.Item>
-  );
+            ]}
+          >
+            <Input
+              type="number"
+              placeholder="Min"
+              style={{
+                width: "48%",
+                marginRight: "4%",
+                borderRadius: "12px",
+              }}
+              disabled={disabled}
+            />
+          </Form.Item>
+          {/* Max Field Validation */}
+          <Form.Item
+            name={field.max}
+            noStyle
+            rules={[
+              ({ getFieldValue }) => ({
+                validator(_, value) {
+                  const min = getFieldValue(field.min);
+                  if (value !== null && +value < 0) {
+                    return Promise.reject(
+                      new Error(`${adjustedLabel} tối đa không được là số âm!`)
+                    );
+                  } else if (min !== null && +value < +min) {
+                    return Promise.reject(
+                      new Error(
+                        `${adjustedLabel} tối đa không được nhỏ hơn ${adjustedLabel} tối thiểu!`
+                      )
+                    );
+                  }
+                  return Promise.resolve();
+                },
+              }),
+            ]}
+          >
+            <Input
+              type="number"
+              placeholder="Max"
+              style={{
+                width: "48%",
+                borderRadius: "12px",
+              }}
+              disabled={disabled}
+            />
+          </Form.Item>
+        </Input.Group>
+      </Form.Item>
+    );
+  };
 
   const getDropdownOptions = () => {
     const totalPages = Math.ceil(42 / 14);
