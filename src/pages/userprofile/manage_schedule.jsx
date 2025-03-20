@@ -95,9 +95,16 @@ const ManageSchedule = () => {
   const formatTimeFromDate = (date) => {
     if (!date) return "";
 
-    // Get UTC time components to avoid timezone issues
-    const hours = date.getUTCHours().toString().padStart(2, "0");
-    const minutes = date.getUTCMinutes().toString().padStart(2, "0");
+    // Convert the date to a JavaScript Date object
+    const utcDate = new Date(date);
+
+    // Add 7 hours to the UTC time
+    const offset = 7 * 60 * 60 * 1000; // UTC+7 in milliseconds
+    const localDate = new Date(utcDate.getTime() + offset);
+
+    // Get the time components in the UTC+7 timezone
+    const hours = localDate.getUTCHours().toString().padStart(2, "0");
+    const minutes = localDate.getUTCMinutes().toString().padStart(2, "0");
 
     return `${hours}:${minutes}`;
   };
@@ -121,7 +128,7 @@ const ManageSchedule = () => {
         year,
         month,
         day,
-        parseInt(hours, 10) + 7, // Cộng thêm 7 tiếng
+        parseInt(hours, 10), // Cộng thêm 7 tiếng
         parseInt(minutes, 10),
         0,
         0
@@ -172,7 +179,7 @@ const ManageSchedule = () => {
     setFormValues({
       time: formatTimeFromDate(appointment.date),
       description: appointment.description,
-      notify: appointment.notify,
+      notify: true,
     });
     console.log("123", formValues);
     setIsEditMode(true);
@@ -252,7 +259,7 @@ const ManageSchedule = () => {
       const appointmentData = {
         description: formValues.description,
         appointmentDate: formatApiDate(selectedDate, formValues.time),
-        isNoti: formValues.notify,
+        isNoti: true,
       };
 
       let response;
@@ -583,13 +590,13 @@ const ManageSchedule = () => {
                 />
               </div>
 
-              {false && (
+              {true && (
                 <div className="mb-6">
                   <label className="flex items-center cursor-pointer">
                     <input
                       type="checkbox"
                       name="notify"
-                      checked={formValues.notify}
+                      checked={true}
                       onChange={handleInputChange}
                       className="mr-2"
                     />

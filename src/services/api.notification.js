@@ -32,7 +32,7 @@ const getUserID = async () => {
           id: item.id,
           date: dateObj,
           description: item.description,
-          notify: item.isNoti,
+          isNoti: item.isNoti,
           appointmentDate: item.appointmentDate,
         };
       });
