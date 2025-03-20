@@ -33,6 +33,7 @@ import Baby from "./pages/healthmetric/sidebar";
 import BabyDetail from "./pages/healthmetric/rightpanel";
 import ManageSubscriptionUser from "./pages/userprofile/manage_subscription";
 import WhoStandardView from "./pages/homepage/whostandard";
+import ManageMyPost from "./pages/userprofile/manage_post";
 
 const router = createBrowserRouter([
   {
@@ -140,6 +141,10 @@ const router = createBrowserRouter([
       {
         path: "subscription",
         element: <ManageSubscriptionUser />,
+      },
+      {
+        path: "save",
+        element: <ManageMyPost />,
       },
     ],
   },

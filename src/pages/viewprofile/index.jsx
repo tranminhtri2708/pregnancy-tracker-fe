@@ -279,10 +279,10 @@ const PregnancyProfile = () => {
               className={`w-full flex items-center space-x-2 text-left px-4 py-2 rounded-lg ${
                 selectedSection === "save" ? "bg-pink-200" : "bg-gray-100"
               }`}
-              onClick={() => setSelectedSection("save")}
+              onClick={() => handleNavigate("save")}
             >
-              <FaSave className="text-green-500 text-2xl" />
-              <span>Bài viết đã lưu</span>
+              <FaSave className="text-pink-500 text-2xl" />
+              <span>Bài viết của tôi</span>
             </button>
             {/*Nút Đã tham gia thể hiện các cộng đồng đã tham gia */}
             <button
@@ -294,7 +294,7 @@ const PregnancyProfile = () => {
               onClick={() => setSelectedSection("communicate")}
             >
               <FaUserFriends className="text-purple-500 text-2xl" />
-              <span>Đã tham gia</span>
+              <span>Nhóm đang tham gia</span>
             </button>
             {/*Thông tin về thai */}
             <button
@@ -661,12 +661,9 @@ const PregnancyProfile = () => {
           {selectedSection === "save" && (
             <div className="bg-white rounded-2xl shadow-lg p-6">
               <h2 className="text-2xl font-semibold mb-6 text-gray-800">
-                Medical History
+                Các bài viết của tôi
               </h2>
-              <p>Conditions: {medicalHistory.conditions.join(", ")}</p>
-              <p>Medications: {medicalHistory.medications.join(", ")}</p>
-              <p>Allergies: {medicalHistory.allergies.join(", ")}</p>
-              <p>Vaccinations: {medicalHistory.vaccinations.join(", ")}</p>
+              <Outlet />
             </div>
           )}
         </div>

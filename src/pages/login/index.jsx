@@ -6,7 +6,6 @@ import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { login } from "../../redux/features/userSlice";
 import { useDispatch } from "react-redux";
-import { store } from "../../redux/store";
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({
@@ -204,7 +203,7 @@ const LoginPage = () => {
                 href="/forget"
                 className="font-medium text-blue-600 hover:text-blue-500"
               >
-                Forgot your password?
+                Quên mật khẩu của bạn?
               </a>
             </div>
           </div>
@@ -237,40 +236,18 @@ const LoginPage = () => {
                   ></path>
                 </svg>
               ) : null}
-              {isLoading ? "Signing in..." : "Sign in"}
+              {isLoading ? "Đăng đăng nhập..." : "Đăng nhập"}
             </button>
 
             <p className="mt-4 text-center text-sm text-gray-600">
-              Don't have an account?{" "}
+              Bạn chưa có tài khoản?
               <a
                 href="/register"
                 className="font-medium text-blue-600 hover:text-blue-500"
               >
-                Register here
+                Đăng kí tại đây
               </a>
             </p>
-          </div>
-
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300"></div>
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white text-gray-500">
-                Or continue with
-              </span>
-            </div>
-          </div>
-
-          <div>
-            <button
-              type="button"
-              className="w-full flex items-center justify-center gap-2 bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              onClick={() => console.log("Google sign in clicked")}
-            >
-              <FcGoogle className="h-5 w-5" />
-              Sign in with Google
-            </button>
           </div>
         </form>
       </div>
