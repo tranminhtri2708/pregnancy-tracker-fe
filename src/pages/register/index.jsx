@@ -122,7 +122,7 @@ const RegisterPage = () => {
         "responseData",
         JSON.stringify(response.data.result)
       );
-      console.log(response.data.result)
+      console.log(response.data.result);
       navigate("/verification"); // nếu thành công sẽ chuyển sang trang verification để nhập code gửi về email
     } catch (err) {
       // bị lỗi =>show ra message lỗi
@@ -150,28 +150,6 @@ const RegisterPage = () => {
     }
   };
 
-  const handleLoginGoogle = () => {
-    console.log("login google...");
-    const provider = new GoogleAuthProvider();
-    signInWithPopup(auth, provider)
-      .then((result) => {
-        const token = result.user.accessToken;
-        const user = result.user;
-
-        console.log(user);
-      })
-      .catch((error) => {
-        // Handle Errors here.
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        // The email of the user's account used.
-        const email = error.customData.email;
-        // The AuthCredential type that was used.
-        const credential = GoogleAuthProvider.credentialFromError(error);
-        // ...
-      });
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-rose-50 to-rose-200 flex items-center justify-center p-4">
       <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-lg">
@@ -179,26 +157,27 @@ const RegisterPage = () => {
           <div className="text-center">
             <FaCheckCircle className="mx-auto h-12 w-12 text-green-500" />
             <h2 className="mt-4 text-2xl font-bold text-gray-900">
-              Registration Successful!
+              Đăng kí thành công
             </h2>
             <p className="mt-2 text-gray-600">
-              Thank you for registering with us.
+              Cảm ơn bạn đã đăng ký với chúng tôi.
             </p>
             <button
               onClick={() => setIsSuccess(false)}
               className="mt-4 w-full inline-flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
             >
-              Register Another Account
+              Đăng ký tài khoản khác
             </button>
           </div>
         ) : (
           <>
             <div className="text-center">
               <h2 className="text-3xl font-extrabold text-gray-900">
-                Create your account
+                Tạo tài khoản của bạn
               </h2>
               <p className="mt-2 text-sm text-gray-600">
-                Join us today and experience all our features
+                Tham gia ngay hôm nay và trải nghiệm tất cả tính năng của chúng
+                tôi!
               </p>
             </div>
 
@@ -210,7 +189,7 @@ const RegisterPage = () => {
                     htmlFor="firstname"
                     className="block text-sm font-medium text-gray-700"
                   >
-                    First Name
+                    Họ
                   </label>
                   <div className="mt-1 relative">
                     <input
@@ -242,7 +221,7 @@ const RegisterPage = () => {
                     htmlFor="firstname"
                     className="block text-sm font-medium text-gray-700"
                   >
-                    Last Name
+                    Tên
                   </label>
                   <div className="mt-1 relative">
                     <input
@@ -274,7 +253,7 @@ const RegisterPage = () => {
                     htmlFor="email"
                     className="block text-sm font-medium text-gray-700"
                   >
-                    Email address
+                    Email
                   </label>
                   <div className="mt-1 relative">
                     <input
@@ -299,44 +278,12 @@ const RegisterPage = () => {
                   )}
                 </div>
 
-                {/* <div>
-                  <label
-                    htmlFor="username"
-                    className="block text-sm font-medium text-gray-700"
-                  >
-                    Username
-                  </label>
-                  <div className="mt-1 relative">
-                    <input
-                      id="username"
-                      name="username"
-                      type="text"
-                      value={formData.username}
-                      onChange={handleChange}
-                      className={`appearance-none block w-full px-3 py-2 border ${
-                        errors.username ? "border-red-300" : "border-gray-300"
-                      } rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm`}
-                      placeholder="username123"
-                    />
-                    {errors.username && (
-                      <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                        <FaTimesCircle className="h-5 w-5 text-red-500" />
-                      </div>
-                    )}
-                  </div>
-                  {errors.username && (
-                    <p className="mt-2 text-sm text-red-600">
-                      {errors.username}
-                    </p>
-                  )}
-                </div> */}
-
                 <div>
                   <label
                     htmlFor="password"
                     className="block text-sm font-medium text-gray-700"
                   >
-                    Password
+                    Mật khẩu
                   </label>
                   <div className="mt-1 relative">
                     <input
@@ -369,7 +316,7 @@ const RegisterPage = () => {
                   )}
                   <div className="mt-2">
                     <div className="text-sm text-gray-600 mb-1">
-                      Password strength:
+                      Độ mạnh mật khẩu:
                     </div>
                     <div className="h-2 w-full bg-gray-200 rounded-full">
                       <div
@@ -385,7 +332,7 @@ const RegisterPage = () => {
                     htmlFor="confirmPassword"
                     className="block text-sm font-medium text-gray-700"
                   >
-                    Confirm Password
+                    Xác nhận lại mật khẩu
                   </label>
                   <div className="mt-1 relative">
                     <input
@@ -435,12 +382,12 @@ const RegisterPage = () => {
                     htmlFor="terms"
                     className="ml-2 block text-sm text-gray-900"
                   >
-                    I agree to the{" "}
+                    Tôi đồng ý với{" "}
                     <a
                       href="#"
                       className="text-indigo-600 hover:text-indigo-500"
                     >
-                      Terms and Conditions
+                      Điều khoản và Điều kiện
                     </a>
                   </label>
                 </div>
@@ -484,27 +431,15 @@ const RegisterPage = () => {
                     "Register"
                   )}
                 </button>
-              </div>
-
-              <div className="flex items-center justify-center">
-                <div className="border-t border-gray-300 flex-grow"></div>
-                <span className="px-4 text-sm text-gray-500">OR</span>
-                <div className="border-t border-gray-300 flex-grow"></div>
-              </div>
-
-              <div
-                onClick={handleLoginGoogle}
-                className="w-full flex justify-center items-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <FaGoogle className="text-red-500 mr-2" />
-              </div>
-              <div className="mt-6 text-center">
-                <Link
-                  to="/login"
-                  className="text-sm text-indigo-600 hover:text-indigo-500 hover:underline focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                >
-                  Already have an account? Login
-                </Link>
+                <p className="mt-4 text-center text-sm text-gray-600">
+                  Bạn có tài khoản rồi?
+                  <a
+                    href="/login"
+                    className="font-medium text-blue-600 hover:text-blue-500"
+                  >
+                    Đăng nhập tại đây
+                  </a>
+                </p>
               </div>
             </form>
           </>

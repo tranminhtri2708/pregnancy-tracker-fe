@@ -59,50 +59,67 @@ function ManageSubscriptionUser() {
       dataIndex: "price",
       key: "price",
     },
+    // {
+    //   title: "Chức năng gói",
+    //   dataIndex: "features",
+    //   key: "features",
+    // },
     {
-      title: "Chức năng gói",
-      dataIndex: "features",
-      key: "features",
-    },
-    {
-      title: "Ngày bắt đầu",
+      title: "Ngày mua gói",
       dataIndex: "startDate",
       key: "startDate",
       render: (text) => formatDate(text),
     },
     {
-      title: "Ngày kết thúc",
+      title: "Ngày gói hết hạn",
       dataIndex: "endDate",
       key: "endDate",
       render: (text, record) => {
         // Nếu gói là vĩnh viễn
-        if (record.status && record.status.toLowerCase() === "vĩnh viễn") {
-          return "Vĩnh viễn";
+        if (record.planName && record.planName.toLowerCase() === "gold") {
+          return "Gói này có hiệu lực vĩnh viễn";
         }
         return formatDate(text);
       },
     },
+    // {
+    //   title: "Trạng thái gói",
+    //   dataIndex: "status",
+    //   key: "status",
+    //   render: (status) => {
+    //     // Determine the color based on status
+    //     let color = "red";
+    //     if (
+    //       status &&
+    //       (status.toLowerCase() === "đang hoạt động" ||
+    //         status.toLowerCase() === "vĩnh viễn")
+    //     ) {
+    //       color = "green";
+    //     } else if (status && status.toLowerCase() === "đã hết hạn") {
+    //       color = "red";
+    //     } else if (status && status.toLowerCase() === "sắp hết hạn") {
+    //       color = "orange";
+    //     }
 
+    //     return <Tag color={color}>{status}</Tag>;
+    //   },
+    // },
     {
-      title: "Trạng thái gói",
-      dataIndex: "status",
-      key: "status",
-      render: (status) => {
-        // Determine the color based on status
-        let color = "red";
-        if (
-          status &&
-          (status.toLowerCase() === "đang hoạt động" ||
-            status.toLowerCase() === "vĩnh viễn")
-        ) {
+      title: "Trạng thái thanh toán",
+      dataIndex: "paymentStatus",
+      key: "paymentStatus",
+      render: (text, record) => {
+        let color = "";
+        let displayText = "";
+        if (record.paymentStatus === "Paid") {
           color = "green";
-        } else if (status && status.toLowerCase() === "đã hết hạn") {
-          color = "red";
-        } else if (status && status.toLowerCase() === "sắp hết hạn") {
-          color = "orange";
+          displayText = "Đã thanh toán";
+        } else if (record.paymentStatus === "Pending") {
+          color = "yellow";
+          displayText = "Chưa thanh toán";
         }
 
-        return <Tag color={color}>{status}</Tag>;
+        return <Tag color={color}>{displayText}</Tag>;
       },
     },
   ];

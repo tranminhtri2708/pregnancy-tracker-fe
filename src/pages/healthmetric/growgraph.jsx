@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Spin, message } from "antd";
+import { Spin, message, Button } from "antd";
 import { useNavigate } from "react-router-dom";
 import {
   LineChart,
@@ -12,6 +12,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import api from "../../config/axios";
+import { getHealthMetricsByChild } from "../../services/api.heathmetric";
 
 const GrowthChart = ({ childId }) => {
   const navigate = useNavigate();
@@ -19,17 +20,14 @@ const GrowthChart = ({ childId }) => {
   const [whoStandards, setWhoStandards] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // Default weeks from 8 to 42
   const defaultWeeks = Array.from({ length: 35 }, (_, i) => i + 8);
 
   // Fetch Baby Data
   const fetchHealthMetrics = async () => {
     try {
       setLoading(true);
-      const response = await api.get(`HealthMetric/GetAllHealthMetric`);
-      const data = response.data.result || [];
-      console.log("Health Metrics", data);
-      setHealthMetrics(data);
+      const response = await getHealthMetricsByChild(childId);
+      setHealthMetrics(response);
     } catch (error) {
       message.error("Cannot fetch health metrics! Please try again.");
     } finally {
@@ -42,7 +40,6 @@ const GrowthChart = ({ childId }) => {
     try {
       const response = await api.get("WHOStandard/GetAllWHOStatistics");
       const data = response.data.result || [];
-      console.log("WHO?", data);
       setWhoStandards(data);
     } catch (error) {
       message.error("Cannot fetch WHO standards! Please try again.");
@@ -54,7 +51,6 @@ const GrowthChart = ({ childId }) => {
     fetchWHOStandards();
   }, [childId]);
 
-  // Merge Data for Each Chart
   const mergeData = (key) => {
     return defaultWeeks.map((week) => {
       const babyMetric =
@@ -70,7 +66,6 @@ const GrowthChart = ({ childId }) => {
     });
   };
 
-  // Define Data for Each Chart
   const graphData = {
     weight: mergeData("weight"),
     length: mergeData("lenght"),
@@ -84,6 +79,7 @@ const GrowthChart = ({ childId }) => {
   if (loading) {
     return <Spin tip="Loading growth data..." />;
   }
+
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
       return (
@@ -94,7 +90,7 @@ const GrowthChart = ({ childId }) => {
             padding: "10px",
           }}
         >
-          <p>{`Week ${label}`}</p> {/* Display Pregnancy Week */}
+          <p>{`Week ${label}`}</p>
           {payload.map((data, index) => (
             <p key={index} style={{ color: data.stroke }}>
               {`${data.name}: ${data.value}`}
@@ -104,11 +100,10 @@ const GrowthChart = ({ childId }) => {
       );
     }
   };
-  // Render Chart with Baby Data and WHO Range (Min and Max)
+
   const renderChart = (data, title, babyKey) => (
     <div style={{ marginBottom: "2rem" }}>
-      <h3 className="text-2xl text-center mb-6">{title}</h3>{" "}
-      {/* Title with spacing */}
+      <h3 className="text-2xl text-center mb-6">{title}</h3>
       <ResponsiveContainer width="100%" height={300}>
         <LineChart data={data}>
           <CartesianGrid stroke="#f5f5f5" />
@@ -129,13 +124,12 @@ const GrowthChart = ({ childId }) => {
               right: -20,
             }}
           />
-          {/* Lines */}
           <Line
             type="monotone"
             dataKey={babyKey}
             stroke="#ff7300"
             name="Baby"
-            strokeWidth={3} // Ensure Baby's line is bold and always on top
+            strokeWidth={3}
           />
           <Line type="monotone" dataKey="min" stroke="#387908" name="WHO Min" />
           <Line type="monotone" dataKey="max" stroke="#1E90FF" name="WHO Max" />
@@ -143,6 +137,24 @@ const GrowthChart = ({ childId }) => {
       </ResponsiveContainer>
     </div>
   );
+
+  const handleExportReport = async () => {
+    try {
+      const response = await api.get(`/PdfExport/health-report/${childId}`, {
+        responseType: "blob", // Ensure the file is downloaded as a blob
+      });
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `health-report-${childId}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      message.success("Health report exported successfully!");
+    } catch (error) {
+      console.error("Error exporting health report:", error);
+      message.error("Cannot export health report! Please try again.");
+    }
+  };
 
   return (
     <div>
@@ -157,8 +169,6 @@ const GrowthChart = ({ childId }) => {
           </u>
         </i>
       </h2>
-
-      {/* Render All Graphs */}
       <div>{renderChart(graphData.weight, "Cân nặng (gram)", "baby")}</div>
       <div>{renderChart(graphData.length, "Chiều dài (cm)", "baby")}</div>
       <div>{renderChart(graphData.heartRate, "Nhịp tim (bpm)", "baby")}</div>
@@ -172,8 +182,17 @@ const GrowthChart = ({ childId }) => {
       <div>
         {renderChart(graphData.bpd, "Đường kính lưỡng đỉnh (mm)", "baby")}
       </div>
-      <div>{renderChart(graphData.ac, "Chu vi bụng	 (mm)", "baby")}</div>
+      <div>{renderChart(graphData.ac, "Chu vi bụng (mm)", "baby")}</div>
       <div>{renderChart(graphData.fl, "Chiều dài xương đùi (mm)", "baby")}</div>
+      <div className="text-center mt-6">
+        <Button
+          type="primary"
+          onClick={handleExportReport}
+          style={{ fontSize: "1rem", padding: "0.5rem 1rem" }}
+        >
+          Export Child Health Report
+        </Button>
+      </div>
     </div>
   );
 };

@@ -120,7 +120,7 @@ const MembershipPackages = () => {
       <Header />
       <div className="max-w-6xl mx-auto text-center mb-16 mt-20">
         <h1 className="text-5xl font-extrabold text-gray-900">
-          Các gói thành viên
+          Các gói phí thành viên
         </h1>
         <p className="mt-5 text-lg text-gray-600 max-w-2xl mx-auto">
           Chọn gói thành viên phù hợp để đồng hành cùng bạn trên hành trình sức

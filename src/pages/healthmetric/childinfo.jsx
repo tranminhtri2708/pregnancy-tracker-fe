@@ -14,21 +14,33 @@ import {
   getHealthMetricsByChild,
   updateHealthMetric,
   deleteHealthMetric,
+  compareHealthMetrics,
 } from "../../services/api.heathmetric";
 const ChildInfo = ({ child }) => {
+  const [isLoadingFeedback, setIsLoadingFeedback] = useState(false);
+  const [feedbackMessages, setFeedbackMessages] = useState([]);
+  const [whoStandards, setWhoStandards] = useState([]);
   const [healthMetrics, setHealthMetrics] = useState([]); // State to manage table data
   const [isModalOpen, setIsModalOpen] = useState(false); // State to control modal visibility
   const [form] = Form.useForm(); // Form instance for managing input data
   const [editingRecord, setEditingRecord] = useState(null); // Manage the record being edited
   const [selectedWeek, setSelectedWeek] = useState(8); // State to manage selected week
   const [loading, setLoading] = useState(false); // Loading state
-  const [selectedWeekId, setSelectedWeekId] = useState(null); // Store the ID of the selected week
 
-  const weekOptions = Array.from({ length: 42 - 8 + 1 }, (_, i) => ({
+  const weekOptions = Array.from({ length: 40 - 8 + 1 }, (_, i) => ({
     value: i + 8,
     label: `${i + 8}`,
   }));
 
+  const fetchWHOStandards = async () => {
+    try {
+      const response = await api.get("WHOStandard/GetAllWHOStatistics");
+      const data = response.data.result || [];
+      setWhoStandards(data);
+    } catch (error) {
+      message.error("Cannot fetch WHO standards! Please try again.");
+    }
+  };
   const fetchHealthMetrics = async () => {
     try {
       setLoading(true); // Set loading state
@@ -49,11 +61,33 @@ const ChildInfo = ({ child }) => {
     }
   };
 
+  const getHealthMetricsID = async () => {
+    try {
+      setLoading(true); // Set loading state
+      const data = await getHealthMetricsByChild(child.id); // Fetch data using child ID
+      // const data = await getHealthMetricsByChild(0)
+      console.log("data", data);
+      // Ensure no duplicate weeks
+      const uniqueMetrics = data.filter(
+        (metric, index, self) =>
+          self.findIndex((m) => m.pregnancyWeek === metric.pregnancyWeek) ===
+          index
+      );
+      return uniqueMetrics[0].id; // Set filtered data
+    } catch (error) {
+      message.error("Không thể lấy dữ liệu sức khỏe! Vui lòng thử lại sau.");
+    } finally {
+      setLoading(false); // Reset loading state
+    }
+  };
+
   // Fetch data when the component mounts or when the child changes
   useEffect(() => {
     if (child?.id) {
       fetchHealthMetrics();
     }
+    handleCompareMetrics();
+    fetchWHOStandards();
   }, [child]);
   // Function to open the modal
   const openModal = (record) => {
@@ -72,39 +106,6 @@ const ChildInfo = ({ child }) => {
     form.resetFields();
   };
 
-  // Function to handle form submission
-  // const handleFormSubmit = async (values) => {
-  //   const healthMetricData = {
-  //     childrenId: child.id,
-  //     pregnancyWeek: selectedWeek,
-  //     headCircumference: values.headCircumference,
-  //     weight: values.weight,
-  //     lenght: values.lenght,
-  //     sacDiameter: values.sacDiameter,
-  //     hearRate: values.hearRate,
-  //     note: values.note || "",
-  //   };
-  //   try {
-  //     console.log("editingRecord 1")
-  //     if (editingRecord) {
-  //       console.log("editingRecord 2")
-  //       // Call update API if editing
-  //       await updateHealthMetric(editingRecord.id, healthMetricData);
-  //       setHealthMetrics((prevMetrics) =>
-  //         prevMetrics.map((item) =>
-  //           item.id === editingRecord.id ? { ...item, ...healthMetricData } : item
-  //         )
-  //       );
-  //       message.success(`Dữ liệu sức khỏe tuần ${selectedWeek} đã được cập nhật!`);
-  //     } else {
-  //       // Add new metric logic here (if needed)
-  //     }
-
-  //     closeModal(); // Close modal after submission
-  //   } catch (error) {
-  //     message.error("Không thể cập nhật dữ liệu sức khỏe. Vui lòng thử lại sau.");
-  //   }
-  // };
   const handleFormSubmit = async (values) => {
     const healthMetricData = {
       childrentId: child.id,
@@ -176,88 +177,281 @@ const ChildInfo = ({ child }) => {
 
   const columns = [
     {
-      title: "Chu Vi Đầu",
-      dataIndex: "headCircumference",
-      key: "headCircumference",
+      title: "Metric",
+      dataIndex: "metric",
+      key: "metric",
       align: "center",
     },
     {
-      title: "Cân Nặng",
-      dataIndex: "weight",
-      key: "weight",
+      title: "Baby's Data",
+      dataIndex: "babyData",
+      key: "babyData",
       align: "center",
     },
     {
-      title: "Chiều Dài",
-      dataIndex: "lenght",
-      key: "lenght",
-      align: "center",
-    },
-    {
-      title: "Đường Kính Lưỡng Đỉnh",
-      dataIndex: "bpd",
-      key: "bpd",
-      align: "center",
-    },
-    {
-      title: "Chu vi bụng",
-      dataIndex: "ac",
-      key: "ac",
-      align: "center",
-    },
-    {
-      title: "Chiều dài xương đùi",
-      dataIndex: "fl",
-      key: "fl",
-      align: "center",
-    },
-    {
-      title: "Nhịp Tim",
-      dataIndex: "hearRate",
-      key: "hearRate",
-      align: "center",
-    },
-    {
-      title: "Ghi Chú",
-      dataIndex: "note",
-      key: "note",
+      title: "WHO Standard (Min - Max)",
+      dataIndex: "whoRange",
+      key: "whoRange",
       align: "center",
     },
   ];
 
+  const dataSource = [
+    {
+      key: "1",
+      metric: "Chu Vi Đầu", // Head Circumference
+      babyData:
+        healthMetrics.find((metric) => metric.pregnancyWeek === selectedWeek)
+          ?.headCircumference || "No data",
+      whoRange: whoStandards.find(
+        (standard) => standard.pregnancyWeek === selectedWeek
+      )
+        ? `${
+            whoStandards.find(
+              (standard) => standard.pregnancyWeek === selectedWeek
+            )?.headCircumMin || "No data"
+          } - ${
+            whoStandards.find(
+              (standard) => standard.pregnancyWeek === selectedWeek
+            )?.headCircumMax || "No data"
+          }`
+        : "No data",
+    },
+    {
+      key: "2",
+      metric: "Cân Nặng", // Weight
+      babyData:
+        healthMetrics.find((metric) => metric.pregnancyWeek === selectedWeek)
+          ?.weight || "No data",
+      whoRange: whoStandards.find(
+        (standard) => standard.pregnancyWeek === selectedWeek
+      )
+        ? `${
+            whoStandards.find(
+              (standard) => standard.pregnancyWeek === selectedWeek
+            )?.weightMin || "No data"
+          } - ${
+            whoStandards.find(
+              (standard) => standard.pregnancyWeek === selectedWeek
+            )?.weightMax || "No data"
+          }`
+        : "No data",
+    },
+    {
+      key: "3",
+      metric: "Chiều Dài", // Length
+      babyData:
+        healthMetrics.find((metric) => metric.pregnancyWeek === selectedWeek)
+          ?.lenght || "No data",
+      whoRange: whoStandards.find(
+        (standard) => standard.pregnancyWeek === selectedWeek
+      )
+        ? `${
+            whoStandards.find(
+              (standard) => standard.pregnancyWeek === selectedWeek
+            )?.lengthMin || "No data"
+          } - ${
+            whoStandards.find(
+              (standard) => standard.pregnancyWeek === selectedWeek
+            )?.lengthMax || "No data"
+          }`
+        : "No data",
+    },
+    {
+      key: "4",
+      metric: "Đường Kính Lưỡng Đỉnh", // BPD
+      babyData:
+        healthMetrics.find((metric) => metric.pregnancyWeek === selectedWeek)
+          ?.bpd || "No data",
+      whoRange: whoStandards.find(
+        (standard) => standard.pregnancyWeek === selectedWeek
+      )
+        ? `${
+            whoStandards.find(
+              (standard) => standard.pregnancyWeek === selectedWeek
+            )?.bpdMin || "No data"
+          } - ${
+            whoStandards.find(
+              (standard) => standard.pregnancyWeek === selectedWeek
+            )?.bpdMax || "No data"
+          }`
+        : "No data",
+    },
+    {
+      key: "5",
+      metric: "Chu vi bụng", // AC
+      babyData:
+        healthMetrics.find((metric) => metric.pregnancyWeek === selectedWeek)
+          ?.ac || "No data",
+      whoRange: whoStandards.find(
+        (standard) => standard.pregnancyWeek === selectedWeek
+      )
+        ? `${
+            whoStandards.find(
+              (standard) => standard.pregnancyWeek === selectedWeek
+            )?.acMin || "No data"
+          } - ${
+            whoStandards.find(
+              (standard) => standard.pregnancyWeek === selectedWeek
+            )?.acMax || "No data"
+          }`
+        : "No data",
+    },
+    {
+      key: "6",
+      metric: "Chiều dài xương đùi", // FL
+      babyData:
+        healthMetrics.find((metric) => metric.pregnancyWeek === selectedWeek)
+          ?.fl || "No data",
+      whoRange: whoStandards.find(
+        (standard) => standard.pregnancyWeek === selectedWeek
+      )
+        ? `${
+            whoStandards.find(
+              (standard) => standard.pregnancyWeek === selectedWeek
+            )?.flMin || "No data"
+          } - ${
+            whoStandards.find(
+              (standard) => standard.pregnancyWeek === selectedWeek
+            )?.flMax || "No data"
+          }`
+        : "No data",
+    },
+    {
+      key: "7",
+      metric: "Nhịp Tim", // Heart Rate
+      babyData:
+        healthMetrics.find((metric) => metric.pregnancyWeek === selectedWeek)
+          ?.hearRate || "No data",
+      whoRange: whoStandards.find(
+        (standard) => standard.pregnancyWeek === selectedWeek
+      )
+        ? `${
+            whoStandards.find(
+              (standard) => standard.pregnancyWeek === selectedWeek
+            )?.hearRateMin || "No data"
+          } - ${
+            whoStandards.find(
+              (standard) => standard.pregnancyWeek === selectedWeek
+            )?.hearRateMax || "No data"
+          }`
+        : "No data",
+    },
+  ];
+  const handleCompareMetrics = async () => {
+    try {
+      // Retrieve the ID associated with the selected week's health metric
+      const id = await getHealthMetricsID();
+      console.log("ID retrieved:", id);
+
+      if (!id) {
+        message.error(
+          "Không thể lấy ID dữ liệu sức khỏe! Vui lòng thử lại sau."
+        );
+        return;
+      }
+
+      setIsLoadingFeedback(true); // Set loading state while fetching feedback
+
+      // Call the API to compare health metrics and retrieve feedback
+      const response = await compareHealthMetrics(id);
+      const response2 = response.data.result; // Extract the result containing feedback
+      const feedback = response2?.split("\n") || []; // Split feedback into individual messages
+      console.log("Feedback from API:", feedback);
+
+      // Translate feedback into Vietnamese
+      const translatedFeedback = feedback.map((msg) => {
+        if (msg.includes("WARNING:")) {
+          if (
+            msg.includes("Fetal weight is different from the standard index!!!")
+          ) {
+            return "CẢNH BÁO: Cân nặng thai nhi khác với chỉ số tiêu chuẩn!!!";
+          }
+          if (
+            msg.includes(
+              "Fetal biparietal diameter is different from the standard index!!!"
+            )
+          ) {
+            return "CẢNH BÁO: Đường kính lưỡng đỉnh của thai nhi khác với chỉ số tiêu chuẩn!!!";
+          }
+          if (
+            msg.includes(
+              "Fetal femur length is different from the standard index!!!"
+            )
+          ) {
+            return "CẢNH BÁO: Chiều dài xương đùi của thai nhi khác với chỉ số tiêu chuẩn!!!";
+          }
+          if (
+            msg.includes(
+              "Fetal head circumference is different from the standard index!!!"
+            )
+          ) {
+            return "CẢNH BÁO: Chu vi đầu của thai nhi khác với chỉ số tiêu chuẩn!!!";
+          }
+          if (
+            msg.includes(
+              "The fetal heart rate is different from the standard index!!!"
+            )
+          ) {
+            return "CẢNH BÁO: Nhịp tim của thai nhi khác với chỉ số tiêu chuẩn!!!";
+          }
+          if (
+            msg.includes(
+              "Fetal abdominal circumference is different from the standard index!!!"
+            )
+          ) {
+            return "CẢNH BÁO: Chu vi bụng của thai nhi khác với chỉ số tiêu chuẩn!!!";
+          }
+        }
+
+        // Translate good feedback
+        if (
+          msg.includes("The fetus's health is in the most stable condition")
+        ) {
+          return "Sức khỏe của thai nhi đang ở trạng thái ổn định nhất";
+        }
+
+        // Return untranslated feedback if no match
+        return msg;
+      });
+
+      console.log("Translated Feedback:", translatedFeedback);
+
+      // Update feedback messages in state
+      setFeedbackMessages(translatedFeedback);
+    } catch (error) {
+      console.error("Error during health metric comparison:", error);
+      message.error("Không thể so sánh chỉ số sức khỏe! Vui lòng thử lại sau.");
+    } finally {
+      setIsLoadingFeedback(false); // Reset loading state
+    }
+  };
+
   return (
     <div>
       <h2 className="text-2xl font-semibold mb-6 text-gray-800">
-        Thông tin sức khỏe của bé {child.fullName} tại tuần {""}
+        Thông tin sức khỏe của bé {child.fullName} tại tuần{" "}
         <Select
           options={weekOptions}
           value={selectedWeek}
-          defaultValue={8}
           onChange={(value) => {
-            setSelectedWeek(value); // Update selected week
-            const selectedMetric = healthMetrics.find(
-              (metric) => metric.pregnancyWeek === value // Match the week
-            );
-            setSelectedWeekId(selectedMetric?.id || null); // Update the selected ID or set to null
+            setSelectedWeek(value); // Update the selected week
+            console.log("value", value);
           }}
           style={{ width: 100 }}
         />
       </h2>
-
       <Table
         columns={columns}
-        dataSource={healthMetrics.filter(
-          (metric) => metric.pregnancyWeek === selectedWeek // Show only records for the selected week
-        )}
+        dataSource={dataSource}
         bordered
         rowKey="key"
-        pagination={{ pageSize: 5 }}
+        pagination={false} // Disable pagination to show all rows on one page
       />
-
       <div className="flex justify-end mt-6">
         <Button
           type="primary"
-          onClick={() => openModal()} // Opens the modal for adding data
+          onClick={() => openModal()}
           style={{ marginRight: 8 }}
         >
           Thêm Dữ Liệu
@@ -267,10 +461,9 @@ const ChildInfo = ({ child }) => {
           onClick={() => {
             const selectedMetric = healthMetrics.find(
               (metric) => metric.pregnancyWeek === selectedWeek
-            ); // Find the record for the selected week
-
+            );
             if (selectedMetric) {
-              openModal(selectedMetric); // Open the modal with the found record
+              openModal(selectedMetric);
             } else {
               message.info(
                 "Không có dữ liệu để chỉnh sửa! Vui lòng thêm dữ liệu trước."
@@ -281,16 +474,15 @@ const ChildInfo = ({ child }) => {
         >
           Sửa Dữ Liệu
         </Button>
-
         <Button
           type="link"
           danger
           onClick={() => {
             const selectedMetric = healthMetrics.find(
               (metric) => metric.pregnancyWeek === selectedWeek
-            ); // Find the record matching the selected week
+            );
             if (selectedMetric) {
-              handleDeleteMetric(selectedMetric.id); // Call handleDeleteMetric with the ID
+              handleDeleteMetric(selectedMetric.id);
             } else {
               message.info(`Không có dữ liệu để xóa cho tuần ${selectedWeek}!`);
             }
@@ -299,7 +491,6 @@ const ChildInfo = ({ child }) => {
           Xóa
         </Button>
       </div>
-
       {/* Modal for Adding/Editing */}
       <Modal
         title={
@@ -313,7 +504,14 @@ const ChildInfo = ({ child }) => {
         okText={editingRecord ? "Cập Nhật" : "Thêm Mới"}
         cancelText="Hủy"
       >
-        <Form form={form} layout="vertical" onFinish={handleFormSubmit}>
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={(values) => {
+            handleFormSubmit(values, editingRecord); // Pass form values and editing state
+            closeModal();
+          }}
+        >
           <Form.Item
             name="headCircumference"
             label="Chu Vi Đầu"
@@ -403,6 +601,31 @@ const ChildInfo = ({ child }) => {
           </Form.Item>
         </Form>
       </Modal>
+      {/* Feedback Section */}
+      <div className="mt-6">
+        <h3 className="text-lg font-semibold">Phản hồi:</h3>
+        {healthMetrics[selectedWeek - 8] == null ? ( // Check if healthMetrics is empty or null
+          <p>Vui Lòng nhập dữ liệu để so sánh</p>
+        ) : isLoadingFeedback ? ( // Check if feedback is loading
+          <p>Đang tải...</p>
+        ) : (
+          <ul>
+            {feedbackMessages.map((msg, index) => (
+              <li
+                key={index}
+                style={{
+                  color: msg.toLowerCase().includes("cảnh báo")
+                    ? "red" // Red for warnings
+                    : "green", // Green for positive feedback
+                  fontWeight: "bold", // Make it bold
+                }}
+              >
+                {msg}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
     </div>
   );
 };

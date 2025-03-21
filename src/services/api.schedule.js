@@ -1,14 +1,46 @@
 import { toast } from "react-toastify";
 import api from "../config/axios";
 // lấy lịch
-export const getSchedule = async () => {
+
+const parseApiDate = (dateString) => {
   try {
-    const response = await api.get("Schedule/GetAllSchedule");
-    return response.data;
+    // Create a new Date object from the ISO string
+    const date = new Date(dateString);
+
+    // For debugging if needed
+    // console.log("Original API date:", dateString);
+    // console.log("Parsed date hours:", date.getHours(), "UTC hours:", date.getUTCHours());
+
+    return date;
   } catch (error) {
-    toast.error(error.response.data);
+    console.error("Invalid date format:", dateString);
+    return new Date();
   }
 };
+
+
+export const getSchedule = async (targetAccountId) => {
+  try {
+    const response = await api.get("Schedule/GetAllSchedule");
+    // Filter the response data by accountId
+    const filteredData = response.data.result.filter(schedule => schedule.accountId === +targetAccountId);
+    const formattedAppointments = filteredData.map((item) => {
+      const dateObj = parseApiDate(item.appointmentDate);
+
+      return {
+        id: item.id,
+        date: dateObj,
+        description: item.description,
+        notify: item.isNoti,
+        appointmentDate: item.appointmentDate,
+      };
+    });
+    return formattedAppointments;
+  } catch (error) {
+    toast.error(error.response?.data || "An error occurred");
+  }
+};
+
 export const createSchedule = async (scheduleData) => {
   try {
     const response = await api.post("Schedule/CreateSchedule", scheduleData); // đẩy thông ting đứa bé đí
