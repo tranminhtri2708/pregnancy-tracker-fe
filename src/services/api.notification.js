@@ -4,23 +4,26 @@ import api from "../config/axios";
 const getUserID = async () => {
     try {
       const response = await api.get("UserAccount/GetUserId");
-
+      console.log("Target account ID:", response.data.result.userId);
         return response.data.result.userId;
     } catch (error) {
-      console.error("Error fetching user ID:", error);
-      toast.error(
-        "Lỗi khi lấy thông tin người dùng: " +
-          (error.message || "Không xác định")
-      );
       return null;
     }
   };
 
   export const getClosestSchedule = async () => {
     try {
-      const response = await api.get("Schedule/GetAllSchedule");
-      // Filter the response data by accountId
       const targetAccountId = await getUserID();
+  
+      // Check if targetAccountId is null or undefined
+      if (targetAccountId == null) {
+        console.log("No target account ID found. Function execution aborted.");
+        return null; // Return nothing if no valid account ID is found
+      }
+      
+      const response = await api.get("Schedule/GetAllSchedule");
+  
+      // Filter the response data by accountId
       const filteredData = response.data.result.filter(
         (schedule) => schedule.accountId === +targetAccountId
       );
@@ -51,12 +54,14 @@ const getUserID = async () => {
           closestSchedule = appointment;
         }
       });
+  
       console.log("Closest schedule:", closestSchedule);
       return closestSchedule || "No upcoming schedules found.";
     } catch (error) {
       toast.error(error.response?.data || "An error occurred");
     }
   };
+  
   
 
   const parseApiDate = (dateString) => {

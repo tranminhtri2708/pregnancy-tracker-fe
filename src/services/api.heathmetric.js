@@ -43,3 +43,13 @@ export const deleteHealthMetric = async (id) => {
     console.error("Error deleting health metric:", error);
     throw error; // Re-throw for UI error handling
   }};
+
+export const compareHealthMetrics = async (id) => {
+  try{
+    const response = await api.get(`/HealthMetric/compareHealthMetricData/${id}`);
+    return response;
+  }catch(error){
+    console.error("Error comparing health metrics:", error);
+    throw error;
+  }
+}
