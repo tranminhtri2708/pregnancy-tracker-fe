@@ -17,7 +17,7 @@ import uploadFile from "../../utils/upload";
 import { getProfile } from "../../services/api.getprofile";
 
 // Post Card component
-const PostCard = ({ post, onLike }) => {
+const PostCard = ({ post }) => {
   return (
     <div className="bg-white rounded-lg shadow-md p-6 mb-6 transition-all hover:shadow-lg">
       <div className="flex items-center mb-4">
@@ -47,68 +47,9 @@ const PostCard = ({ post, onLike }) => {
           />
         </div>
       )}
-      <div className="flex items-center space-x-6">
-        <button
-          onClick={() => onLike(post.id)}
-          className="flex items-center space-x-2 text-gray-600 hover:text-pink-500 transition-colors"
-          aria-label="Like post"
-        >
-          <FiHeart />
-          <span>{post.likes || 0}</span>
-        </button>
-        <button
-          className="flex items-center space-x-2 text-gray-600 hover:text-pink-500 transition-colors"
-          aria-label="Comment on post"
-        >
-          <FiMessageSquare />
-          <span>{post.comments || 0}</span>
-        </button>
-        <button
-          className="flex items-center space-x-2 text-gray-600 hover:text-pink-500 transition-colors"
-          aria-label="Save post"
-        >
-          <FiSave />
-          <span>Save</span>
-        </button>
-      </div>
     </div>
   );
 };
-
-// Trending Topics component
-const TrendingTopics = () => {
-  const topics = [
-    "Thai nhi khỏe mạnh",
-    "Tiêm phòng",
-    "Ăn uống đủ chất",
-    "Yoga bầu",
-  ];
-
-  return (
-    <div className="bg-white rounded-lg shadow-md p-4 mb-6">
-      <h2 className="font-bold text-lg mb-3 text-gray-800">Chủ đề nổi bật</h2>
-      <div className="flex flex-wrap gap-2">
-        {topics.map((topic, index) => (
-          <span
-            key={index}
-            className="bg-pink-50 text-pink-600 px-3 py-1 rounded-full text-sm"
-          >
-            #{topic}
-          </span>
-        ))}
-      </div>
-    </div>
-  );
-};
-
-// Get Base64 function
-const getBase64 = (file) =>
-  new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = (error) => reject(error);
-  });
 
 // Create Post Modal component
 const CreatePostModal = ({ show, onClose, onSubmit, isSubmitting }) => {
@@ -117,6 +58,14 @@ const CreatePostModal = ({ show, onClose, onSubmit, isSubmitting }) => {
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState("");
   const [fileList, setFileList] = useState([]);
+  // Get Base64 function
+  const getBase64 = (file) =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = (error) => reject(error);
+    });
 
   const handlePreview = async (file) => {
     if (!file.url && !file.preview) {
@@ -264,19 +213,8 @@ const UnderBanner = () => (
 
     {/* Content */}
     <div className="flex-1">
-      <h2 className="text-lg font-bold">Chuẩn bị mang thai</h2>
-      <div className="text-gray-600 text-sm flex items-center gap-x-4">
-        <span>4 chủ đề</span>
-        <span>💬 7.2k tương tác</span>
-        <span>👥 6k thành viên</span>
-      </div>
+      <h2 className="text-lg font-bold">Cộng đồng mẹ bầu</h2>
     </div>
-
-    {/* Join button */}
-    <button className="bg-pink-500 text-white px-4 py-2 rounded-full flex items-center gap-x-2">
-      <span className="text-lg">+</span>
-      <span>Tham gia</span>
-    </button>
   </div>
 );
 
@@ -299,10 +237,10 @@ const Pregnancy = () => {
     try {
       setLoading(true);
       const result = await getPost();
+      console.log("Kết quả API:", result); // In ra toàn bộ kết quả
       if (result && result.items) {
         setPosts(result.items);
       } else {
-        console.error("Không nhận được dữ liệu bài viết hợp lệ");
         toast.error("Không thể tải bài viết");
       }
     } catch (error) {
@@ -313,7 +251,9 @@ const Pregnancy = () => {
       setRefreshing(false);
     }
   };
-
+  useEffect(() => {
+    fetchPosts();
+  }, []);
   // Refresh data function
   const handleRefresh = () => {
     setRefreshing(true);
@@ -338,10 +278,6 @@ const Pregnancy = () => {
     };
 
     fetchUserInfo();
-  }, []);
-
-  useEffect(() => {
-    fetchPosts();
   }, []);
 
   const handleCreatePost = async ({ title, content, fileList }) => {
@@ -391,14 +327,6 @@ const Pregnancy = () => {
     }
   };
 
-  const handleLike = (postId) => {
-    setPosts(
-      posts.map((post) =>
-        post.id === postId ? { ...post, likes: (post.likes || 0) + 1 } : post
-      )
-    );
-  };
-
   const filteredPosts = posts.filter(
     (post) =>
       (post.content || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -445,9 +373,6 @@ const Pregnancy = () => {
 
         {/* Full-width post section */}
         <div className="w-full">
-          {/* Optional: Trending topics section */}
-          <TrendingTopics />
-
           {/* Posts section */}
           {loading ? (
             <div className="text-center py-10">
@@ -462,7 +387,7 @@ const Pregnancy = () => {
           ) : (
             <div className="space-y-6">
               {filteredPosts.map((post) => (
-                <PostCard key={post.id} post={post} onLike={handleLike} />
+                <PostCard key={post.id} post={post} />
               ))}
             </div>
           )}
