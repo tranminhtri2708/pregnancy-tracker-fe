@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { FiMenu, FiX } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
-import { Dropdown, Space } from "antd";
-import { DownOutlined } from "@ant-design/icons";
+import { Dropdown } from "antd";
+
 import { useSelector, useDispatch } from "react-redux";
 import { logout } from "../../redux/features/userSlice";
 
@@ -20,26 +20,8 @@ const Header = () => {
     { name: "Trang chủ", path: "/" },
     { name: "Gói thành viên", path: "/subscription" },
     { name: "Công cụ sức khỏe", path: "/health-check" },
+    { name: "Cộng đồng", path: "/community" },
   ];
-
-  const communityItems = [
-    {
-      label: "Chuẩn bị mang thai",
-      key: "1",
-      path: "/community/PregnancyPrep",
-    },
-    { label: "Mẹ bầu", key: "2", path: "/community/Pregnancy" },
-  ].map((item) => ({
-    label: (
-      <button
-        onClick={() => navigate(item.path)}
-        className="block text-left w-full px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md"
-      >
-        {item.label}
-      </button>
-    ),
-    key: item.key,
-  }));
 
   const handleLogout = () => {
     dispatch(logout());
@@ -69,25 +51,11 @@ const Header = () => {
                 {item.name}
               </button>
             ))}
-
-            <Dropdown menu={{ items: communityItems }} trigger={["click"]}>
-              <button className="text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 rounded-md text-sm font-medium">
-                <Space>
-                  Cộng đồng
-                  <DownOutlined />
-                </Space>
-              </button>
-            </Dropdown>
           </nav>
 
           <div className="flex items-center space-x-4">
             {user ? (
               <>
-                <input
-                  type="text"
-                  placeholder="Tìm kiếm..."
-                  className="px-2 py-1 rounded-full border border-gray-300 dark:border-gray-700 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 w-40"
-                />
                 <Dropdown
                   menu={{
                     items: [

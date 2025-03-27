@@ -20,8 +20,7 @@ import ForgotPassword from "./pages/forget";
 import PregnancyProfile from "./pages/viewprofile";
 
 import MembershipPackages from "./pages/subscription/SubscriptionUser";
-import PregnancyPrep from "./pages/community";
-import Pregnancy from "./pages/community/index1";
+
 import EmailVerification from "./pages/verification";
 import { Provider } from "react-redux";
 import { persistor, store } from "./redux/store";
@@ -35,6 +34,8 @@ import ManageSubscriptionUser from "./pages/userprofile/manage_subscription";
 import WhoStandardView from "./pages/homepage/whostandard";
 import ManageMyPost from "./pages/userprofile/manage_post";
 import Overview from "./pages/admin/overview";
+import ManageSubscriptionUserAdmin from "./pages/admin/manage-subscriptionuser";
+import Pregnancy from "./pages/community";
 
 const router = createBrowserRouter([
   {
@@ -63,12 +64,9 @@ const router = createBrowserRouter([
     path: "/subscription",
     element: <MembershipPackages />,
   },
+
   {
-    path: "/community/PregnancyPrep",
-    element: <PregnancyPrep />,
-  },
-  {
-    path: "/community/Pregnancy",
+    path: "/community",
     element: <Pregnancy />,
   },
   {
@@ -107,6 +105,10 @@ const router = createBrowserRouter([
       {
         path: "/dashboard/subscription",
         element: <ManageSubscription />,
+      },
+      {
+        path: "/dashboard/subscriptionuser",
+        element: <ManageSubscriptionUserAdmin />,
       },
       {
         path: "/dashboard/user",
