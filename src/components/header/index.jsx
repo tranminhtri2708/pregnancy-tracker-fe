@@ -19,12 +19,8 @@ const Header = () => {
   const navItems = [
     { name: "Trang chủ", path: "/" },
     { name: "Gói thành viên", path: "/subscription" },
-<<<<<<< HEAD
     { name: "Công cụ sức khỏe", path: "/baby" },
-=======
-    { name: "Công cụ sức khỏe", path: "/health-check" },
     { name: "Cộng đồng", path: "/community" },
->>>>>>> dc5ccdcd5df9eed96538f8a2de20dfb6ef296171
   ];
 
   const handleLogout = () => {
