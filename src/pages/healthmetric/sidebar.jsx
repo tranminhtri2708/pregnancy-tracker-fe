@@ -88,7 +88,7 @@ const Baby = () => {
                     onClick={() => setSelectedChild(child)}
                   >
                     <p className="font-bold">Bé: {child.fullName}</p>
-                    <p>Giới tính: {child.gender}</p>
+                    {/* <p>Giới tính: {child.gender}</p> */}
                     <p>
                       Ngày sinh:{" "}
                       {new Date(child.birth).toLocaleDateString("vi-VN")}

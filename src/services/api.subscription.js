@@ -55,3 +55,17 @@ export const getSubscriptionPlanId = async (planId) => {
     return null; // để xác định khi nào lỗi và khi nào không lỗi
   }
 };
+// admin quản lý các gói thành viên mà người dùng đã mua và đang sử dụng
+export const getAllMemberByPlan = async (PlansName) => {
+  // update cần 2 fill id và product
+
+  try {
+    const response = await api.get(
+      `UserAccount/GetAllMemberByPlan/${PlansName}`
+    ); // truyền dữ liệu cần update xuống be
+    return response.data;
+  } catch (error) {
+    toast.error(error.response.data);
+    return null; // để xác định khi nào lỗi và khi nào không lỗi
+  }
+};

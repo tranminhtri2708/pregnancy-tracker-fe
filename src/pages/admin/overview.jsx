@@ -159,9 +159,7 @@ function Overview() {
                   cy="50%"
                   outerRadius={80}
                   fill="#8884d8"
-                  label={({ name, value }) =>
-                    `${name}: ${formatCurrency(value)}đ`
-                  }
+                  label={({ name, value }) => `${formatCurrency(value)}đ`}
                 >
                   {revenuePieData.map((entry, index) => (
                     <Cell
