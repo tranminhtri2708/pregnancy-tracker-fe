@@ -20,7 +20,7 @@ const ManageSchedule = () => {
   const [formValues, setFormValues] = useState({
     time: "09:00",
     description: "",
-    notify: true,
+    isNoti: true,
   });
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [isLoading, setIsLoading] = useState(false);
@@ -165,7 +165,7 @@ const ManageSchedule = () => {
     setFormValues({
       time: "09:00",
       description: "",
-      notify: true,
+      isNoti: true,
     });
   };
 
@@ -179,7 +179,7 @@ const ManageSchedule = () => {
     setFormValues({
       time: formatTimeFromDate(appointment.date),
       description: appointment.description,
-      notify: true,
+      isNoti: true,
     });
     console.log("123", formValues);
     setIsEditMode(true);
@@ -218,7 +218,7 @@ const ManageSchedule = () => {
       //     id: item.id,
       //     date: dateObj,
       //     description: item.description,
-      //     notify: item.isNoti,
+      //     isNoti: item.isNoti,
       //     appointmentDate: item.appointmentDate,
       //   };
       // });
@@ -428,7 +428,7 @@ const ManageSchedule = () => {
                 {formatTimeFromDate(appointment.date)} -{" "}
                 {appointment.description.substring(0, 8)}
                 {appointment.description.length > 8 ? "..." : ""}
-                {appointment.notify && (
+                {appointment.isNoti && (
                   <Bell className="inline-block w-3 h-3 ml-1 text-green-600" />
                 )}
               </span>
@@ -590,12 +590,12 @@ const ManageSchedule = () => {
                 />
               </div>
 
-              {true && (
+              {!true && (
                 <div className="mb-6">
                   <label className="flex items-center cursor-pointer">
                     <input
                       type="checkbox"
-                      name="notify"
+                      name="isNoti"
                       checked={true}
                       onChange={handleInputChange}
                       className="mr-2"
@@ -764,7 +764,7 @@ const ManageSchedule = () => {
                     {formatTimeFromDate(appointment.date)}
                   </div>
                   <div className="flex items-center">
-                    {appointment.notify ? (
+                    {appointment.isNoti ? (
                       <div className="flex items-center text-green-600 mr-3">
                         <Bell className="w-4 h-4 mr-1" />
                         <span className="text-sm">Có thông báo</span>

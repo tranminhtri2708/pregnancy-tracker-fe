@@ -50,6 +50,7 @@ const WhoStandard = () => {
   }));
 
   const handleCreateForWeek = (row) => {
+    form.resetFields();
     setEditingRow(row);
     setIsCreateModalVisible(true);
   };
@@ -86,7 +87,7 @@ const WhoStandard = () => {
   const handleCreate = async (values) => {
     try {
       const newRecord = {
-        pregnancyWeek: 0,
+        pregnancyWeek: +values.pregnancyWeek,
         headCircumferenceMin: 0,
         headCircumferenceMax: 0,
         weightMin: 0,
@@ -103,7 +104,7 @@ const WhoStandard = () => {
         hearRateMax: 0,
         ...values,
       };
-      console.log(pregnancyWeek);
+      newRecord.pregnancyWeek = +values.pregnancyWeek;
       await AddWHOStandard(newRecord); // Add API call
 
       // Add the new record to local state
@@ -188,14 +189,16 @@ const WhoStandard = () => {
   };
 
   const handleEdit = (row) => {
+    form.resetFields();
     setEditingRow(row);
     setIsModalVisible(true);
   };
 
   const handleSave = async (values) => {
+    console.log("values", values.pregnancyWeek);
     try {
       const updatedRecord = {
-        pregnancyWeek: +editingRow.week,
+        pregnancyWeek: editingRow.week,
         headCircumferenceMin: +editingRow.headCircumferenceMin || null,
         headCircumferenceMax: +editingRow.headCircumferenceMax || null,
         weightMin: +editingRow.weightMin || null,
@@ -213,7 +216,7 @@ const WhoStandard = () => {
         ...values,
       };
       // Use the id from the editing row
-      console.log("nam mo", +editingRow.id, updatedRecord);
+      console.log("nam mo", +values.id, updatedRecord);
       await UpdateWHOStandard(+editingRow.id, updatedRecord);
 
       // Update local state with the new values
@@ -606,10 +609,10 @@ const WhoStandard = () => {
         <Form form={form} onFinish={handleCreate} layout="vertical">
           <Form.Item
             name="pregnancyWeek"
-            initialValue={editingRow?.week || 0}
+            initialValue={editingRow?.week}
             hidden
           >
-            <Input type="number" disabled />
+            <Input type="number" disabled initialValue={editingRow?.week} />
           </Form.Item>
 
           {editingRow?.week >= 1 && editingRow?.week <= 7 ? (

@@ -306,10 +306,7 @@ const PregnancyHomepage = () => {
       const response = await getClosestSchedule();
       console.log("Closest Schedule:", response.date);
       return new Date(response.date);
-    } catch (error) {
-      console.error("Error fetching appointments:", error);
-      return null; // Return null if there's an error
-    }
+    } catch (error) {}
   };
 
   // Function to compare the current date to the closest date and show the modal
@@ -322,8 +319,8 @@ const PregnancyHomepage = () => {
     // Check if the user has already been notified today
     const lastNotified = localStorage.getItem("lastNotificationDate");
     const today = new Date().toDateString();
-
-    if (timeDifference < 1 && lastNotified !== today) {
+    // if (timeDifference < 1 && lastNotified !== today) {
+    if (timeDifference < 1) {
       console.log("The closest schedule is within 1 day!");
       setIsModalVisible(true); // Show Antd Modal
     }

@@ -190,7 +190,7 @@ const GrowthChart = ({ childId }) => {
           onClick={handleExportReport}
           style={{ fontSize: "1rem", padding: "0.5rem 1rem" }}
         >
-          Export Child Health Report
+          Xuất file báo cáo sức khỏe bé
         </Button>
       </div>
     </div>

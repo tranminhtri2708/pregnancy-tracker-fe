@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FaEye, FaEyeSlash, FaLock, FaUser } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
+import { logout } from "../../redux/features/userSlice";
 import api from "../../config/axios";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
@@ -35,6 +36,15 @@ const LoginPage = () => {
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
+
+  useEffect(() => {
+    console.log("Đăng xuất...");
+    localStorage.removeItem("token");
+    localStorage.removeItem("expiration");
+    localStorage.clear();
+
+    dispatch(logout());
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

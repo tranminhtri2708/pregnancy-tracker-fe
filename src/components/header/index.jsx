@@ -19,7 +19,7 @@ const Header = () => {
   const navItems = [
     { name: "Trang chủ", path: "/" },
     { name: "Gói thành viên", path: "/subscription" },
-    { name: "Công cụ sức khỏe", path: "/health-check" },
+    { name: "Công cụ sức khỏe", path: "/baby" },
   ];
 
   const communityItems = [
