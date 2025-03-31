@@ -764,17 +764,6 @@ const ManageSchedule = () => {
                     {formatTimeFromDate(appointment.date)}
                   </div>
                   <div className="flex items-center">
-                    {appointment.isNoti ? (
-                      <div className="flex items-center text-green-600 mr-3">
-                        <Bell className="w-4 h-4 mr-1" />
-                        <span className="text-sm">Có thông báo</span>
-                      </div>
-                    ) : (
-                      <div className="flex items-center text-gray-400 mr-3">
-                        <Bell className="w-4 h-4 mr-1" />
-                        <span className="text-sm">Không thông báo</span>
-                      </div>
-                    )}
                     <div className="flex">
                       <button
                         className="text-blue-500 hover:text-blue-700 mr-2 opacity-0 group-hover:opacity-100 transition-opacity"

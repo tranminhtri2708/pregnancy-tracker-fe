@@ -15,7 +15,7 @@ export const getHealthMetricsByChild = async (childId) => {
       // Filter the response by childrenId
       console.log("response", response.data.result);
       const filteredData = response.data.result.filter(
-        (metric) => metric.childrentId === childId
+        (metric) => metric.childrentId === +childId
       );
       console.log("filteredData", filteredData);
       return filteredData; // Return only the filtered data

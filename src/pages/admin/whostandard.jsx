@@ -244,23 +244,23 @@ const WhoStandard = () => {
       key: "week",
       align: "center", // Center horizontally
     },
-    {
-      title: "Chu vi vòng đầu",
-      dataIndex: "headCircumference",
-      key: "headCircumference",
-      align: "center",
-      render: (_, record) => {
-        const min = record.headCircumferenceMin || "";
-        const max = record.headCircumferenceMax || "";
-        return min && max ? (
-          `${min}mm - ${max}mm`
-        ) : min || max ? (
-          `${min || max}mm`
-        ) : (
-          <span className="bg-gray-200 text-gray-500"></span>
-        );
-      },
-    },
+    // {
+    //   title: "Chu vi vòng đầu",
+    //   dataIndex: "headCircumference",
+    //   key: "headCircumference",
+    //   align: "center",
+    //   render: (_, record) => {
+    //     const min = record.headCircumferenceMin || "";
+    //     const max = record.headCircumferenceMax || "";
+    //     return min && max ? (
+    //       `${min}mm - ${max}mm`
+    //     ) : min || max ? (
+    //       `${min || max}mm`
+    //     ) : (
+    //       <span className="bg-gray-200 text-gray-500"></span>
+    //     );
+    //   },
+    // },
     {
       title: "Cân nặng",
       dataIndex: "weight",
@@ -301,74 +301,74 @@ const WhoStandard = () => {
         );
       },
     },
-    {
-      title: "Đường kính lưỡng đỉnh",
-      dataIndex: "bpd",
-      key: "bpd",
-      align: "center",
-      render: (_, record) => {
-        const min = record.bpdMin || "";
-        const max = record.bpdMax || "";
-        return min && max ? (
-          `${min} mm - ${max} mm`
-        ) : min || max ? (
-          `${min || max} mm`
-        ) : (
-          <span className="bg-gray-200 text-gray-500"></span>
-        );
-      },
-    },
-    {
-      title: "Chu vi bụng",
-      dataIndex: "ac",
-      key: "ac",
-      align: "center",
-      render: (_, record) => {
-        const min = record.acMin || "";
-        const max = record.acMax || "";
-        return min && max ? (
-          `${min} mm - ${max} mm`
-        ) : min || max ? (
-          `${min || max} mm`
-        ) : (
-          <span className="bg-gray-200 text-gray-500"></span>
-        );
-      },
-    },
-    {
-      title: "Chiều dài xương đùi",
-      dataIndex: "fl",
-      key: "fl",
-      align: "center",
-      render: (_, record) => {
-        const min = record.flMin || "";
-        const max = record.flMax || "";
-        return min && max ? (
-          `${min} mm - ${max} mm`
-        ) : min || max ? (
-          `${min || max} mm`
-        ) : (
-          <span className="bg-gray-200 text-gray-500"></span>
-        );
-      },
-    },
-    {
-      title: "Nhịp tim",
-      dataIndex: "heartRate",
-      key: "heartRate",
-      align: "center",
-      render: (_, record) => {
-        const min = record.hearRateMin || "";
-        const max = record.hearRateMax || "";
-        return min && max ? (
-          `${min} - ${max}`
-        ) : min || max ? (
-          `${min || max}`
-        ) : (
-          <span className="bg-gray-200 text-gray-500"></span>
-        );
-      },
-    },
+    // {
+    //   title: "Đường kính lưỡng đỉnh",
+    //   dataIndex: "bpd",
+    //   key: "bpd",
+    //   align: "center",
+    //   render: (_, record) => {
+    //     const min = record.bpdMin || "";
+    //     const max = record.bpdMax || "";
+    //     return min && max ? (
+    //       `${min} mm - ${max} mm`
+    //     ) : min || max ? (
+    //       `${min || max} mm`
+    //     ) : (
+    //       <span className="bg-gray-200 text-gray-500"></span>
+    //     );
+    //   },
+    // },
+    // {
+    //   title: "Chu vi bụng",
+    //   dataIndex: "ac",
+    //   key: "ac",
+    //   align: "center",
+    //   render: (_, record) => {
+    //     const min = record.acMin || "";
+    //     const max = record.acMax || "";
+    //     return min && max ? (
+    //       `${min} mm - ${max} mm`
+    //     ) : min || max ? (
+    //       `${min || max} mm`
+    //     ) : (
+    //       <span className="bg-gray-200 text-gray-500"></span>
+    //     );
+    //   },
+    // },
+    // {
+    //   title: "Chiều dài xương đùi",
+    //   dataIndex: "fl",
+    //   key: "fl",
+    //   align: "center",
+    //   render: (_, record) => {
+    //     const min = record.flMin || "";
+    //     const max = record.flMax || "";
+    //     return min && max ? (
+    //       `${min} mm - ${max} mm`
+    //     ) : min || max ? (
+    //       `${min || max} mm`
+    //     ) : (
+    //       <span className="bg-gray-200 text-gray-500"></span>
+    //     );
+    //   },
+    // },
+    // {
+    //   title: "Nhịp tim",
+    //   dataIndex: "heartRate",
+    //   key: "heartRate",
+    //   align: "center",
+    //   render: (_, record) => {
+    //     const min = record.hearRateMin || "";
+    //     const max = record.hearRateMax || "";
+    //     return min && max ? (
+    //       `${min} - ${max}`
+    //     ) : min || max ? (
+    //       `${min || max}`
+    //     ) : (
+    //       <span className="bg-gray-200 text-gray-500"></span>
+    //     );
+    //   },
+    // },
     {
       title: "Chỉnh sửa",
       key: "actions",
@@ -440,6 +440,10 @@ const WhoStandard = () => {
             name={field.max}
             noStyle
             rules={[
+              {
+                required: true,
+                message: `${adjustedLabel} tối đa là bắt buộc!`,
+              },
               ({ getFieldValue }) => ({
                 validator(_, value) {
                   const min = getFieldValue(field.min);
@@ -489,15 +493,15 @@ const WhoStandard = () => {
   const labels = [
     { min: "weightMin", max: "weightMax", label: "Cân nặng (gram)" },
     { min: "lenghtMin", max: "lenghtMax", label: "Chiều dài (cm)" },
-    { min: "hearRateMin", max: "hearRateMax", label: "Nhịp tim (bpm)" },
-    {
-      min: "headCircumferenceMin",
-      max: "headCircumferenceMax",
-      label: "Chu vi vòng đầu (mm)",
-    },
-    { min: "bpdMin", max: "bpdMax", label: "Đường kính lưỡng đỉnh (mm)" },
-    { min: "acMin", max: "acMax", label: "Chu vi bụng (mm)" },
-    { min: "flMin", max: "flMax", label: "Chiều dài xương đùi (mm)" },
+    // { min: "hearRateMin", max: "hearRateMax", label: "Nhịp tim (bpm)" },
+    // {
+    //   min: "headCircumferenceMin",
+    //   max: "headCircumferenceMax",
+    //   label: "Chu vi vòng đầu (mm)",
+    // },
+    // { min: "bpdMin", max: "bpdMax", label: "Đường kính lưỡng đỉnh (mm)" },
+    // { min: "acMin", max: "acMax", label: "Chu vi bụng (mm)" },
+    // { min: "flMin", max: "flMax", label: "Chiều dài xương đùi (mm)" },
   ];
 
   return (

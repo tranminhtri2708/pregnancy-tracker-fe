@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FiMenu, FiX } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import { Dropdown } from "antd";
-
+import { BellOutlined } from "@ant-design/icons";
 import { useSelector, useDispatch } from "react-redux";
 import { logout } from "../../redux/features/userSlice";
+import { getClosestSchedule } from "../../services/api.notification";
 
 // Fixed avatar URL
 const FIXED_AVATAR =
@@ -12,20 +13,46 @@ const FIXED_AVATAR =
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [closestAppointment, setClosestAppointment] = useState(null);
+  const [isNotificationAcknowledged, setIsNotificationAcknowledged] = useState(
+    JSON.parse(localStorage.getItem("notificationAcknowledged") || "false") // Retrieve acknowledgment status
+  );
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const user = useSelector((state) => state.user);
 
-  const navItems = [
-    { name: "Trang chủ", path: "/" },
-    { name: "Gói thành viên", path: "/subscription" },
-    { name: "Công cụ sức khỏe", path: "/baby" },
-    { name: "Cộng đồng", path: "/community" },
-  ];
+  // Fetch the closest appointment date
+  useEffect(() => {
+    const fetchClosestDate = async () => {
+      try {
+        const response = await getClosestSchedule();
+        const appointmentDate = new Date(response.date);
+        const now = new Date();
+        const timeDifference = appointmentDate - now;
+
+        // Check if the appointment is less than a day away
+        if (timeDifference > 0 && timeDifference <= 24 * 60 * 60 * 1000) {
+          setClosestAppointment(appointmentDate);
+        } else {
+          setClosestAppointment(null);
+        }
+      } catch (error) {
+        console.error("Error fetching closest appointment:", error);
+      }
+    };
+
+    fetchClosestDate();
+  }, []);
 
   const handleLogout = () => {
     dispatch(logout());
     navigate("/");
+  };
+
+  const handleNotificationClick = () => {
+    setIsNotificationAcknowledged(true); // Disable the red dot
+    localStorage.setItem("notificationAcknowledged", JSON.stringify(true)); // Persist status in local storage
+    navigate("/viewprofile/calendar"); // Navigate to calendar
   };
 
   return (
@@ -42,7 +69,12 @@ const Header = () => {
           </div>
 
           <nav className="hidden md:flex space-x-8">
-            {navItems.map((item) => (
+            {[
+              { name: "Trang chủ", path: "/" },
+              { name: "Gói thành viên", path: "/subscription" },
+              { name: "Công cụ sức khỏe", path: "/baby" },
+              { name: "Cộng đồng", path: "/community" },
+            ].map((item) => (
               <button
                 key={item.name}
                 onClick={() => navigate(item.path)}
@@ -62,7 +94,7 @@ const Header = () => {
                       {
                         label: (
                           <button
-                            onClick={() => navigate("/profile")}
+                            onClick={() => navigate("/viewprofile")}
                             className="block text-left w-full px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md"
                           >
                             Xem hồ sơ
@@ -85,18 +117,95 @@ const Header = () => {
                   }}
                   trigger={["click"]}
                 >
-                  <button
-                    className="flex items-center space-x-2 text-gray-700 dark:text-gray-200"
-                    onClick={() => navigate("/viewprofile")}
-                  >
+                  {/* <button className="flex items-center space-x-2 text-gray-700 dark:text-gray-200">
                     <img
                       className="h-8 w-8 rounded-full"
                       src={FIXED_AVATAR}
                       alt="User avatar"
                     />
                     <span className="hidden md:inline">{user.name}</span>
-                  </button>
+                  </button> */}
                 </Dropdown>
+
+                <div className="flex items-center space-x-4">
+                  {/* Thông báo Button */}
+                  <Dropdown
+                    menu={{
+                      items: [
+                        {
+                          label: closestAppointment ? (
+                            <div
+                              onClick={handleNotificationClick} // Handle click to disable dot and navigate
+                              className="cursor-pointer text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 px-4 py-2 rounded-md"
+                            >
+                              Bạn có lịch hẹn khám trong ngày{" "}
+                              {closestAppointment.toLocaleString()}
+                            </div>
+                          ) : (
+                            <div
+                              onClick={() => navigate("/viewprofile/calendar")} // Navigate to calendar
+                              className="cursor-pointer text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 px-4 py-2 rounded-md"
+                            >
+                              Không có lịch hẹn trong ngày
+                            </div>
+                          ),
+                          key: "notification",
+                        },
+                      ],
+                    }}
+                    trigger={["click"]}
+                  >
+                    <button className="relative px-4 py-2 border rounded-lg text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center space-x-2">
+                      <span className="relative">
+                        {!isNotificationAcknowledged && (
+                          <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
+                        )}
+                        <BellOutlined className="text-gray-500 dark:text-gray-400" />
+                      </span>
+                      <span>Thông báo</span>
+                    </button>
+                  </Dropdown>
+
+                  {/* Avatar Dropdown */}
+                  <Dropdown
+                    menu={{
+                      items: [
+                        {
+                          label: (
+                            <button
+                              onClick={() => navigate("/viewprofile")}
+                              className="block text-left w-full px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md"
+                            >
+                              Xem hồ sơ
+                            </button>
+                          ),
+                          key: "profile",
+                        },
+                        {
+                          label: (
+                            <button
+                              onClick={handleLogout}
+                              className="block text-left w-full px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md"
+                            >
+                              Đăng xuất
+                            </button>
+                          ),
+                          key: "logout",
+                        },
+                      ],
+                    }}
+                    trigger={["click"]}
+                  >
+                    <button className="flex items-center space-x-2 text-gray-700 dark:text-gray-200">
+                      <img
+                        className="h-8 w-8 rounded-full"
+                        src={FIXED_AVATAR}
+                        alt="User avatar"
+                      />
+                      <span className="hidden md:inline">{user.name}</span>
+                    </button>
+                  </Dropdown>
+                </div>
               </>
             ) : (
               <div className="hidden md:flex space-x-4">
@@ -114,17 +223,6 @@ const Header = () => {
                 </button>
               </div>
             )}
-
-            <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="md:hidden p-2 rounded-md text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover't:blue-400"
-            >
-              {isMenuOpen ? (
-                <FiX className="h-6 w-6" />
-              ) : (
-                <FiMenu className="h-6 w-6" />
-              )}
-            </button>
           </div>
         </div>
       </div>

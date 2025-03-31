@@ -90,7 +90,7 @@ const Baby = () => {
                     <p className="font-bold">Bé: {child.fullName}</p>
                     {/* <p>Giới tính: {child.gender}</p> */}
                     <p>
-                      Ngày sinh:{" "}
+                      Ngày dự sinh:{" "}
                       {new Date(child.birth).toLocaleDateString("vi-VN")}
                     </p>
                   </button>

@@ -5,7 +5,7 @@ import {
   getAllChildren,
   updateChildren,
 } from "../../services/api.children";
-
+import { useNavigate } from "react-router-dom";
 import api from "../../config/axios";
 import {
   Button,
@@ -22,6 +22,7 @@ import { toast } from "react-toastify";
 import dayjs from "dayjs";
 
 function ManagerBaby() {
+  const navigate = useNavigate();
   const [childrens, setChildrens] = useState([]);
   const [open, setOpen] = useState(false);
   const [form] = useForm();
@@ -146,7 +147,7 @@ function ManagerBaby() {
       render: (gender) => formatGender(gender),
     },
     {
-      title: "Ngày sinh",
+      title: "Ngày dự sinh",
       dataIndex: "birth",
       key: "birth",
       render: (birth) => formatDate(birth),
@@ -184,6 +185,12 @@ function ManagerBaby() {
                 Xóa
               </Button>
             </Popconfirm>
+            <Button
+              style={{ marginLeft: 8 }}
+              onClick={() => navigate(`/baby/${id}`)} // Navigate to /baby/id
+            >
+              Chi tiết sức khỏe
+            </Button>
           </>
         );
       },
@@ -319,16 +326,19 @@ function ManagerBaby() {
             </Select>
           </Form.Item>
           <Form.Item
-            label="Ngày Sinh"
+            label="Ngày dự sinh"
             name="birth"
             rules={[
-              { required: true, message: "Vui lòng nhập ngày sinh của bé!!!" },
+              {
+                required: true,
+                message: "Vui lòng nhập Ngày dự sinh của bé!!!",
+              },
             ]}
           >
             <DatePicker
               style={{ width: "100%" }}
               format="DD/MM/YYYY"
-              placeholder="Chọn ngày sinh"
+              placeholder="Chọn Ngày dự sinh"
             />
           </Form.Item>
         </Form>

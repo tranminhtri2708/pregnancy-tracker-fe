@@ -60,11 +60,26 @@ function ManageSubscription() {
       ? subscriptionPlan
       : subscriptionPlan.filter((plan) => plan.isActive === filterStatus);
 
+  // Sort the filtered data by name in ascending order
+  const sortedData = filteredData.sort((a, b) => a.name - b.name);
+
   const columns = [
     {
       title: "Tên",
       dataIndex: "name",
       key: "name",
+      render: (text) => {
+        switch (text) {
+          case 0:
+            return "Bronze";
+          case 1:
+            return "Silver";
+          case 2:
+            return "Gold";
+          default:
+            return text; // Fallback for undefined or unexpected values
+        }
+      },
     },
     {
       title: "Giá",
@@ -265,7 +280,7 @@ function ManageSubscription() {
       </div>
 
       <Table
-        dataSource={filteredData}
+        dataSource={sortedData}
         columns={columns}
         rowKey="id" // Add rowKey to ensure each row has a unique key
       />
@@ -297,7 +312,11 @@ function ManageSubscription() {
               },
             ]}
           >
-            <InputNumber style={{ width: "100%" }} disabled={isUpdateMode} />
+            <Select style={{ width: "100%" }} disabled={isUpdateMode}>
+              <Select.Option value={0}>Bronze</Select.Option>
+              <Select.Option value={1}>Silver</Select.Option>
+              <Select.Option value={2}>Gold</Select.Option>
+            </Select>
           </Form.Item>
 
           <Form.Item
