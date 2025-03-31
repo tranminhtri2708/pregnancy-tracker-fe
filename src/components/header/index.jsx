@@ -35,6 +35,7 @@ const Header = () => {
           setClosestAppointment(appointmentDate);
         } else {
           setClosestAppointment(null);
+          setIsNotificationAcknowledged(true);
         }
       } catch (error) {
         console.error("Error fetching closest appointment:", error);

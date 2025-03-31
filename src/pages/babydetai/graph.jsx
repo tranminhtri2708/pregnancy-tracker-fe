@@ -10,7 +10,10 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
+  Area,
+  ComposedChart,
 } from "recharts";
+import html2canvas from "html2canvas";
 import api from "../../config/axios";
 import { getHealthMetricsByChild } from "../../services/api.heathmetric";
 
@@ -61,11 +64,11 @@ const GrowthChart = ({ childId }) => {
         healthMetrics.find((m) => m.pregnancyWeek === week) || {};
       const whoMetric =
         whoStandards.find((s) => s.pregnancyWeek === week) || {};
+      const range = [whoMetric[`${key}Min`] ?? 0, whoMetric[`${key}Max`] ?? 0];
       return {
         pregnancyWeek: week,
         baby: babyMetric[key] || null,
-        min: whoMetric[`${key}Min`] || null,
-        max: whoMetric[`${key}Max`] || null,
+        range: range,
       };
     });
   };
@@ -105,58 +108,77 @@ const GrowthChart = ({ childId }) => {
     }
   };
 
-  const renderChart = (data, title, babyKey) => (
-    <div style={{ marginBottom: "2rem" }}>
-      <h3 className="text-2xl text-center mb-6">{title}</h3>
-      <ResponsiveContainer width="100%" height={300}>
-        <LineChart data={data}>
-          <CartesianGrid stroke="#f5f5f5" />
-          <XAxis
-            dataKey="pregnancyWeek"
-            label={{
-              value: "Pregnancy Week",
-              position: "insideBottom",
-              offset: -2,
-            }}
-            tickFormatter={(tick) => `${tick}`}
-          />
-          <YAxis />
-          <Tooltip content={<CustomTooltip />} />
-          <Legend
-            wrapperStyle={{
-              bottom: -10,
-              right: -20,
-            }}
-          />
-          <Line
-            type="monotone"
-            dataKey={babyKey}
-            stroke="#ff7300"
-            name="Baby"
-            strokeWidth={3}
-          />
-          <Line type="monotone" dataKey="min" stroke="#387908" name="WHO Min" />
-          <Line type="monotone" dataKey="max" stroke="#1E90FF" name="WHO Max" />
-        </LineChart>
-      </ResponsiveContainer>
-    </div>
-  );
+  const renderChart = (data, title, babyKey) => {
+    // Filter the data to include only weeks with baby data
+    const filteredData = data.filter((entry) => entry[babyKey] !== null);
 
-  const handleExportReport = async () => {
+    return (
+      <div className="chart-container">
+        <div style={{ marginBottom: "2rem" }}>
+          <h3 className="text-2xl text-center mb-6">{title}</h3>
+          <ResponsiveContainer width="100%" height={300}>
+            <ComposedChart data={filteredData}>
+              <CartesianGrid stroke="#f5f5f5" />
+              <XAxis
+                dataKey="pregnancyWeek"
+                label={{
+                  value: "Pregnancy Week",
+                  position: "insideBottom",
+                  offset: -2,
+                }}
+                tickFormatter={(tick) => `${tick}`}
+              />
+              <YAxis />
+              <Tooltip />
+              <Legend
+                wrapperStyle={{
+                  bottom: -10,
+                  right: -20,
+                }}
+              />
+              {/* Line representing the baby's data */}
+              <Line
+                type="monotone"
+                dataKey={babyKey}
+                stroke="#ff7300"
+                name="Baby"
+                strokeWidth={3}
+              />
+              {/* Area representing WHO Min and Max range */}
+              <Area
+                type="monotone"
+                dataKey="range"
+                stroke="none"
+                fill="#add8e6"
+                name="WHO Range"
+                fillOpacity={0.3}
+                connectNulls
+              />
+            </ComposedChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+    );
+  };
+
+  const handleExportImage = async () => {
+    const chartElement = document.querySelector(".chart-container"); // Adjust the selector to match your chart's container
+    console.log("clicked!", chartElement);
+    if (!chartElement) {
+      message.error("Chart not found!");
+      return;
+    }
+
     try {
-      const response = await api.get(`/PdfExport/health-report/${id}`, {
-        responseType: "blob", // Ensure the file is downloaded as a blob
-      });
-      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const canvas = await html2canvas(chartElement);
       const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute("download", `health-report-${id}.pdf`);
-      document.body.appendChild(link);
+      link.download = "chart.png";
+      link.href = canvas.toDataURL("image/png");
       link.click();
-      message.success("Health report exported successfully!");
+      message.success("Chart exported as an image successfully!");
     } catch (error) {
-      console.error("Error exporting health report:", error);
-      message.error("Cannot export health report! Please try again.");
+      console.error("Error exporting chart:", error);
+      message.error("Could not export chart as an image.");
     }
   };
 
@@ -191,10 +213,14 @@ const GrowthChart = ({ childId }) => {
       <div className="text-center mt-6">
         <Button
           type="primary"
-          onClick={handleExportReport}
-          style={{ fontSize: "1rem", padding: "0.5rem 1rem" }}
+          onClick={handleExportImage}
+          style={{
+            marginRight: "1rem",
+            fontSize: "1rem",
+            padding: "0.5rem 1rem",
+          }}
         >
-          Xuất file báo cáo sức khỏe bé
+          Export as Image
         </Button>
       </div>
     </div>
