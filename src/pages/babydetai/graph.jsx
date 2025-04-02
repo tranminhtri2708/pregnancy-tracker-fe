@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Spin, message, Button } from "antd";
+import { Spin, message, Button, Select, Table } from "antd";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   LineChart,
@@ -23,6 +23,8 @@ import { getHealthMetricsByChild } from "../../services/api.heathmetric";
 
 const GrowthChart = ({ childId }) => {
   const { id } = useParams();
+  const [startWeek, setStartWeek] = useState(9); // Default start week
+  const [endWeek, setEndWeek] = useState(19); // Default end week
   const navigate = useNavigate();
   const [healthMetrics, setHealthMetrics] = useState([]);
   const [whoStandards, setWhoStandards] = useState([]);
@@ -132,7 +134,7 @@ const GrowthChart = ({ childId }) => {
   //   message.success("Chart exported as a PDF successfully!");
   // };
   const handleExportPDF = async () => {
-    const chartElement = document.querySelector(".namMo");
+    const chartElement = document.querySelector(".NamMoo");
     if (!chartElement) {
       message.error("Chart not found!");
       return;
@@ -198,7 +200,12 @@ const GrowthChart = ({ childId }) => {
 
   const renderChart = (data, title, babyKey) => {
     // Filter the data to include only weeks with baby data
-    const filteredData = data.filter((entry) => entry[babyKey] !== null);
+    const filteredData = data.filter(
+      (entry) =>
+        entry.pregnancyWeek >= startWeek &&
+        entry.pregnancyWeek <= endWeek &&
+        entry[babyKey] !== null
+    );
 
     return (
       <div
@@ -279,6 +286,26 @@ const GrowthChart = ({ childId }) => {
     }
   };
 
+  const columns = [
+    {
+      title: "Tuần",
+      dataIndex: "pregnancyWeek",
+      key: "pregnancyWeek",
+      sorter: (a, b) => a.pregnancyWeek - b.pregnancyWeek, // Default sorting in ascending order
+      defaultSortOrder: "ascend",
+    },
+    {
+      title: "Cân nặng (grams)",
+      dataIndex: "weight",
+      key: "weight",
+    },
+    {
+      title: "Chiều dài (cm)",
+      dataIndex: "lenght",
+      key: "lenght",
+    },
+  ];
+
   return (
     <div className={`pl-25 pr-25 pt-5 pb-5 min-h-screen`}>
       <Header />
@@ -293,11 +320,66 @@ const GrowthChart = ({ childId }) => {
           </u>
         </i>
       </h2>
-      <div className="namMo">
-        <div>{renderChart(graphData.weight, "Cân nặng (gram)", "baby")}</div>
-        <div>{renderChart(graphData.length, "Chiều dài (cm)", "baby")}</div>
+      <div>
+        {/* Week Selection */}
+        <div
+          style={{
+            display: "flex",
+            gap: "10px",
+            justifyContent: "center",
+            marginBottom: "1rem",
+          }}
+        >
+          {" "}
+          {/* Start Week Dropdown */}{" "}
+          <Select defaultValue={startWeek} onChange={setStartWeek}>
+            {" "}
+            {[...Array.from({ length: 33 }, (_, i) => i + 8)].map((week) => (
+              <Select.Option key={week} value={week}>
+                {" "}
+                Tuần {week}{" "}
+              </Select.Option>
+            ))}{" "}
+          </Select>{" "}
+          {/* End Week Dropdown (Only Weeks Greater than startWeek) */}{" "}
+          <Select defaultValue={endWeek} onChange={setEndWeek}>
+            {" "}
+            {[...Array.from({ length: 33 + 8 }, (_, i) => i + 8).keys()]
+              .filter((week) => week > startWeek)
+              .map((week) => (
+                <Select.Option key={week} value={week}>
+                  {" "}
+                  Tuần {week}{" "}
+                </Select.Option>
+              ))}{" "}
+          </Select>{" "}
+        </div>
       </div>
-
+      <div className="NamMoo">
+        <h1 className="text-4xl font-bold text-center">
+          Báo cáo sức khỏe của bé qua các tuần
+        </h1>
+        <h3 className="text-2xl font-semibold text-left mt-6">
+          {startWeek === 9 && endWeek === 13
+            ? "Biểu đồ từ tuần 9 đến tuần 13"
+            : `Biểu đồ từ tuần ${startWeek} đến tuần ${endWeek}`}
+        </h3>
+        <div className="namMo">
+          <div>{renderChart(graphData.weight, "Cân nặng (gram)", "baby")}</div>
+          <div>{renderChart(graphData.length, "Chiều dài (cm)", "baby")}</div>
+        </div>
+        <div className="bg-white shadow-md rounded-lg p-6 mb-6">
+          <h3 className="text-2xl font-semibold text-left mb-6">
+            Bảng báo cáo chỉ số sức khỏe của bé
+          </h3>
+          <Table
+            columns={columns}
+            dataSource={healthMetrics}
+            rowKey="id"
+            pagination={false}
+          />
+        </div>
+      </div>
       {/* <div>{renderChart(graphData.heartRate, "Nhịp tim (bpm)", "baby")}</div>
       <div>
         {renderChart(
@@ -323,8 +405,6 @@ const GrowthChart = ({ childId }) => {
         >
           Export as PDF
         </Button>
-      </div>
-      <div className="text-center mt-6">
         <Button
           type="primary"
           onClick={handleExportImage}
