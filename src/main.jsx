@@ -18,10 +18,9 @@ import ManageSubscription from "./pages/admin/manage-subscription";
 import ManageUser from "./pages/admin/manage-user";
 import ForgotPassword from "./pages/forget";
 import PregnancyProfile from "./pages/viewprofile";
-
+import BabyDetails from "./pages/babydetai/babyDetail";
 import MembershipPackages from "./pages/subscription/SubscriptionUser";
-import PregnancyPrep from "./pages/community";
-import Pregnancy from "./pages/community/index1";
+
 import EmailVerification from "./pages/verification";
 import { Provider } from "react-redux";
 import { persistor, store } from "./redux/store";
@@ -29,28 +28,19 @@ import ManagerBaby from "./pages/userprofile/manager_baby";
 import { PersistGate } from "redux-persist/integration/react";
 import ManagerProfile from "./pages/userprofile/manager_profile";
 import ManageSchedule from "./pages/userprofile/manage_schedule";
-import Baby from "./pages/healthmetric/sidebar";
-import BabyDetail from "./pages/healthmetric/rightpanel";
 import ManageSubscriptionUser from "./pages/userprofile/manage_subscription";
 import WhoStandardView from "./pages/homepage/whostandard";
 import ManageMyPost from "./pages/userprofile/manage_post";
 import Overview from "./pages/admin/overview";
-
+import ManageSubscriptionUserAdmin from "./pages/admin/manage-subscriptionuser";
+import Pregnancy from "./pages/community";
+import GrowthChart from "./pages/babydetai/graph";
 const router = createBrowserRouter([
   {
     path: "whostandard",
     element: <WhoStandardView />,
   },
-  {
-    path: "/baby",
-    element: <Baby />,
-    children: [
-      {
-        path: "/baby/babydetail/:id",
-        element: <BabyDetail />,
-      },
-    ],
-  },
+
   {
     path: "/login",
     element: <LoginPage />,
@@ -63,12 +53,9 @@ const router = createBrowserRouter([
     path: "/subscription",
     element: <MembershipPackages />,
   },
+
   {
-    path: "/community/PregnancyPrep",
-    element: <PregnancyPrep />,
-  },
-  {
-    path: "/community/Pregnancy",
+    path: "/community",
     element: <Pregnancy />,
   },
   {
@@ -99,7 +86,14 @@ const router = createBrowserRouter([
     path: "/forget",
     element: <ForgotPassword />,
   },
-
+  {
+    path: "/baby/:id",
+    element: <BabyDetails />,
+  },
+  {
+    path: "/graph/:id",
+    element: <GrowthChart />,
+  },
   {
     path: "/dashboard",
     element: <AdminLayout />,
@@ -107,6 +101,10 @@ const router = createBrowserRouter([
       {
         path: "/dashboard/subscription",
         element: <ManageSubscription />,
+      },
+      {
+        path: "/dashboard/subscriptionuser",
+        element: <ManageSubscriptionUserAdmin />,
       },
       {
         path: "/dashboard/user",

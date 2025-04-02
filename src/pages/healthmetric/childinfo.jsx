@@ -9,6 +9,7 @@ import {
   Select,
   message,
 } from "antd";
+import api from "../../config/axios";
 import {
   addNewHealthMetric,
   getHealthMetricsByChild,
@@ -35,12 +36,14 @@ const ChildInfo = ({ child }) => {
   const fetchWHOStandards = async () => {
     try {
       const response = await api.get("WHOStandard/GetAllWHOStatistics");
+      console.log("ALOOO", response);
       const data = response.data.result || [];
       setWhoStandards(data);
     } catch (error) {
       message.error("Cannot fetch WHO standards! Please try again.");
     }
   };
+
   const fetchHealthMetrics = async () => {
     try {
       setLoading(true); // Set loading state
@@ -83,11 +86,9 @@ const ChildInfo = ({ child }) => {
 
   // Fetch data when the component mounts or when the child changes
   useEffect(() => {
-    if (child?.id) {
-      fetchHealthMetrics();
-    }
-    handleCompareMetrics();
     fetchWHOStandards();
+    fetchHealthMetrics();
+    handleCompareMetrics();
   }, [child]);
   // Function to open the modal
   const openModal = (record) => {
@@ -199,123 +200,129 @@ const ChildInfo = ({ child }) => {
   const dataSource = [
     {
       key: "1",
-      metric: "Chu Vi Đầu", // Head Circumference
+      metric: "Chu Vi Đầu (mm)", // Head Circumference
       babyData:
         healthMetrics.find((metric) => metric.pregnancyWeek === selectedWeek)
           ?.headCircumference || "No data",
-      whoRange: whoStandards.find(
-        (standard) => standard.pregnancyWeek === selectedWeek
-      )
-        ? `${
-            whoStandards.find(
-              (standard) => standard.pregnancyWeek === selectedWeek
-            )?.headCircumMin || "No data"
-          } - ${
-            whoStandards.find(
-              (standard) => standard.pregnancyWeek === selectedWeek
-            )?.headCircumMax || "No data"
-          }`
-        : "No data",
+      whoRange: (() => {
+        const standard = whoStandards.find(
+          (standard) => standard.pregnancyWeek === selectedWeek
+        );
+        const min = standard?.headCircumferenceMin || "No data";
+        const max = standard?.headCircumferenceMax || "No data";
+        return min !== "No data" && max !== "No data"
+          ? `${min} - ${max}`
+          : min !== "No data"
+          ? `${min}`
+          : max !== "No data"
+          ? `${max}`
+          : "No data";
+      })(),
     },
     {
       key: "2",
-      metric: "Cân Nặng", // Weight
+      metric: "Cân Nặng (gram)", // Weight
       babyData:
         healthMetrics.find((metric) => metric.pregnancyWeek === selectedWeek)
           ?.weight || "No data",
-      whoRange: whoStandards.find(
-        (standard) => standard.pregnancyWeek === selectedWeek
-      )
-        ? `${
-            whoStandards.find(
-              (standard) => standard.pregnancyWeek === selectedWeek
-            )?.weightMin || "No data"
-          } - ${
-            whoStandards.find(
-              (standard) => standard.pregnancyWeek === selectedWeek
-            )?.weightMax || "No data"
-          }`
-        : "No data",
+      whoRange: (() => {
+        const standard = whoStandards.find(
+          (standard) => standard.pregnancyWeek === selectedWeek
+        );
+        const min = standard?.weightMin || "No data";
+        const max = standard?.weightMax || "No data";
+        return min !== "No data" && max !== "No data"
+          ? `${min} - ${max}`
+          : min !== "No data"
+          ? `${min}`
+          : max !== "No data"
+          ? `${max}`
+          : "No data";
+      })(),
     },
     {
       key: "3",
-      metric: "Chiều Dài", // Length
+      metric: "Chiều Dài (cm)", // Length
       babyData:
         healthMetrics.find((metric) => metric.pregnancyWeek === selectedWeek)
           ?.lenght || "No data",
-      whoRange: whoStandards.find(
-        (standard) => standard.pregnancyWeek === selectedWeek
-      )
-        ? `${
-            whoStandards.find(
-              (standard) => standard.pregnancyWeek === selectedWeek
-            )?.lengthMin || "No data"
-          } - ${
-            whoStandards.find(
-              (standard) => standard.pregnancyWeek === selectedWeek
-            )?.lengthMax || "No data"
-          }`
-        : "No data",
+      whoRange: (() => {
+        const standard = whoStandards.find(
+          (standard) => standard.pregnancyWeek === selectedWeek
+        );
+        const min = standard?.lenghtMin || "No data";
+        const max = standard?.lenghtMax || "No data";
+        return min !== "No data" && max !== "No data"
+          ? `${min} - ${max}`
+          : min !== "No data"
+          ? `${min}`
+          : max !== "No data"
+          ? `${max}`
+          : "No data";
+      })(),
     },
     {
       key: "4",
-      metric: "Đường Kính Lưỡng Đỉnh", // BPD
+      metric: "Đường Kính Lưỡng Đỉnh (mm)", // BPD
       babyData:
         healthMetrics.find((metric) => metric.pregnancyWeek === selectedWeek)
           ?.bpd || "No data",
-      whoRange: whoStandards.find(
-        (standard) => standard.pregnancyWeek === selectedWeek
-      )
-        ? `${
-            whoStandards.find(
-              (standard) => standard.pregnancyWeek === selectedWeek
-            )?.bpdMin || "No data"
-          } - ${
-            whoStandards.find(
-              (standard) => standard.pregnancyWeek === selectedWeek
-            )?.bpdMax || "No data"
-          }`
-        : "No data",
+      whoRange: (() => {
+        const standard = whoStandards.find(
+          (standard) => standard.pregnancyWeek === selectedWeek
+        );
+        const min = standard?.bpdMin || "No data";
+        const max = standard?.bpdMax || "No data";
+        return min !== "No data" && max !== "No data"
+          ? `${min} - ${max}`
+          : min !== "No data"
+          ? `${min}`
+          : max !== "No data"
+          ? `${max}`
+          : "No data";
+      })(),
     },
     {
       key: "5",
-      metric: "Chu vi bụng", // AC
+      metric: "Chu vi bụng (mm)", // AC
       babyData:
         healthMetrics.find((metric) => metric.pregnancyWeek === selectedWeek)
           ?.ac || "No data",
-      whoRange: whoStandards.find(
-        (standard) => standard.pregnancyWeek === selectedWeek
-      )
-        ? `${
-            whoStandards.find(
-              (standard) => standard.pregnancyWeek === selectedWeek
-            )?.acMin || "No data"
-          } - ${
-            whoStandards.find(
-              (standard) => standard.pregnancyWeek === selectedWeek
-            )?.acMax || "No data"
-          }`
-        : "No data",
+      whoRange: (() => {
+        const standard = whoStandards.find(
+          (standard) => standard.pregnancyWeek === selectedWeek
+        );
+        const min = standard?.acMin || "No data";
+        const max = standard?.acMax || "No data";
+        return min !== "No data" && max !== "No data"
+          ? `${min} - ${max}`
+          : min !== "No data"
+          ? `${min}`
+          : max !== "No data"
+          ? `${max}`
+          : "No data";
+      })(),
     },
     {
       key: "6",
-      metric: "Chiều dài xương đùi", // FL
+      metric: "Chiều dài xương đùi (mm)", // FL
       babyData:
         healthMetrics.find((metric) => metric.pregnancyWeek === selectedWeek)
           ?.fl || "No data",
-      whoRange: whoStandards.find(
-        (standard) => standard.pregnancyWeek === selectedWeek
-      )
-        ? `${
-            whoStandards.find(
-              (standard) => standard.pregnancyWeek === selectedWeek
-            )?.flMin || "No data"
-          } - ${
-            whoStandards.find(
-              (standard) => standard.pregnancyWeek === selectedWeek
-            )?.flMax || "No data"
-          }`
-        : "No data",
+      whoRange: (() => {
+        const standard = whoStandards.find(
+          (standard) => standard.pregnancyWeek === selectedWeek
+        );
+        const min = standard?.flMin || "No data";
+        const max = standard?.flMax || "No data";
+        return min !== "No data" && max !== "No data"
+          ? `${min} - ${max}`
+          : min !== "No data"
+          ? `${min}`
+          : max !== "No data"
+          ? `${max} `
+          : "No data";
+      })(),
     },
     {
       key: "7",
@@ -323,21 +330,23 @@ const ChildInfo = ({ child }) => {
       babyData:
         healthMetrics.find((metric) => metric.pregnancyWeek === selectedWeek)
           ?.hearRate || "No data",
-      whoRange: whoStandards.find(
-        (standard) => standard.pregnancyWeek === selectedWeek
-      )
-        ? `${
-            whoStandards.find(
-              (standard) => standard.pregnancyWeek === selectedWeek
-            )?.hearRateMin || "No data"
-          } - ${
-            whoStandards.find(
-              (standard) => standard.pregnancyWeek === selectedWeek
-            )?.hearRateMax || "No data"
-          }`
-        : "No data",
+      whoRange: (() => {
+        const standard = whoStandards.find(
+          (standard) => standard.pregnancyWeek === selectedWeek
+        );
+        const min = standard?.hearRateMin || "No data";
+        const max = standard?.hearRateMax || "No data";
+        return min !== "No data" && max !== "No data"
+          ? `${min} - ${max}`
+          : min !== "No data"
+          ? `${min}`
+          : max !== "No data"
+          ? `${max}`
+          : "No data";
+      })(),
     },
   ];
+
   const handleCompareMetrics = async () => {
     try {
       // Retrieve the ID associated with the selected week's health metric
@@ -512,86 +521,44 @@ const ChildInfo = ({ child }) => {
             closeModal();
           }}
         >
-          <Form.Item
-            name="headCircumference"
-            label="Chu Vi Đầu"
-            rules={[{ required: true, message: "Vui lòng nhập chu vi đầu!" }]}
-          >
+          <Form.Item name="headCircumference" label="Chu Vi Đầu (mm)">
             <InputNumber
-              min={0}
-              placeholder="Nhập chu vi đầu"
+              placeholder="Nhập chu vi đầu "
               style={{ width: "100%" }}
             />
           </Form.Item>
-          <Form.Item
-            name="weight"
-            label="Cân Nặng"
-            rules={[{ required: true, message: "Vui lòng nhập cân nặng!" }]}
-          >
+          <Form.Item name="weight" label="Cân Nặng (gram)">
             <InputNumber
-              min={0}
               placeholder="Nhập cân nặng"
               style={{ width: "100%" }}
             />
           </Form.Item>
-          <Form.Item
-            name="lenght"
-            label="Chiều Dài"
-            rules={[{ required: true, message: "Vui lòng nhập chiều dài!" }]}
-          >
+          <Form.Item name="lenght" label="Chiều Dài (cm)">
             <InputNumber
-              min={0}
               placeholder="Nhập chiều dài"
               style={{ width: "100%" }}
             />
           </Form.Item>
-          <Form.Item
-            name="bpd"
-            label="Đường Kính Lưỡng Đỉnh"
-            rules={[
-              {
-                required: true,
-                message: "Vui lòng nhập đường kính lưỡng đỉnh!",
-              },
-            ]}
-          >
+          <Form.Item name="bpd" label="Đường Kính Lưỡng Đỉnh (mm)">
             <InputNumber
-              min={0}
               placeholder="Nhập đường kính lưỡng đỉnh"
               style={{ width: "100%" }}
             />
           </Form.Item>
-          <Form.Item
-            name="ac"
-            label="Chu Vi Bụng"
-            rules={[{ required: true, message: "Vui lòng nhập chu vi bụng!" }]}
-          >
+          <Form.Item name="ac" label="Chu Vi Bụng (mm)">
             <InputNumber
-              min={0}
               placeholder="Nhập chu vi bụng"
               style={{ width: "100%" }}
             />
           </Form.Item>
-          <Form.Item
-            name="fl"
-            label="Chiều Dài Xương Đùi"
-            rules={[
-              { required: true, message: "Vui lòng nhập chiều dài xương đùi!" },
-            ]}
-          >
+          <Form.Item name="fl" label="Chiều Dài Xương Đùi (mm)">
             <InputNumber
-              min={0}
               placeholder="Nhập chiều dài xương đùi"
               style={{ width: "100%" }}
             />
           </Form.Item>
-          <Form.Item
-            name="hearRate"
-            label="Nhịp Tim"
-            rules={[{ required: true, message: "Vui lòng nhập nhịp tim!" }]}
-          >
+          <Form.Item name="hearRate" label="Nhịp Tim">
             <InputNumber
-              min={0}
               placeholder="Nhập nhịp tim"
               style={{ width: "100%" }}
             />

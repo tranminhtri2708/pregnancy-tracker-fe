@@ -9,32 +9,22 @@ function ManageSubscriptionUser() {
   const fetchMySubscription = async () => {
     const data = await getAllSubscriptionPlanUser();
     // Xử lý dữ liệu để thêm trạng thái hết hạn và chuyển active sang tiếng Việt
+    console.log("456456", data);
     const processedData = data.map((item) => {
       // Clone đối tượng để không ảnh hưởng đến dữ liệu gốc
       const newItem = { ...item };
-
       // Chuyển "active" thành "Đang hoạt động"
-      if (newItem.status && newItem.status.toLowerCase() === "active") {
+      if (newItem.status && newItem.status.toLowerCase() === "Active") {
+        console.log("123123", newItem.status);
         newItem.status = "Đang hoạt động";
       }
-
-      // Kiểm tra xem gói đã hết hạn chưa
-      if (newItem.endDate) {
-        const endDate = moment(newItem.endDate);
-        const today = moment();
-
-        // Nếu đã quá ngày kết thúc và trạng thái không phải là vĩnh viễn
-        if (
-          endDate.isBefore(today) &&
-          (!newItem.status || newItem.status.toLowerCase() !== "vĩnh viễn")
-        ) {
-          newItem.status = "Đã hết hạn";
-        }
-      }
+      // else {
+      //   newItem.status = "Hết hạn";
+      // }
 
       return newItem;
     });
-
+    console.log("processedData", processedData);
     setMysubscription(processedData);
   };
 
@@ -59,11 +49,7 @@ function ManageSubscriptionUser() {
       dataIndex: "price",
       key: "price",
     },
-    // {
-    //   title: "Chức năng gói",
-    //   dataIndex: "features",
-    //   key: "features",
-    // },
+
     {
       title: "Ngày mua gói",
       dataIndex: "startDate",
@@ -82,28 +68,25 @@ function ManageSubscriptionUser() {
         return formatDate(text);
       },
     },
-    // {
-    //   title: "Trạng thái gói",
-    //   dataIndex: "status",
-    //   key: "status",
-    //   render: (status) => {
-    //     // Determine the color based on status
-    //     let color = "red";
-    //     if (
-    //       status &&
-    //       (status.toLowerCase() === "đang hoạt động" ||
-    //         status.toLowerCase() === "vĩnh viễn")
-    //     ) {
-    //       color = "green";
-    //     } else if (status && status.toLowerCase() === "đã hết hạn") {
-    //       color = "red";
-    //     } else if (status && status.toLowerCase() === "sắp hết hạn") {
-    //       color = "orange";
-    //     }
+    {
+      title: "Trạng thái gói",
+      dataIndex: "status",
+      key: "status",
+      render: (text, record) => {
+        // Determine the color based on status
 
-    //     return <Tag color={color}>{status}</Tag>;
-    //   },
-    // },
+        let color = "";
+        let displayText = "";
+        if (record.status === "Active") {
+          color = "green";
+          displayText = "Đang hoạt động";
+        } else if (record.status === "Expired") {
+          color = "red";
+          displayText = "Hết hạn";
+        }
+        return <Tag color={color}>{displayText}</Tag>;
+      },
+    },
     {
       title: "Trạng thái thanh toán",
       dataIndex: "paymentStatus",

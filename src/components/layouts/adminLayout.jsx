@@ -20,10 +20,11 @@ function getItem(label, key, icon, children) {
   };
 }
 const items = [
-  getItem("overview", "overview", <PieChartOutlined />),
-  getItem("subscription", "subscription", <DesktopOutlined />),
-  getItem("user", "user", <DesktopOutlined />),
-  getItem("whostandard", "whostandard", <InfoCircleOutlined />),
+  getItem("Tổng quát", "overview", <PieChartOutlined />),
+  getItem("Gói thành viên", "subscription", <DesktopOutlined />),
+  getItem("Người dùng gói", "subscriptionuser", <DesktopOutlined />),
+  getItem("Khách hàng", "user", <DesktopOutlined />),
+  getItem("Chỉ số WHO", "whostandard", <InfoCircleOutlined />),
   //   getItem("User", "sub1", <UserOutlined />, [
   //     getItem("Tom", "3"),
   //     getItem("Bill", "4"),

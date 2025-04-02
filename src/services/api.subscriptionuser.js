@@ -6,7 +6,6 @@ export const getAllSubscriptionPlanUser = async () => {
     const response = await api.get("Subscription/my-subscriptions");
     return response.data.result;
   } catch (error) {
-    toast.error(error.response.data); // lấy bị lỗi thì sẽ show ra lỗi
   }
 };
 

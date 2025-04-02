@@ -10,15 +10,37 @@ export const getAllChildren = async () => {
     console.log(response);
     return response.data; // trả về danh sách đứa con
   } catch (error) {
-    toast.error(error.response.data); // lấy bị lỗi thì sẽ show ra lỗi
+   
   }
 };
+
+export const getChildById = async (id) => {
+  try {
+    // Fetch all children
+    const response = await getAllChildren();
+    // Filter the result based on the provided id
+    const allChildren = response?.result ||
+      response?.data?.result || // Check if the response has a nested data object
+      response; // Fallback to the original
+    const filteredChildren = allChildren.filter((child) => child.id === +id);
+
+    if (filteredChildren.length === 0) {
+      throw new Error(`No child found with ID: ${id}`);
+    }
+
+    return filteredChildren[0]; // Return the first item from the filtered array
+  } catch (error) {
+    toast.error(error.message || "Something went wrong!"); // Show an error message if not found
+    console.error("Error fetching child:", error);
+  }
+};
+
 export const createChildren = async (children) => {
   try {
     const response = await api.post("Children/AddNewChildren", children); // đẩy thông ting đứa bé đí
     return response.data; // trả về danh sách đứa con
   } catch (error) {
-    toast.error(error.response.data); // lấy bị lỗi thì sẽ show ra lỗi
+    // toast.error(error.response.data); // lấy bị lỗi thì sẽ show ra lỗi
   }
 };
 export const updateChildren = async ({ id, children }) => {

@@ -2,7 +2,10 @@ import React, { useEffect, useState } from "react";
 import { FaUserCircle } from "react-icons/fa";
 import { Spin } from "antd";
 import api from "../../config/axios";
-import RightPanel from "./rightpanel";// Import the RightPanel component
+import RightPanel from "./rightpanel"; // Import the RightPanel component
+
+import Header from "../../components/header";
+import Footer from "../../components/footer";
 
 const Baby = () => {
   const [childrens, setChildrens] = useState([]);
@@ -61,7 +64,8 @@ const Baby = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-pink-50">
-      <div className="flex flex-grow p-4 md:p-8">
+      <Header />
+      <div className="flex flex-grow p-4 md:p-8 mt-12">
         {/* Left side: List of children */}
         <div className="w-1/6 bg-white rounded-2xl shadow-lg p-6">
           <h2 className="text-2xl font-semibold mb-6 text-gray-800">
@@ -76,15 +80,19 @@ const Baby = () => {
               {childrens.map((child) => (
                 <li key={child.id}>
                   <button
-                    className={`w-full flex items-center space-x-4 text-left px-4 py-2 rounded-lg ${
+                    className={`w-full flex flex-col text-left px-4 py-2 rounded-lg ${
                       selectedChild?.id === child.id
                         ? "bg-pink-200"
                         : "bg-gray-100"
                     }`}
                     onClick={() => setSelectedChild(child)}
                   >
-                    <FaUserCircle className="text-pink-500 text-2xl" />
-                    <span>{child.fullName}</span>
+                    <p className="font-bold">Bé: {child.fullName}</p>
+                    {/* <p>Giới tính: {child.gender}</p> */}
+                    <p>
+                      Ngày dự sinh:{" "}
+                      {new Date(child.birth).toLocaleDateString("vi-VN")}
+                    </p>
                   </button>
                 </li>
               ))}
@@ -97,8 +105,8 @@ const Baby = () => {
           <RightPanel child={selectedChild} />
         </div>
       </div>
+      <Footer />
     </div>
   );
 };
-
 export default Baby;

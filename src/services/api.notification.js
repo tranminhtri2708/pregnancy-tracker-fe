@@ -58,7 +58,7 @@ const getUserID = async () => {
       console.log("Closest schedule:", closestSchedule);
       return closestSchedule || "No upcoming schedules found.";
     } catch (error) {
-      toast.error(error.response?.data || "An error occurred");
+      
     }
   };
   

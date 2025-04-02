@@ -8,14 +8,9 @@ import { getClosestSchedule } from "../../services/api.notification";
 const PregnancyHomepage = () => {
   const [darkMode] = useState(false);
   const [selectedWeek, setSelectedWeek] = useState(null);
-  const [closestSchedule, setClosestSchedule] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
 
   const navigate = useNavigate(); // Navigation hook from React Router
-
-  useEffect(() => {
-    handleNotification();
-  }, []);
 
   const pregnancyStages = [
     {
@@ -300,55 +295,6 @@ const PregnancyHomepage = () => {
     },
   ];
 
-  // Function to fetch the closest schedule date
-  const fetchClosestDate = async () => {
-    try {
-      const response = await getClosestSchedule();
-      console.log("Closest Schedule:", response.date);
-      return new Date(response.date);
-    } catch (error) {
-      console.error("Error fetching appointments:", error);
-      return null; // Return null if there's an error
-    }
-  };
-
-  // Function to compare the current date to the closest date and show the modal
-  const compareDatesAndShowModal = (closestDate) => {
-    if (!closestDate) return;
-
-    const currentDate = new Date();
-    const timeDifference = (closestDate - currentDate) / (1000 * 60 * 60 * 24); // Difference in days
-
-    // Check if the user has already been notified today
-    const lastNotified = localStorage.getItem("lastNotificationDate");
-    const today = new Date().toDateString();
-
-    if (timeDifference < 1 && lastNotified !== today) {
-      console.log("The closest schedule is within 1 day!");
-      setIsModalVisible(true); // Show Antd Modal
-    }
-  };
-
-  // Combined function to handle both fetching and comparison
-  const handleNotification = async () => {
-    const closestDate = await fetchClosestDate();
-    setClosestSchedule(closestDate);
-    compareDatesAndShowModal(closestDate);
-  };
-
-  // Function to update the notification tracking in localStorage
-  const updateNotificationDate = () => {
-    const today = new Date().toDateString();
-    localStorage.setItem("lastNotificationDate", today); // Update the localStorage variable
-    setIsModalVisible(false); // Close the modal
-  };
-
-  // Function to navigate to the schedule page and update localStorage
-  const navigateToSchedule = () => {
-    updateNotificationDate();
-    navigate("/viewprofile/calendar"); // Navigate to the schedule page
-  };
-
   const healthTips = [
     {
       title: "Dinh dưỡng thai kì",
@@ -384,23 +330,6 @@ const PregnancyHomepage = () => {
         />
       </header>
 
-      {/* Antd Modal */}
-      <Modal
-        title="Lịch nhắc nhở"
-        visible={isModalVisible}
-        onCancel={updateNotificationDate} // Close the modal
-        footer={[
-          <Button key="close" onClick={updateNotificationDate}>
-            Đóng
-          </Button>,
-          <Button key="schedule" type="primary" onClick={navigateToSchedule}>
-            Tới lịch hẹn ngay
-          </Button>,
-        ]}
-      >
-        <p>Lịch hẹn gần nhất của bạn nằm trong 1 ngày!</p>
-      </Modal>
-
       <section className="container mx-auto py-16 px-6">
         <h3 className="text-3xl font-bold mb-8">
           Hành trình thai kỳ theo tuần
@@ -420,7 +349,7 @@ const PregnancyHomepage = () => {
             >
               <img
                 //https://i.pinimg.com/736x/36/8d/4d/368d4dd9ec1b21434a26795fe293b82b.jpg
-                src="https://i.pinimg.com/736x/21/f6/1a/21f61a0c25168b1ce5d87cc0c5786a06.jpg"
+                src={stage.image}
                 alt="Fixed Image"
                 className="w-full h-32 object-cover rounded-lg mb-2"
               />

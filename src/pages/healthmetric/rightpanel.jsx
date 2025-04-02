@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { Tabs } from "antd";
 import ChildInfo from "./childinfo";
-import GrowthChart from "./growgraph"; 
+import GrowthChart from "./growgraph";
 const { TabPane } = Tabs;
 
 const RightPanel = ({ child }) => {
