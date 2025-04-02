@@ -428,7 +428,7 @@ const RegisterPage = () => {
                       ></path>
                     </svg>
                   ) : (
-                    "Register"
+                    "Đăng kí"
                   )}
                 </button>
                 <p className="mt-4 text-center text-sm text-gray-600">

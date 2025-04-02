@@ -7,10 +7,12 @@ import { createSubscription } from "../../services/api.subscriptionuser";
 import { toast } from "react-toastify";
 import { createOrder } from "../../services/api.order";
 import { createPayment } from "../../services/api.payment";
+import { getAllSubscriptionPlanUser } from "../../services/api.subscriptionuser";
 
 const MembershipPackages = () => {
   const [packages, setPackages] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [buyAble, setBuyAble] = useState(false);
 
   function getFormattedCurrentTime() {
     const now = new Date();
@@ -42,16 +44,54 @@ const MembershipPackages = () => {
       setLoading(false);
     }
   };
+  const handleBuyAbleStatus = (currentSubscriptions) => {
+    if (!currentSubscriptions) {
+      // If currentSubscriptions is null, set buyAble to true and return
+      setBuyAble(true);
+      return;
+    }
+
+    if (currentSubscriptions.paymentStatus === "Pending") {
+      // If paymentStatus is Pending, set buyAble to true
+      setBuyAble(true);
+      return;
+    }
+
+    if (
+      currentSubscriptions.paymentStatus === "Paid" &&
+      currentSubscriptions.status === "Active"
+    ) {
+      // If paymentStatus is Paid and status is Active, set buyAble to false
+      setBuyAble(false);
+      return;
+    }
+
+    // Default case (if none of the above conditions match)
+    setBuyAble(true);
+  };
+
+  const fetchUserSubscription = async () => {
+    try {
+      const data = await getAllSubscriptionPlanUser();
+      console.log("987", data);
+      const currentSubscriptions = data[0];
+      console.log("432", currentSubscriptions);
+      handleBuyAbleStatus(currentSubscriptions);
+      console.log("123", buyAble);
+    } catch (error) {
+      toast.error("Không thể tải danh sách gói thành viên");
+    }
+  };
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const status = params.get("status");
     if (status === "success") {
-      toast.success("Transaction successful! Thank you for your purchase!");
+      toast.success("Thanh toán thành công!");
     } else if (status === "failure") {
-      toast.error("Transaction failed. Please try again.");
+      toast.error("Thanh toán bị lỗi! Xin hãy thử lại");
     }
-
+    fetchUserSubscription();
     fetchPackages();
   }, []);
 
@@ -77,6 +117,11 @@ const MembershipPackages = () => {
 
   // Handle "Trải nghiệm ngay" button click
   const handleSubscription = async (pkgId) => {
+    if (!buyAble) {
+      console.log("123", buyAble);
+      toast.error("Gói của bạn hiện tại vẫn đang có hiệu lực");
+      return;
+    }
     const startDate = getFormattedCurrentTime();
     const data = {
       planId: pkgId,

@@ -30,7 +30,7 @@ const WhoStandard = () => {
   const [isCreateModalVisible, setIsCreateModalVisible] = useState(false); // State for the create modal
   const [form] = Form.useForm();
 
-  const defaultRows = Array.from({ length: 42 }, (_, index) => ({
+  const defaultRows = Array.from({ length: 40 }, (_, index) => ({
     key: index + 1,
     week: index + 1,
     weightMin: null,
@@ -50,6 +50,7 @@ const WhoStandard = () => {
   }));
 
   const handleCreateForWeek = (row) => {
+    form.resetFields();
     setEditingRow(row);
     setIsCreateModalVisible(true);
   };
@@ -86,7 +87,7 @@ const WhoStandard = () => {
   const handleCreate = async (values) => {
     try {
       const newRecord = {
-        pregnancyWeek: 0,
+        pregnancyWeek: +values.pregnancyWeek,
         headCircumferenceMin: 0,
         headCircumferenceMax: 0,
         weightMin: 0,
@@ -103,7 +104,7 @@ const WhoStandard = () => {
         hearRateMax: 0,
         ...values,
       };
-      console.log(pregnancyWeek);
+      newRecord.pregnancyWeek = +values.pregnancyWeek;
       await AddWHOStandard(newRecord); // Add API call
 
       // Add the new record to local state
@@ -188,14 +189,16 @@ const WhoStandard = () => {
   };
 
   const handleEdit = (row) => {
+    form.resetFields();
     setEditingRow(row);
     setIsModalVisible(true);
   };
 
   const handleSave = async (values) => {
+    console.log("values", values.pregnancyWeek);
     try {
       const updatedRecord = {
-        pregnancyWeek: +editingRow.week,
+        pregnancyWeek: editingRow.week,
         headCircumferenceMin: +editingRow.headCircumferenceMin || null,
         headCircumferenceMax: +editingRow.headCircumferenceMax || null,
         weightMin: +editingRow.weightMin || null,
@@ -213,7 +216,7 @@ const WhoStandard = () => {
         ...values,
       };
       // Use the id from the editing row
-      console.log("nam mo", +editingRow.id, updatedRecord);
+      console.log("nam mo", +values.id, updatedRecord);
       await UpdateWHOStandard(+editingRow.id, updatedRecord);
 
       // Update local state with the new values
@@ -241,23 +244,23 @@ const WhoStandard = () => {
       key: "week",
       align: "center", // Center horizontally
     },
-    {
-      title: "Chu vi vòng đầu",
-      dataIndex: "headCircumference",
-      key: "headCircumference",
-      align: "center",
-      render: (_, record) => {
-        const min = record.headCircumferenceMin || "";
-        const max = record.headCircumferenceMax || "";
-        return min && max ? (
-          `${min}mm - ${max}mm`
-        ) : min || max ? (
-          `${min || max}mm`
-        ) : (
-          <span className="bg-gray-200 text-gray-500"></span>
-        );
-      },
-    },
+    // {
+    //   title: "Chu vi vòng đầu",
+    //   dataIndex: "headCircumference",
+    //   key: "headCircumference",
+    //   align: "center",
+    //   render: (_, record) => {
+    //     const min = record.headCircumferenceMin || "";
+    //     const max = record.headCircumferenceMax || "";
+    //     return min && max ? (
+    //       `${min}mm - ${max}mm`
+    //     ) : min || max ? (
+    //       `${min || max}mm`
+    //     ) : (
+    //       <span className="bg-gray-200 text-gray-500"></span>
+    //     );
+    //   },
+    // },
     {
       title: "Cân nặng",
       dataIndex: "weight",
@@ -298,74 +301,74 @@ const WhoStandard = () => {
         );
       },
     },
-    {
-      title: "Đường kính lưỡng đỉnh",
-      dataIndex: "bpd",
-      key: "bpd",
-      align: "center",
-      render: (_, record) => {
-        const min = record.bpdMin || "";
-        const max = record.bpdMax || "";
-        return min && max ? (
-          `${min} mm - ${max} mm`
-        ) : min || max ? (
-          `${min || max} mm`
-        ) : (
-          <span className="bg-gray-200 text-gray-500"></span>
-        );
-      },
-    },
-    {
-      title: "Chu vi bụng",
-      dataIndex: "ac",
-      key: "ac",
-      align: "center",
-      render: (_, record) => {
-        const min = record.acMin || "";
-        const max = record.acMax || "";
-        return min && max ? (
-          `${min} mm - ${max} mm`
-        ) : min || max ? (
-          `${min || max} mm`
-        ) : (
-          <span className="bg-gray-200 text-gray-500"></span>
-        );
-      },
-    },
-    {
-      title: "Chiều dài xương đùi",
-      dataIndex: "fl",
-      key: "fl",
-      align: "center",
-      render: (_, record) => {
-        const min = record.flMin || "";
-        const max = record.flMax || "";
-        return min && max ? (
-          `${min} mm - ${max} mm`
-        ) : min || max ? (
-          `${min || max} mm`
-        ) : (
-          <span className="bg-gray-200 text-gray-500"></span>
-        );
-      },
-    },
-    {
-      title: "Nhịp tim",
-      dataIndex: "heartRate",
-      key: "heartRate",
-      align: "center",
-      render: (_, record) => {
-        const min = record.hearRateMin || "";
-        const max = record.hearRateMax || "";
-        return min && max ? (
-          `${min} - ${max}`
-        ) : min || max ? (
-          `${min || max}`
-        ) : (
-          <span className="bg-gray-200 text-gray-500"></span>
-        );
-      },
-    },
+    // {
+    //   title: "Đường kính lưỡng đỉnh",
+    //   dataIndex: "bpd",
+    //   key: "bpd",
+    //   align: "center",
+    //   render: (_, record) => {
+    //     const min = record.bpdMin || "";
+    //     const max = record.bpdMax || "";
+    //     return min && max ? (
+    //       `${min} mm - ${max} mm`
+    //     ) : min || max ? (
+    //       `${min || max} mm`
+    //     ) : (
+    //       <span className="bg-gray-200 text-gray-500"></span>
+    //     );
+    //   },
+    // },
+    // {
+    //   title: "Chu vi bụng",
+    //   dataIndex: "ac",
+    //   key: "ac",
+    //   align: "center",
+    //   render: (_, record) => {
+    //     const min = record.acMin || "";
+    //     const max = record.acMax || "";
+    //     return min && max ? (
+    //       `${min} mm - ${max} mm`
+    //     ) : min || max ? (
+    //       `${min || max} mm`
+    //     ) : (
+    //       <span className="bg-gray-200 text-gray-500"></span>
+    //     );
+    //   },
+    // },
+    // {
+    //   title: "Chiều dài xương đùi",
+    //   dataIndex: "fl",
+    //   key: "fl",
+    //   align: "center",
+    //   render: (_, record) => {
+    //     const min = record.flMin || "";
+    //     const max = record.flMax || "";
+    //     return min && max ? (
+    //       `${min} mm - ${max} mm`
+    //     ) : min || max ? (
+    //       `${min || max} mm`
+    //     ) : (
+    //       <span className="bg-gray-200 text-gray-500"></span>
+    //     );
+    //   },
+    // },
+    // {
+    //   title: "Nhịp tim",
+    //   dataIndex: "heartRate",
+    //   key: "heartRate",
+    //   align: "center",
+    //   render: (_, record) => {
+    //     const min = record.hearRateMin || "";
+    //     const max = record.hearRateMax || "";
+    //     return min && max ? (
+    //       `${min} - ${max}`
+    //     ) : min || max ? (
+    //       `${min || max}`
+    //     ) : (
+    //       <span className="bg-gray-200 text-gray-500"></span>
+    //     );
+    //   },
+    // },
     {
       title: "Chỉnh sửa",
       key: "actions",
@@ -437,6 +440,10 @@ const WhoStandard = () => {
             name={field.max}
             noStyle
             rules={[
+              {
+                required: true,
+                message: `${adjustedLabel} tối đa là bắt buộc!`,
+              },
               ({ getFieldValue }) => ({
                 validator(_, value) {
                   const min = getFieldValue(field.min);
@@ -472,12 +479,12 @@ const WhoStandard = () => {
   };
 
   const getDropdownOptions = () => {
-    const totalPages = Math.ceil(42 / 14);
+    const totalPages = Math.ceil(40 / 10);
     const options = [];
 
     for (let page = 1; page <= totalPages; page++) {
-      const startWeek = (page - 1) * 14 + 1;
-      const endWeek = startWeek + 13;
+      const startWeek = (page - 1) * 10 + 1;
+      const endWeek = startWeek + 9;
       options.push({ label: `Week ${startWeek}-${endWeek}`, value: page });
     }
 
@@ -486,15 +493,15 @@ const WhoStandard = () => {
   const labels = [
     { min: "weightMin", max: "weightMax", label: "Cân nặng (gram)" },
     { min: "lenghtMin", max: "lenghtMax", label: "Chiều dài (cm)" },
-    { min: "hearRateMin", max: "hearRateMax", label: "Nhịp tim (bpm)" },
-    {
-      min: "headCircumferenceMin",
-      max: "headCircumferenceMax",
-      label: "Chu vi vòng đầu (mm)",
-    },
-    { min: "bpdMin", max: "bpdMax", label: "Đường kính lưỡng đỉnh (mm)" },
-    { min: "acMin", max: "acMax", label: "Chu vi bụng (mm)" },
-    { min: "flMin", max: "flMax", label: "Chiều dài xương đùi (mm)" },
+    // { min: "hearRateMin", max: "hearRateMax", label: "Nhịp tim (bpm)" },
+    // {
+    //   min: "headCircumferenceMin",
+    //   max: "headCircumferenceMax",
+    //   label: "Chu vi vòng đầu (mm)",
+    // },
+    // { min: "bpdMin", max: "bpdMax", label: "Đường kính lưỡng đỉnh (mm)" },
+    // { min: "acMin", max: "acMax", label: "Chu vi bụng (mm)" },
+    // { min: "flMin", max: "flMax", label: "Chiều dài xương đùi (mm)" },
   ];
 
   return (
@@ -505,7 +512,7 @@ const WhoStandard = () => {
       <Table
         className="border-gray-400"
         columns={columns}
-        dataSource={data.slice((currentPage - 1) * 14, currentPage * 14)}
+        dataSource={data.slice((currentPage - 1) * 10, currentPage * 10)}
         loading={loading}
         bordered
         pagination={false}
@@ -606,10 +613,10 @@ const WhoStandard = () => {
         <Form form={form} onFinish={handleCreate} layout="vertical">
           <Form.Item
             name="pregnancyWeek"
-            initialValue={editingRow?.week || 0}
+            initialValue={editingRow?.week}
             hidden
           >
-            <Input type="number" disabled />
+            <Input type="number" disabled initialValue={editingRow?.week} />
           </Form.Item>
 
           {editingRow?.week >= 1 && editingRow?.week <= 7 ? (

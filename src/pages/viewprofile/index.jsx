@@ -265,15 +265,7 @@ const PregnancyProfile = () => {
               <span>Gói thành viên của tôi</span>
             </button>
             {/*Nút xem sức khỏe thai nhi của từng user */}
-            <button
-              className={`w-full flex items-center space-x-2 text-left px-4 py-2 rounded-lg ${
-                selectedSection === "health" ? "bg-pink-200" : "bg-gray-100"
-              }`}
-              onClick={() => setSelectedSection("health")}
-            >
-              <FaHeartbeat className="text-red-500  text-2xl" />
-              <span>Sức khỏe</span>
-            </button>
+
             {/*Nút đã lưu thể hiện các bài viết đã lưu */}
             <button
               className={`w-full flex items-center space-x-2 text-left px-4 py-2 rounded-lg ${
@@ -285,17 +277,6 @@ const PregnancyProfile = () => {
               <span>Bài viết của tôi</span>
             </button>
             {/*Nút Đã tham gia thể hiện các cộng đồng đã tham gia */}
-            <button
-              className={`w-full flex items-center space-x-2 text-left px-4 py-2 rounded-lg ${
-                selectedSection === "communicate"
-                  ? "bg-pink-200"
-                  : "bg-gray-100"
-              }`}
-              onClick={() => setSelectedSection("communicate")}
-            >
-              <FaUserFriends className="text-purple-500 text-2xl" />
-              <span>Nhóm đang tham gia</span>
-            </button>
             {/*Thông tin về thai */}
             <button
               className={`w-full flex items-center space-x-2 text-left px-4 py-2 rounded-lg ${
@@ -316,61 +297,6 @@ const PregnancyProfile = () => {
               <FaRegCalendarCheck className="text-pink-500 text-2xl" />
               <span>Lịch sử lịch hẹn</span>
             </button>
-
-            {/*Nút thiết lâp tài khoản ở đây có hai cái là mật khẩu và vô hiệu hóa tài khoản */}
-            <div>
-              {/* Nút Thiết lập tài khoản */}
-              <button
-                className={`w-full flex items-center justify-between px-4 py-2 rounded-lg ${
-                  selectedSection === "account" ? "bg-pink-200" : "bg-gray-100"
-                }`}
-                onClick={() =>
-                  setSelectedSection(
-                    selectedSection === "account" ? null : "account"
-                  )
-                }
-              >
-                <div className="flex items-center space-x-2">
-                  <FaGear className="text-gray-500 text-2xl" />
-                  <span>Thiết lập tài khoản</span>
-                </div>
-                {selectedSection === "account" ? (
-                  <FaChevronUp />
-                ) : (
-                  <FaChevronDown />
-                )}
-              </button>
-
-              {/* Danh sách con của Thiết lập tài khoản */}
-              {selectedSection === "account" && (
-                <div className="mt-2 space-y-1 pl-6">
-                  {/*Nút đặt lại mật khẩu trong nút thiết lập tài khoản */}
-                  <button
-                    className={`w-full flex items-center space-x-2 text-left px-3 py-2 rounded-md transition ${
-                      selectedSubSection === "password"
-                        ? "bg-gray-300"
-                        : "hover:bg-gray-200"
-                    }`}
-                    onClick={() => setSelectedSubSection("password")}
-                  >
-                    <span className="text-blue-500">•</span>
-                    <span>Mật khẩu</span>
-                  </button>
-                  {/*Nút vô hiệu hóa tài khoản trong nút thiết lập tài khoản */}
-                  <button
-                    className={`w-full flex items-center space-x-2 text-left px-3 py-2 rounded-md transition ${
-                      selectedSubSection === "deactivate"
-                        ? "bg-gray-300"
-                        : "hover:bg-gray-200"
-                    }`}
-                    onClick={() => setSelectedSubSection("deactivate")}
-                  >
-                    <span className="text-blue-500">•</span>
-                    <span>Vô hiệu hóa tài khoản</span>
-                  </button>
-                </div>
-              )}
-            </div>
 
             {/*Nút trợ giúp */}
             <button
