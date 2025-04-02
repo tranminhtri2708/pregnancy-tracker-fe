@@ -15,6 +15,7 @@ import {
   Table,
   Select,
   Typography,
+  AutoComplete,
 } from "antd";
 
 import { toast } from "react-toastify";
@@ -28,7 +29,13 @@ function ManageSubscription() {
   const [isUpdateMode, setIsUpdateMode] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false); // Add state to track submission status
   const { Title } = Typography;
-
+  const options = [
+    { value: "1", label: "1 tháng" },
+    { value: "3", label: "3 tháng" },
+    { value: "6", label: "6 tháng" },
+    { value: "12", label: "12 tháng" },
+    { value: "500", label: "Vĩnh viễn" },
+  ];
   //CRUD
   const fetchSubscriptionPlan = async () => {
     try {
@@ -90,6 +97,8 @@ function ManageSubscription() {
       title: "Thời hạn sử dụng",
       dataIndex: "durationInMonths",
       key: "durationInMonths",
+      render: (durationInMonths) =>
+        durationInMonths > 500 ? "Vĩnh viễn" : durationInMonths + " tháng",
     },
     {
       title: "Miêu tả",
@@ -210,10 +219,14 @@ function ManageSubscription() {
       } else {
         // CREATE case
         // Make sure we're sending correct data types
+        const apiValue =
+          formValues.durationInMonths === "Vĩnh viễn"
+            ? 999
+            : formValues.durationInMonths;
         const newPlan = {
           ...formValues,
           price: Number(formValues.price),
-          durationInMonths: Number(formValues.durationInMonths),
+          durationInMonths: Number(apiValue),
           isActive: true,
         };
 
@@ -342,7 +355,19 @@ function ManageSubscription() {
               },
             ]}
           >
-            <InputNumber style={{ width: "100%" }} disabled={isUpdateMode} />
+            <AutoComplete
+              style={{ width: "100%" }}
+              options={[
+                { value: 1, label: "1 tháng" },
+                { value: 3, label: "3 tháng" },
+                { value: 6, label: "6 tháng" },
+                { value: 12, label: "12 tháng" },
+                { value: "Vĩnh viễn", label: "Vĩnh viễn" },
+              ]}
+              filterOption={(inputValue, option) =>
+                option.label.toLowerCase().includes(inputValue.toLowerCase())
+              }
+            />
           </Form.Item>
 
           <Form.Item

@@ -10,7 +10,7 @@ export const getAllChildren = async () => {
     console.log(response);
     return response.data; // trả về danh sách đứa con
   } catch (error) {
-    toast.error(error.response.data); // lấy bị lỗi thì sẽ show ra lỗi
+   
   }
 };
 
@@ -40,7 +40,7 @@ export const createChildren = async (children) => {
     const response = await api.post("Children/AddNewChildren", children); // đẩy thông ting đứa bé đí
     return response.data; // trả về danh sách đứa con
   } catch (error) {
-    toast.error(error.response.data); // lấy bị lỗi thì sẽ show ra lỗi
+    // toast.error(error.response.data); // lấy bị lỗi thì sẽ show ra lỗi
   }
 };
 export const updateChildren = async ({ id, children }) => {

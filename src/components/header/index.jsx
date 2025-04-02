@@ -26,7 +26,7 @@ const Header = () => {
     const fetchClosestDate = async () => {
       try {
         const response = await getClosestSchedule();
-        const appointmentDate = new Date(response.date);
+        const appointmentDate = new Date(response?.date);
         const now = new Date();
         const timeDifference = appointmentDate - now;
 
@@ -73,7 +73,7 @@ const Header = () => {
             {[
               { name: "Trang chủ", path: "/" },
               { name: "Gói thành viên", path: "/subscription" },
-              { name: "Công cụ sức khỏe", path: "/whostandard" },
+              { name: "Bảng sức khỏe chuẩn", path: "/whostandard" },
               { name: "Cộng đồng", path: "/community" },
             ].map((item) => (
               <button

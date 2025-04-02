@@ -320,7 +320,6 @@ const Pregnancy = () => {
         throw new Error("Không nhận được phản hồi từ API");
       }
     } catch (error) {
-      console.error("Lỗi khi tạo bài viết:", error);
       toast.error("Đã xảy ra lỗi khi đăng bài viết!");
     } finally {
       setIsSubmitting(false);

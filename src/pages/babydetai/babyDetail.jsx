@@ -35,7 +35,7 @@ const BabyDetails = () => {
   const [editingRecord, setEditingRecord] = useState(null);
   const [form] = Form.useForm();
   const [isLoading, setIsLoading] = useState(true);
-
+  console.log("123", weeksUntilBirth);
   // Helper function for pregnancy week calculation
   const calculateCurrentPregnancyWeek = (birthDate) => {
     const currentDate = dayjs();
@@ -330,7 +330,7 @@ const BabyDetails = () => {
         </div>
       </div>
 
-      {weeksUntilBirth > 7 ? (
+      {40 - weeksUntilBirth > 7 ? (
         healthMetrics[0] ? (
           <div>
             <div className="bg-white shadow-md rounded-lg p-6 mb-6">

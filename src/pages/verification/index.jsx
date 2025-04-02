@@ -4,12 +4,8 @@ import { FiMail } from "react-icons/fi";
 import { IoReloadOutline } from "react-icons/io5";
 import { useNavigate } from "react-router-dom"; // Thêm import useNavigate
 
-
-
-
 const savedData = JSON.parse(localStorage.getItem("responseData"));
 console.log("Saved data: ", savedData);
-
 
 const EmailVerification = ({ userId }) => {
   const navigate = useNavigate(); // Khởi tạo hook useNavigate
@@ -28,7 +24,6 @@ const EmailVerification = ({ userId }) => {
   const [attempts, setAttempts] = useState(0);
   const [resendLoading, setResendLoading] = useState(false);
   const inputRefs = useRef([]);
-  
 
   useEffect(() => {
     if (timeLeft > 0) {
@@ -73,7 +68,7 @@ const EmailVerification = ({ userId }) => {
 
     const savedData = JSON.parse(localStorage.getItem("responseData"));
 
-    console.log("userId: ", savedData," code: ", code);
+    console.log("userId: ", savedData, " code: ", code);
     setLoading(true);
     try {
       const response = await axios.post(
@@ -83,7 +78,7 @@ const EmailVerification = ({ userId }) => {
           verificationCode: code,
         }
       );
-     
+
       console.log("error: ", error);
       if (response.status === 200) {
         setIsSuccess(true);
@@ -123,14 +118,12 @@ const EmailVerification = ({ userId }) => {
         <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-xl shadow-lg">
           <div className="text-center">
             <h2 className="mt-6 text-3xl font-bold text-green-600">
-              Email Verified!
+              Xác thực email của bạn!
             </h2>
             <p className="mt-2 text-gray-600">
-              Your email has been successfully verified.
+              Email của bạn đã xác thực thành công
             </p>
-            <p className="mt-4 text-sm text-gray-500">
-              Redirecting to login page...
-            </p>
+            <p className="mt-4 text-sm text-gray-500">Chuyển trang đăng nhập</p>
           </div>
         </div>
       </div>
@@ -143,10 +136,10 @@ const EmailVerification = ({ userId }) => {
         <div className="text-center">
           <FiMail className="mx-auto h-12 w-12 text-pink-500" />
           <h2 className="mt-6 text-3xl font-bold text-gray-900">
-            Verify Your Email
+            Xác thực email của bạn
           </h2>
           <p className="mt-2 text-sm text-gray-600">
-            Please enter the 6-digit code sent to your email
+            Hãy nhập mã gồm 6 chữ số được gửi tới email của bạn
           </p>
         </div>
 
@@ -177,7 +170,7 @@ const EmailVerification = ({ userId }) => {
 
           <div className="text-sm text-center">
             <p className="text-gray-600">
-              Time remaining: {Math.floor(timeLeft / 60)}:
+              Thời gian còn lại: {Math.floor(timeLeft / 60)}:
               {String(timeLeft % 60).padStart(2, "0")}
             </p>
           </div>
@@ -191,7 +184,7 @@ const EmailVerification = ({ userId }) => {
                 : "bg-pink-600 hover:bg-pink-700 focus:ring-4 focus:ring-pink-300"
             } transition-colors duration-200`}
           >
-            {loading ? "Verifying..." : "Verify Email"}
+            {loading ? "Đang xác thực..." : "Xác thực Email!"}
           </button>
 
           {attempts < 3 && (
@@ -205,7 +198,7 @@ const EmailVerification = ({ userId }) => {
               ) : (
                 <>
                   <IoReloadOutline className="w-4 h-4" />{" "}
-                  <span>Resend Code</span>
+                  <span>Gửi lại mã xác thực</span>
                 </>
               )}
             </button>

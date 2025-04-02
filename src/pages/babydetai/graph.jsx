@@ -321,6 +321,19 @@ const GrowthChart = ({ childId }) => {
             padding: "0.5rem 1rem",
           }}
         >
+          Export as PDF
+        </Button>
+      </div>
+      <div className="text-center mt-6">
+        <Button
+          type="primary"
+          onClick={handleExportImage}
+          style={{
+            marginRight: "1rem",
+            fontSize: "1rem",
+            padding: "0.5rem 1rem",
+          }}
+        >
           Export as Image
         </Button>
       </div>

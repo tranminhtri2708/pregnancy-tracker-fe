@@ -57,7 +57,7 @@ const LoginPage = () => {
         if (response.data.isSuccess && response.data.result) {
           const token = response.data.result;
           localStorage.setItem("token", token);
-          toast.success("Successfully login!");
+          toast.success("Đăng nhập thành công");
 
           // Giải mã JWT để lấy thông tin role
           const base64Url = token.split(".")[1];
@@ -86,7 +86,9 @@ const LoginPage = () => {
         }
       } catch (err) {
         console.error("Login error:", err);
-        toast.error(err.response?.data?.errorMessage || "Login failed!");
+        toast.error(
+          err.response?.data?.errorMessage || "Đăng nhập không thành công"
+        );
       } finally {
         setIsLoading(false);
       }
@@ -111,7 +113,7 @@ const LoginPage = () => {
             alt="Logo"
           />
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Welcome back!
+            Chào mừng trở lại!
           </h2>
         </div>
 
@@ -119,7 +121,7 @@ const LoginPage = () => {
           <div className="rounded-md shadow-sm space-y-4">
             <div>
               <label htmlFor="userEmail" className="sr-only">
-                User Email
+                Email
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -134,7 +136,7 @@ const LoginPage = () => {
                   className={`appearance-none rounded-lg relative block w-full pl-10 pr-3 py-2 border ${
                     errors.userEmail ? "border-red-300" : "border-gray-300"
                   } placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm`}
-                  placeholder="Enter your mail"
+                  placeholder="Email"
                   value={formData.userEmail}
                   onChange={handleChange}
                   aria-invalid={errors.userEmail ? "true" : "false"}
@@ -164,7 +166,7 @@ const LoginPage = () => {
                   className={`appearance-none rounded-lg relative block w-full pl-10 pr-10 py-2 border ${
                     errors.password ? "border-red-300" : "border-gray-300"
                   } placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm`}
-                  placeholder="Enter your password"
+                  placeholder="Password"
                   value={formData.password}
                   onChange={handleChange}
                   aria-invalid={errors.password ? "true" : "false"}
@@ -204,7 +206,7 @@ const LoginPage = () => {
                 htmlFor="remember-me"
                 className="ml-2 block text-sm text-gray-900"
               >
-                Remember me
+                Lưu thông tin đăng nhập
               </label>
             </div>
 

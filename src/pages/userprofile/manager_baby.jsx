@@ -65,7 +65,6 @@ function ManagerBaby() {
       console.log("getAllChildren response:", data);
 
       if (!data || !data.result) {
-        console.error("Invalid children data format:", data);
         toast.error("Định dạng dữ liệu trẻ em không hợp lệ");
         setChildrens([]);
         return;
@@ -255,7 +254,10 @@ function ManagerBaby() {
           form.resetFields();
           fetchChildren(currentUserId);
         } else {
-          toast.error(response?.errorMessage || "Có lỗi xảy ra!");
+          toast.error(
+            response?.errorMessage ||
+              "Vui lòng mua gói để sử dụng chức năng này"
+          );
         }
       }
     } catch (error) {

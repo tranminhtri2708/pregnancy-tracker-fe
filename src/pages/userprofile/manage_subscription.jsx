@@ -17,7 +17,9 @@ function ManageSubscriptionUser() {
       if (newItem.status && newItem.status.toLowerCase() === "active") {
         newItem.status = "Đang hoạt động";
       }
-
+      if (newItem.status && newItem.status.toLowerCase() === "expired") {
+        newItem.status = "Hết hạn";
+      }
       // Kiểm tra xem gói đã hết hạn chưa
       if (newItem.endDate) {
         const endDate = moment(newItem.endDate);
@@ -59,11 +61,7 @@ function ManageSubscriptionUser() {
       dataIndex: "price",
       key: "price",
     },
-    // {
-    //   title: "Chức năng gói",
-    //   dataIndex: "features",
-    //   key: "features",
-    // },
+
     {
       title: "Ngày mua gói",
       dataIndex: "startDate",
@@ -82,28 +80,22 @@ function ManageSubscriptionUser() {
         return formatDate(text);
       },
     },
-    // {
-    //   title: "Trạng thái gói",
-    //   dataIndex: "status",
-    //   key: "status",
-    //   render: (status) => {
-    //     // Determine the color based on status
-    //     let color = "red";
-    //     if (
-    //       status &&
-    //       (status.toLowerCase() === "đang hoạt động" ||
-    //         status.toLowerCase() === "vĩnh viễn")
-    //     ) {
-    //       color = "green";
-    //     } else if (status && status.toLowerCase() === "đã hết hạn") {
-    //       color = "red";
-    //     } else if (status && status.toLowerCase() === "sắp hết hạn") {
-    //       color = "orange";
-    //     }
-
-    //     return <Tag color={color}>{status}</Tag>;
-    //   },
-    // },
+    {
+      title: "Trạng thái gói",
+      dataIndex: "status",
+      key: "status",
+      render: (status) => {
+        // Determine the color based on status
+        console.log("status", status);
+        let color = "green";
+        if (status === "Đang hoạt động") {
+          color = "green";
+        } else if (status === "Hết hạn") {
+          color = "red";
+        }
+        return <Tag color={color}>{status}</Tag>;
+      },
+    },
     {
       title: "Trạng thái thanh toán",
       dataIndex: "paymentStatus",
