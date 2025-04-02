@@ -10,6 +10,7 @@ import {
   Dropdown,
   Menu,
 } from "antd";
+import { toast } from "react-toastify";
 import { DownOutlined } from "@ant-design/icons";
 import {
   GetAllWHOStatistics,
@@ -105,8 +106,12 @@ const WhoStandard = () => {
         ...values,
       };
       newRecord.pregnancyWeek = +values.pregnancyWeek;
-      await AddWHOStandard(newRecord); // Add API call
-
+      try {
+        await AddWHOStandard(newRecord);
+      } catch (error) {
+        // Add API call
+        toast.error("Dữ liệu tuần này đã tồn tại");
+      }
       // Add the new record to local state
       fetchData();
 
@@ -216,9 +221,25 @@ const WhoStandard = () => {
         ...values,
       };
       // Use the id from the editing row
-      console.log("nam mo", +values.id, updatedRecord);
-      await UpdateWHOStandard(+editingRow.id, updatedRecord);
+      try {
+        await UpdateWHOStandard(+editingRow.id, updatedRecord);
+        toast.success("Chỉ số sức khỏe đã được cập nhật thành công!");
+      } catch (error) {
+        console.error("Error adding health metric:", error);
+        toast.error("Dữ liệu tuần này chưa tồn tại. Hãy tạo mới!");
+      }
+      // try {
+      //         await addNewHealthMetric({
+      //           ...values,
+      //           childrentId: id,
+      //           pregnancyWeek: currentPregnancyWeek,
+      //         });
 
+      //         toast.success("Chỉ số sức khỏe đã được thêm thành công!"); // Success message
+      //       } catch (error) {
+      //         console.error("Error adding health metric:", error);
+      //         toast.error("Tuần này đã có dữ liệu hãy update tại bảng dưới");
+      //       }
       // Update local state with the new values
       const updatedData = data.map((row) =>
         row.id === editingRow.id ? { ...row, ...values } : row
@@ -233,7 +254,7 @@ const WhoStandard = () => {
         `Successfully updated record for week ${editingRow?.week}!`
       );
     } catch (error) {
-      message.error("Failed to update WHO Standard record.");
+      console.error("Failed to update WHO Standard record.");
     }
   };
 

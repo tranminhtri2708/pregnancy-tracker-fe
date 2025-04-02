@@ -1,4 +1,5 @@
 import api from "../config/axios"; // Your axios instance
+import { toast } from "react-toastify";
 
 export const addNewHealthMetric = async (healthMetricData) => {
   try {
@@ -6,7 +7,8 @@ export const addNewHealthMetric = async (healthMetricData) => {
     return response.data; // Return the API response
   } catch (error) {
     console.error("Error adding health metric:", error);
-    throw error; // Re-throw the error for further handling
+    toast.error(error.response.data);
+    throw error;
   }
 };
 export const getHealthMetricsByChild = async (childId) => {

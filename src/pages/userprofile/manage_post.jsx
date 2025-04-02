@@ -263,20 +263,7 @@ const ManageMyPost = () => {
   );
 
   // Add a search component at the top
-  const SearchBar = () => (
-    <div className="mb-6">
-      <div className="relative">
-        <input
-          type="text"
-          placeholder="Search by title..."
-          className="w-full p-3 pl-10 pr-4 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
-        <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-      </div>
-    </div>
-  );
+  const SearchBar = () => <div className="mb-6"></div>;
 
   if (isLoading) {
     return (

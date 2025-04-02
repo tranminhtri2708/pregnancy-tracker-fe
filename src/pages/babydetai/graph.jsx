@@ -23,23 +23,35 @@ import { getHealthMetricsByChild } from "../../services/api.heathmetric";
 
 const GrowthChart = ({ childId }) => {
   const { id } = useParams();
-  const [startWeek, setStartWeek] = useState(9); // Default start week
-  const [endWeek, setEndWeek] = useState(19); // Default end week
+  const [startWeek, setStartWeek] = useState(8); // Default start week
+  const [endWeek, setEndWeek] = useState(40); // Default end week
   const navigate = useNavigate();
   const [healthMetrics, setHealthMetrics] = useState([]);
+  const [sortedHealthMetrics, setSortedHealthMetrics] = useState([]);
   const [whoStandards, setWhoStandards] = useState([]);
   const [loading, setLoading] = useState(false);
   const [darkMode] = useState(false);
   const defaultWeeks = Array.from({ length: 35 }, (_, i) => i + 8);
 
   // Fetch Baby Data
+  // ✅ State Management & Variables
   const fetchHealthMetrics = async () => {
     try {
       setLoading(true);
-      console.log("@3", id);
+
       const response = await getHealthMetricsByChild(id);
-      console.log("123", response);
       setHealthMetrics(response);
+      const sortedHealthMetrics = response.sort(
+        (a, b) => a.pregnancyWeek - b.pregnancyWeek
+      );
+      setSortedHealthMetrics("sortedHealthMetrics");
+      console.log("!!!!!", sortedHealthMetrics);
+      if (sortedHealthMetrics.length === 0) return; // Prevent errors
+      setStartWeek(sortedHealthMetrics[0].pregnancyWeek);
+
+      setEndWeek(
+        sortedHealthMetrics[sortedHealthMetrics.length - 1].pregnancyWeek
+      );
     } catch (error) {
       message.error("Cannot fetch health metrics! Please try again.");
     } finally {
@@ -47,34 +59,26 @@ const GrowthChart = ({ childId }) => {
     }
   };
 
-  // Fetch WHO Standards
   const fetchWHOStandards = async () => {
     try {
       const response = await api.get("WHOStandard/GetAllWHOStatistics");
-      const data = response.data.result || [];
-      setWhoStandards(data);
+      setWhoStandards(response.data.result || []);
     } catch (error) {
       message.error("Cannot fetch WHO standards! Please try again.");
     }
   };
 
-  useEffect(() => {
-    fetchHealthMetrics();
-
-    fetchWHOStandards();
-  }, [childId]);
-
+  // ✅ Data Processing Functions
   const mergeData = (key) => {
     return defaultWeeks.map((week) => {
       const babyMetric =
         healthMetrics.find((m) => m.pregnancyWeek === week) || {};
       const whoMetric =
         whoStandards.find((s) => s.pregnancyWeek === week) || {};
-      const range = [whoMetric[`${key}Min`] ?? 0, whoMetric[`${key}Max`] ?? 0];
       return {
         pregnancyWeek: week,
         baby: babyMetric[key] || null,
-        range: range,
+        range: [whoMetric[`${key}Min`] ?? 0, whoMetric[`${key}Max`] ?? 0],
       };
     });
   };
@@ -89,117 +93,17 @@ const GrowthChart = ({ childId }) => {
     fl: mergeData("fl"),
   };
 
-  if (loading) {
-    return <Spin tip="Loading growth data..." />;
-  }
+  // ✅ Data Fetching on Component Mount
+  useEffect(() => {
+    const fetchData = async () => {
+      await fetchHealthMetrics();
+      await fetchWHOStandards();
+    };
+    fetchData();
+  }, [childId]);
 
-  const CustomTooltip = ({ active, payload, label }) => {
-    if (active && payload && payload.length) {
-      return (
-        <div
-          style={{
-            backgroundColor: "#fff",
-            border: "1px solid #ccc",
-            padding: "10px",
-          }}
-        >
-          <p>{`Week ${label}`}</p>
-          {payload.map((data, index) => (
-            <p key={index} style={{ color: data.stroke }}>
-              {`${data.name}: ${data.value}`}
-            </p>
-          ))}
-        </div>
-      );
-    }
-  };
-
-  // const handleExportPDF = () => {
-  //   const chartElement = document.querySelector(".namMo"); // Adjust selector to match your chart's container
-  //   console.log("clicked!", chartElement);
-  //   if (!chartElement) {
-  //     message.error("Chart not found!");
-  //     return;
-  //   }
-
-  //   const options = {
-  //     margin: 10,
-  //     filename: "chart.pdf",
-  //     image: { type: "jpeg", quality: 0.98 },
-  //     html2canvas: { scale: 3 }, // Adjusted for better resolution without excessive scaling
-  //     jsPDF: { unit: "mm", format: "a4", orientation: "portrait" }, // Changed format to A3 for a larger chart
-  //   };
-
-  //   html2pdf().from(chartElement).set(options).save();
-  //   message.success("Chart exported as a PDF successfully!");
-  // };
-  const handleExportPDF = async () => {
-    const chartElement = document.querySelector(".NamMoo");
-    if (!chartElement) {
-      message.error("Chart not found!");
-      return;
-    }
-
-    try {
-      const canvas = await html2canvas(chartElement, { scale: 2 });
-      const imgData = canvas.toDataURL("image/png");
-
-      const pdf = new jsPDF({
-        orientation: "portrait", // Portrait ensures better readability for multipage PDFs
-        unit: "mm",
-        format: "a4",
-      });
-
-      const pageWidth = pdf.internal.pageSize.getWidth();
-      const pageHeight = pdf.internal.pageSize.getHeight();
-      let imgWidth = pageWidth - 20; // Slight padding for better visibility
-      let imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-      let yPosition = 30; // Start below the header
-      // Add Header
-      pdf.setFontSize(16);
-      pdf.setFont("times", "bold"); // Make first line bold
-      pdf.text("Pregnancy's health overview report", 10, 15);
-
-      pdf.setFontSize(12);
-      pdf.setFont("times", "normal"); // Reset to normal font
-      pdf.text("Pregnancy's health growth chart", 10, 25); // Change Y value to place below
-
-      // Split the chart into multiple pages
-      while (yPosition + imgHeight > pageHeight - 20) {
-        pdf.addImage(
-          imgData,
-          "PNG",
-          10,
-          yPosition,
-          imgWidth,
-          pageHeight - yPosition - 20
-        );
-        pdf.addPage(); // Create a new page
-        yPosition = 10; // Reset position on the new page
-      }
-
-      // Add remaining part of the image on the last page
-      pdf.addImage(imgData, "PNG", 10, yPosition, imgWidth, imgHeight);
-
-      // Add Footer
-      pdf.setFontSize(10);
-      pdf.text(
-        "Generated by MomCare",
-        10,
-        pdf.internal.pageSize.getHeight() - 10
-      );
-
-      pdf.save("chart.pdf");
-      message.success("Chart exported as a multi-page PDF successfully!");
-    } catch (error) {
-      console.error("Error exporting chart:", error);
-      message.error("Could not export chart as a PDF.");
-    }
-  };
-
+  // ✅ Chart Rendering Function
   const renderChart = (data, title, babyKey) => {
-    // Filter the data to include only weeks with baby data
     const filteredData = data.filter(
       (entry) =>
         entry.pregnancyWeek >= startWeek &&
@@ -216,62 +120,53 @@ const GrowthChart = ({ childId }) => {
           borderRadius: "8px",
         }}
       >
-        <div style={{ marginBottom: "2rem" }}>
-          <h3 className="text-2xl text-center mb-6">{title}</h3>
-          <ResponsiveContainer width="100%" height={400}>
-            <ComposedChart data={filteredData}>
-              <CartesianGrid stroke="#f5f5f5" />
-              <XAxis
-                dataKey="pregnancyWeek"
-                label={{
-                  value: "Pregnancy Week",
-                  position: "insideBottom",
-                  offset: -2,
-                }}
-                tickFormatter={(tick) => `${tick}`}
-              />
-              <YAxis />
-              <Tooltip />
-              <Legend
-                wrapperStyle={{
-                  position: "absolute",
-                  textAlign: "center",
-                  width: "100%", // Ensures it aligns correctly
-                }}
-              />
-
-              {/* Line representing the baby's data */}
-              <Line
-                type="monotone"
-                dataKey={babyKey}
-                stroke="#ff7300"
-                name="Baby"
-                strokeWidth={3}
-              />
-              {/* Area representing WHO Min and Max range */}
-              <Area
-                type="monotone"
-                dataKey="range"
-                stroke="none"
-                fill="#add8e6"
-                name="WHO Range"
-                fillOpacity={0.3}
-                connectNulls
-              />
-            </ComposedChart>
-          </ResponsiveContainer>
-        </div>
+        <h3 className="text-2xl text-center mb-6">{title}</h3>
+        <ResponsiveContainer width="100%" height={400}>
+          <ComposedChart data={filteredData}>
+            <CartesianGrid stroke="#f5f5f5" />
+            <XAxis
+              dataKey="pregnancyWeek"
+              label={{
+                value: "Pregnancy Week",
+                position: "insideBottom",
+                offset: -2,
+              }}
+            />
+            <YAxis />
+            <Tooltip />
+            <Legend
+              wrapperStyle={{
+                position: "absolute",
+                textAlign: "center",
+                width: "100%",
+              }}
+            />
+            <Line
+              type="monotone"
+              dataKey={babyKey}
+              stroke="#ff7300"
+              name="Baby"
+              strokeWidth={3}
+            />
+            <Area
+              type="monotone"
+              dataKey="range"
+              stroke="none"
+              fill="#add8e6"
+              name="WHO Range"
+              fillOpacity={0.3}
+              connectNulls
+            />
+          </ComposedChart>
+        </ResponsiveContainer>
       </div>
     );
   };
 
+  // ✅ Export Chart as Image
   const handleExportImage = async () => {
-    const chartElement = document.querySelector(".namMo"); // Adjust the selector to match your chart's container
-    console.log("clicked!", chartElement);
-    if (!chartElement) {
-      message.error("Chart not found!");
-      return;
-    }
+    const chartElement = document.querySelector(".namMo");
+    if (!chartElement) return message.error("Chart not found!");
 
     try {
       const canvas = await html2canvas(chartElement);
@@ -286,25 +181,44 @@ const GrowthChart = ({ childId }) => {
     }
   };
 
+  // ✅ Export Report as PDF
+  const exportToPDF = () => {
+    const element = document.querySelector(".NamMoo");
+    html2canvas(element, { scale: 2 }).then((canvas) => {
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF("p", "mm", "a4");
+      const imgWidth = 190;
+      const pageHeight = pdf.internal.pageSize.height;
+      let imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let position = 10;
+
+      pdf.addImage(imgData, "PNG", 10, position, imgWidth, imgHeight);
+      position += imgHeight;
+
+      while (position > pageHeight) {
+        pdf.addPage();
+        position -= pageHeight;
+      }
+
+      pdf.save("report.pdf");
+    });
+  };
+
+  // ✅ Table Configuration
   const columns = [
     {
       title: "Tuần",
       dataIndex: "pregnancyWeek",
       key: "pregnancyWeek",
-      sorter: (a, b) => a.pregnancyWeek - b.pregnancyWeek, // Default sorting in ascending order
+      sorter: (a, b) => a.pregnancyWeek - b.pregnancyWeek,
       defaultSortOrder: "ascend",
     },
-    {
-      title: "Cân nặng (grams)",
-      dataIndex: "weight",
-      key: "weight",
-    },
-    {
-      title: "Chiều dài (cm)",
-      dataIndex: "lenght",
-      key: "lenght",
-    },
+    { title: "Cân nặng (grams)", dataIndex: "weight", key: "weight" },
+    { title: "Chiều dài (cm)", dataIndex: "lenght", key: "lenght" },
   ];
+
+  // ✅ Loading State
+  if (loading) return <Spin tip="Loading growth data..." />;
 
   return (
     <div className={`pl-25 pr-25 pt-5 pb-5 min-h-screen`}>
@@ -334,12 +248,14 @@ const GrowthChart = ({ childId }) => {
           {/* Start Week Dropdown */}{" "}
           <Select defaultValue={startWeek} onChange={setStartWeek}>
             {" "}
-            {[...Array.from({ length: 33 }, (_, i) => i + 8)].map((week) => (
-              <Select.Option key={week} value={week}>
-                {" "}
-                Tuần {week}{" "}
-              </Select.Option>
-            ))}{" "}
+            {[...Array.from({ length: 33 }, (_, i) => i + 8)]
+              .filter((week) => week < endWeek)
+              .map((week) => (
+                <Select.Option key={week} value={week}>
+                  {" "}
+                  Tuần {week}{" "}
+                </Select.Option>
+              ))}{" "}
           </Select>{" "}
           {/* End Week Dropdown (Only Weeks Greater than startWeek) */}{" "}
           <Select defaultValue={endWeek} onChange={setEndWeek}>
@@ -359,7 +275,7 @@ const GrowthChart = ({ childId }) => {
         <h1 className="text-4xl font-bold text-center">
           Báo cáo sức khỏe của bé qua các tuần
         </h1>
-        <h3 className="text-2xl font-semibold text-left mt-6">
+        <h3 className="text-2xl font-semibold text-left mt-6 mb-2">
           {startWeek === 9 && endWeek === 13
             ? "Biểu đồ từ tuần 9 đến tuần 13"
             : `Biểu đồ từ tuần ${startWeek} đến tuần ${endWeek}`}
@@ -368,18 +284,17 @@ const GrowthChart = ({ childId }) => {
           <div>{renderChart(graphData.weight, "Cân nặng (gram)", "baby")}</div>
           <div>{renderChart(graphData.length, "Chiều dài (cm)", "baby")}</div>
         </div>
-        <div className="bg-white shadow-md rounded-lg p-6 mb-6">
-          <h3 className="text-2xl font-semibold text-left mb-6">
-            Bảng báo cáo chỉ số sức khỏe của bé
-          </h3>
-          <Table
-            columns={columns}
-            dataSource={healthMetrics}
-            rowKey="id"
-            pagination={false}
-          />
-        </div>
       </div>
+      <div className="bg-white shadow-md rounded-lg p-6 mb-6">
+        {/* <Table
+          className="ant-table-content"
+          columns={columns}
+          dataSource={healthMetrics}
+          rowKey="id"
+          pagination={false}
+        /> */}
+      </div>
+
       {/* <div>{renderChart(graphData.heartRate, "Nhịp tim (bpm)", "baby")}</div>
       <div>
         {renderChart(
@@ -393,17 +308,17 @@ const GrowthChart = ({ childId }) => {
       </div>
       <div>{renderChart(graphData.ac, "Chu vi bụng (mm)", "baby")}</div>
       <div>{renderChart(graphData.fl, "Chiều dài xương đùi (mm)", "baby")}</div> */}
-      <div className="text-center mt-6">
+      <div className="text-center mt-6 mb-9">
         <Button
           type="primary"
-          onClick={handleExportPDF}
+          onClick={exportToPDF}
           style={{
             marginRight: "1rem",
             fontSize: "1rem",
             padding: "0.5rem 1rem",
           }}
         >
-          Export as PDF
+          Xuất file PDF
         </Button>
         <Button
           type="primary"
@@ -414,7 +329,7 @@ const GrowthChart = ({ childId }) => {
             padding: "0.5rem 1rem",
           }}
         >
-          Export as Image
+          Xuất file ảnh
         </Button>
       </div>
       <Footer />
