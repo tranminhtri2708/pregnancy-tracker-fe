@@ -291,9 +291,6 @@ const WhoStandard = () => {
         const min = record.weightMin || "";
         const max = record.weightMax || "";
         const formatWeight = (value) => {
-          if (value && value > 1000) {
-            return `${(value / 1000).toFixed(1)} kg`;
-          }
           return `${value} gram`;
         };
         return min && max ? (

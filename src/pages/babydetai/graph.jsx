@@ -230,7 +230,7 @@ const GrowthChart = ({ childId }) => {
             className="font-bold italic cursor-pointer text-blue-500 hover:underline"
             onClick={() => navigate("/whostandard")}
           >
-            Who Standard
+            bảng sức khỏe chuẩn
           </u>
         </i>
       </h2>
