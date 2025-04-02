@@ -1,12 +1,14 @@
 import { useParams } from "react-router-dom";
 import React, { useState, useEffect } from "react";
-import { Button, Modal, Input, Form, message } from "antd";
+import { Button, Modal, Input, Form, message, Table, Tag } from "antd";
 import dayjs from "dayjs";
+import Header from "../../components/header";
+import Footer from "../../components/footer";
 import { useNavigate } from "react-router-dom";
 import { getChildById } from "../../services/api.children";
 import { GetAllWHOStatistics } from "../../services/api.whostandard";
 import { getClosestSchedule } from "../../services/api.notification";
-
+import { debounce } from "lodash";
 import {
   addNewHealthMetric,
   getHealthMetricsByChild,
@@ -17,6 +19,7 @@ import {
 const BabyDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [darkMode] = useState(false);
   // State Variables
   const [child, setChild] = useState(null);
   const [filteredWHOData, setFilteredWHOData] = useState(null);
@@ -38,11 +41,11 @@ const BabyDetails = () => {
     const currentDate = dayjs();
     const daysUntilBirth = dayjs(birthDate).diff(currentDate, "day");
     return {
-      currentPregnancyWeek: 40 - Math.ceil(daysUntilBirth / 7),
+      currentPregnancyWeek: 40 - Math.round(daysUntilBirth / 7),
       daysUntilBirth,
     };
   };
-
+  console.log("1", weeksUntilBirth <= 7);
   // Fetch WHO Data
   const fetchWHOData = async (currentPregnancyWeek) => {
     try {
@@ -52,17 +55,40 @@ const BabyDetails = () => {
       );
       setFilteredWHOData(dataForCurrentWeek || null);
     } catch (error) {
-      console.error("Error fetching WHO data:", error);
       message.error("Failed to fetch WHO standards.");
     }
   };
   const handleNavigateToGraph = () => {
     navigate(`/graph/${id}`); // Dynamically navigate to graph/id
   };
+  const HealthMetricsTable = ({ healthMetrics }) => {
+    return (
+      <div className="bg-white shadow-md rounded-lg p-6 mb-6">
+        <h2 className="text-xl font-bold text-gray-800 mb-4">
+          Lịch sử sức khỏe
+        </h2>
+        <Table columns={columns} dataSource={healthMetrics} rowKey="id" />
+        <div className="w-full flex justify-center mt-4">
+          <Button
+            type="primary"
+            onClick={handleNavigateToGraph}
+            style={{
+              backgroundColor: "#f0f0f0",
+              borderColor: "#d9d9d9",
+              color: "#000",
+            }}
+          >
+            Xem Đồ Thị
+          </Button>
+        </div>
+      </div>
+    );
+  };
   // Fetch Child Details
   const getChildDetails = async () => {
     try {
       const childData = await getChildById(id);
+
       if (!childData) {
         message.error("Child data not found.");
         return;
@@ -108,27 +134,50 @@ const BabyDetails = () => {
         }));
       }
     } catch (error) {
-      console.error("Error fetching child details:", error);
       message.error("Failed to fetch child details.");
     }
   };
-
+  const columns = [
+    {
+      title: "Tuần",
+      dataIndex: "pregnancyWeek",
+      key: "pregnancyWeek",
+      sorter: (a, b) => a.pregnancyWeek - b.pregnancyWeek, // Default sorting in ascending order
+      defaultSortOrder: "ascend",
+    },
+    {
+      title: "Cân nặng (grams)",
+      dataIndex: "weight",
+      key: "weight",
+    },
+    {
+      title: "Chiều dài (cm)",
+      dataIndex: "lenght",
+      key: "lenght",
+    },
+    {
+      title: "Action",
+      key: "action",
+      render: (_, record) => (
+        <div className="flex space-x-4">
+          <Button type="link" onClick={() => handleEdit(record)}>
+            Chỉnh sửa
+          </Button>
+          <Button type="link" danger onClick={() => handleDelete(record.id)}>
+            Xóa
+          </Button>
+        </div>
+      ),
+    },
+  ];
   // Fetch Health Metrics
   const getChildHealthMetrics = async () => {
     try {
       const data = await getHealthMetricsByChild(id);
-      const currentPregnancyWeek = weeksUntilBirth
-        ? 40 - weeksUntilBirth
-        : null;
-
-      const filteredData = currentPregnancyWeek
-        ? data.filter((metric) => metric.pregnancyWeek === currentPregnancyWeek)
-        : data;
+      data.sort((a, b) => b.id - a.id);
 
       setHealthMetrics(data);
-      setFilteredMetrics(filteredData);
     } catch (error) {
-      console.error("Error fetching health metrics:", error);
       message.error("Failed to fetch health metrics.");
     }
   };
@@ -139,23 +188,26 @@ const BabyDetails = () => {
       setIsLoading(true);
       await getChildDetails();
       await getChildHealthMetrics();
+      // Ensure healthMetrics exists before checking the condition
+      if (healthMetrics.lenght > 0) {
+        if (weeksUntilBirth === healthMetrics[0]?.pregnancyWeek) {
+          setIsEditing(true);
+        }
+      }
       setIsLoading(false);
     };
-
     fetchData();
-  }, [id]);
+  }, [id]); // Added dependencies for reactivity
 
   // Handle Add/Edit Modal
   const handleAddNew = () => {
     form.resetFields();
-    setIsEditing(false);
     setIsModalVisible(true);
   };
 
   const handleEdit = (record) => {
     setEditingRecord(record);
     form.setFieldsValue(record);
-    setIsEditing(true);
     setIsModalVisible(true);
   };
 
@@ -165,7 +217,6 @@ const BabyDetails = () => {
       message.success("Health metric deleted successfully.");
       await getChildHealthMetrics();
     } catch (error) {
-      console.error("Error deleting health metric:", error);
       message.error("Failed to delete health metric.");
     }
   };
@@ -176,7 +227,8 @@ const BabyDetails = () => {
       const currentPregnancyWeek = 40 - weeksUntilBirth;
 
       if (isEditing) {
-        await updateHealthMetric(editingRecord.id, values);
+        await updateHealthMetric(values.editID, values);
+
         message.success("Health metric updated successfully.");
       } else {
         await addNewHealthMetric({
@@ -190,7 +242,6 @@ const BabyDetails = () => {
       setIsModalVisible(false);
       await getChildHealthMetrics();
     } catch (error) {
-      console.error("Error saving health metric:", error);
       message.error("Failed to save health metric.");
     }
   };
@@ -204,9 +255,24 @@ const BabyDetails = () => {
     return <p>Loading...</p>;
   }
 
+  const weightPercentage = Math.floor(
+    ((healthMetrics[0]?.weight - filteredWHOData?.weightMin) /
+      (filteredWHOData?.weightMax - filteredWHOData?.weightMin)) *
+      100
+  );
+  const lengthPercentage = Math.floor(
+    ((healthMetrics[0]?.lenght - filteredWHOData?.lenghtMin) /
+      (filteredWHOData?.lenghtMax - filteredWHOData?.lenghtMin)) *
+      100
+  );
   return (
-    <div className="p-4 bg-gray-50 min-h-screen">
-      <div className="mb-6">
+    <div
+      className={`pl-25 pr-25 pt-5 pb-5 min-h-screen ${
+        darkMode ? "bg-gray-900 text-white" : "bg-rose-50 text-gray-800"
+      }`}
+    >
+      <Header />
+      <div className="mb-6 mt-12">
         <h1 className="text-3xl font-bold text-pink-600 mb-6">
           Thông Tin Bé {child.fullName}
         </h1>
@@ -227,9 +293,7 @@ const BabyDetails = () => {
               Tuần thai hiện tại
             </h3>
             <p className="text-2xl font-bold text-pink-600 mt-2">
-              {weeksUntilBirth > 0
-                ? `${40 - weeksUntilBirth} tuần`
-                : "Ngày dự sinh đã qua."}
+              {weeksUntilBirth > 0 ? `${40 - weeksUntilBirth} tuần` : "Tuần 40"}
             </p>
             <p className="text-sm text-gray-500">{currentTrimester}</p>
           </div>
@@ -266,202 +330,296 @@ const BabyDetails = () => {
         </div>
       </div>
 
-      <div className="bg-white shadow-md rounded-lg p-6 mb-6">
-        <h2 className="text-xl font-bold text-gray-800 mb-4">
-          Chỉ số sức khỏe của tuần hiện tại
-        </h2>
-        <div className="flex flex-col items-center space-y-6">
-          {/* Weight Progress Bar */}
-          <div className="w-full">
-            <h3 className="text-lg font-semibold text-gray-600 mb-2">
-              Cân nặng (grams)
-            </h3>
-            {/* Min and Max Labels */}
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                marginBottom: "4px",
-              }}
-            >
-              <span className="text-gray-500">
-                {filteredWHOData?.weightMin || 0} g
-              </span>
-              <span className="text-gray-500">
-                {filteredWHOData?.weightMax || 0} g
-              </span>
-            </div>
-            {/* Progress Bar */}
-            <div style={{ display: "flex", alignItems: "center" }}>
-              <div
-                style={{
-                  width: `${
-                    healthMetrics.length &&
-                    filteredWHOData?.weightMin !== undefined &&
-                    filteredWHOData?.weightMax !== undefined &&
-                    healthMetrics[0]?.weight
-                      ? ((healthMetrics[0]?.weight -
-                          filteredWHOData?.weightMin) /
-                          (filteredWHOData?.weightMax -
-                            filteredWHOData?.weightMin)) *
-                        100
-                      : 0
-                  }%`,
-                  backgroundColor: "black",
-                  height: "12px",
-                  borderRadius: "6px",
-                }}
-              ></div>
-              <div
-                style={{
-                  width: `${
-                    healthMetrics.weight &&
-                    filteredWHOData?.weightMin !== undefined &&
-                    filteredWHOData?.weightMax !== undefined &&
-                    healthMetrics[0]?.weight
-                      ? 100 -
-                        ((healthMetrics[0]?.weight -
-                          filteredWHOData?.weightMin) /
-                          (filteredWHOData?.weightMax -
-                            filteredWHOData?.weightMin)) *
-                          100
-                      : 100
-                  }%`,
-                  backgroundColor: "lightgray",
-                  height: "12px",
-                  borderRadius: "6px",
-                }}
-              ></div>
-              <span style={{ marginLeft: "8px", color: "green" }}>
-                {healthMetrics[0]?.weight >= filteredWHOData?.weightMin &&
-                healthMetrics[0]?.weight <= filteredWHOData?.weightMax
-                  ? "Normal"
-                  : "Out of Range"}
-              </span>
-            </div>
-          </div>
+      {weeksUntilBirth > 7 ? (
+        healthMetrics[0] ? (
+          <div>
+            <div className="bg-white shadow-md rounded-lg p-6 mb-6">
+              <h2 className="text-xl font-bold text-gray-800 mb-4">
+                Thông Tin Sức Khỏe Bé
+              </h2>
+              <div className="flex flex-col items-center space-y-6">
+                {/* Weight Progress Bar */}
+                <div className="w-full">
+                  {/* Name, Status Label, and Baby Stats */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <h3 className="text-lg font-semibold text-gray-600">
+                        Cân nặng (grams)
+                      </h3>
+                      <span
+                        style={{
+                          backgroundColor:
+                            healthMetrics[0]?.weight >=
+                              filteredWHOData?.weightMin &&
+                            healthMetrics[0]?.weight <=
+                              filteredWHOData?.weightMax
+                              ? "#d1fad1" // Light green background for Normal
+                              : "#fad1d1", // Light red background for Out of Range
+                          color:
+                            healthMetrics[0]?.weight >=
+                              filteredWHOData?.weightMin &&
+                            healthMetrics[0]?.weight <=
+                              filteredWHOData?.weightMax
+                              ? "green"
+                              : "red",
+                          fontWeight: "bold",
+                          padding: "4px 8px",
+                          borderRadius: "6px",
+                          marginLeft: "12px",
+                        }}
+                      >
+                        {healthMetrics[0]?.weight >=
+                          filteredWHOData?.weightMin &&
+                        healthMetrics[0]?.weight <= filteredWHOData?.weightMax
+                          ? "Khỏe mạnh"
+                          : "Hãy đi khám bác sĩ ngay"}
+                      </span>
+                    </div>
 
-          {/* Height Progress Bar */}
-          <div className="w-full">
-            <h3 className="text-lg font-semibold text-gray-600 mb-2">
-              Chiều dài (cm)
-            </h3>
-            {/* Min and Max Labels */}
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                marginBottom: "4px",
-              }}
-            >
-              <span className="text-gray-500">
-                {filteredWHOData?.lenghtMin || 0} cm
-              </span>
-              <span className="text-gray-500">
-                {filteredWHOData?.lenghtMax || 0} cm
-              </span>
-            </div>
-            {/* Progress Bar */}
-            <div style={{ display: "flex", alignItems: "center" }}>
-              <div
-                style={{
-                  width: `${
-                    healthMetrics.lenght &&
-                    filteredWHOData?.lenghtMin !== undefined &&
-                    filteredWHOData?.lenghtMax !== undefined &&
-                    healthMetrics[0]?.length
-                      ? ((healthMetrics[0]?.lenght -
-                          filteredWHOData?.lenghtMin) /
-                          (filteredWHOData?.lenghtMax -
-                            filteredWHOData?.lenghtMin)) *
-                        100
-                      : 0
-                  }%`,
-                  backgroundColor: "black",
-                  height: "12px",
-                  borderRadius: "6px",
-                }}
-              ></div>
-              <div
-                style={{
-                  width: `${
-                    healthMetrics.lenght &&
-                    filteredWHOData?.lenghtMin !== undefined &&
-                    filteredWHOData?.lenghtMax !== undefined &&
-                    healthMetrics[0]?.lenght
-                      ? 100 -
-                        ((healthMetrics[0]?.lenght -
-                          filteredWHOData?.lenghtMin) /
-                          (filteredWHOData?.lenghtMax -
-                            filteredWHOData?.lenghtMin)) *
-                          100
-                      : 100
-                  }%`,
-                  backgroundColor: "lightgray",
-                  height: "12px",
-                  borderRadius: "6px",
-                }}
-              ></div>
-              <span style={{ marginLeft: "8px", color: "green" }}>
-                {healthMetrics[0]?.lenght >= filteredWHOData?.lenghtMin &&
-                healthMetrics[0]?.lenght <= filteredWHOData?.lenghtMax
-                  ? "Normal"
-                  : "Out of Range"}
-              </span>
-            </div>
-          </div>
+                    <span className="text-gray-600">
+                      {healthMetrics[0]?.weight} g
+                    </span>
+                  </div>
 
-          {/* Add Data Button */}
-          <div className="w-full flex justify-center mt-4">
-            <Button
-              type="primary"
-              onClick={handleAddNew}
-              style={{ backgroundColor: "#1890ff", borderColor: "#1890ff" }}
-            >
-              Nhập Chỉ Số
-            </Button>
+                  {/* Min and Max Labels */}
+                  <div className="flex justify-between mb-1">
+                    <span className="text-gray-500">
+                      {filteredWHOData?.weightMin || 0} g
+                    </span>
+                    <span className="text-gray-500">
+                      {filteredWHOData?.weightMax || 0} g
+                    </span>
+                  </div>
+
+                  {/* Progress Bar */}
+                  <div className="flex items-center">
+                    <div
+                      style={{
+                        width: `${weightPercentage}%`,
+                        backgroundColor: "black",
+                        height: "12px",
+                        borderRadius: "6px",
+                      }}
+                    ></div>
+
+                    <div
+                      style={{
+                        flexGrow: 1,
+                        backgroundColor: "lightgray",
+                        height: "12px",
+                        borderRadius: "6px",
+                        marginLeft: "8px",
+                      }}
+                    ></div>
+                  </div>
+                </div>
+
+                {/* Height Progress Bar */}
+                <div className="w-full">
+                  {/* Name, Status Label, and Baby Stats */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <h3 className="text-lg font-semibold text-gray-600">
+                        Chiều dài (cm)
+                      </h3>
+                      <span
+                        style={{
+                          backgroundColor:
+                            healthMetrics[0]?.lenght >=
+                              filteredWHOData?.lenghtMin &&
+                            healthMetrics[0]?.lenght <=
+                              filteredWHOData?.lenghtMax
+                              ? "#d1fad1" // Light green for Normal
+                              : "#fad1d1", // Light red for Out of Range
+                          color:
+                            healthMetrics[0]?.lenght >=
+                              filteredWHOData?.lenghtMin &&
+                            healthMetrics[0]?.lenght <=
+                              filteredWHOData?.lenghtMax
+                              ? "green"
+                              : "red",
+                          fontWeight: "bold",
+                          padding: "4px 8px",
+                          borderRadius: "6px",
+                          marginLeft: "12px",
+                        }}
+                      >
+                        {healthMetrics[0]?.lenght >=
+                          filteredWHOData?.lenghtMin &&
+                        healthMetrics[0]?.lenght <= filteredWHOData?.lenghtMax
+                          ? "Khỏe mạnh"
+                          : "Hãy đi khám bác sĩ ngay"}
+                      </span>
+                    </div>
+
+                    <span className="text-gray-600">
+                      {healthMetrics[0]?.lenght} cm
+                    </span>
+                  </div>
+
+                  {/* Min and Max Labels */}
+                  <div className="flex justify-between mb-1">
+                    <span className="text-gray-500">
+                      {filteredWHOData?.lenghtMin || 0} cm
+                    </span>
+                    <span className="text-gray-500">
+                      {filteredWHOData?.lenghtMax || 0} cm
+                    </span>
+                  </div>
+
+                  {/* Progress Bar */}
+                  <div className="flex items-center">
+                    <div
+                      style={{
+                        width: `${lengthPercentage}%`,
+                        backgroundColor: "black",
+                        height: "12px",
+                        borderRadius: "6px",
+                      }}
+                    ></div>
+
+                    <div
+                      style={{
+                        flexGrow: 1,
+                        backgroundColor: "lightgray",
+                        height: "12px",
+                        borderRadius: "6px",
+                        marginLeft: "8px",
+                      }}
+                    ></div>
+                  </div>
+                </div>
+
+                {/* Add Data Button */}
+                <div className="w-full flex justify-center mt-4">
+                  <Button
+                    type="primary"
+                    onClick={handleAddNew}
+                    style={{
+                      backgroundColor: "#1890ff",
+                      borderColor: "#1890ff",
+                    }}
+                  >
+                    Nhập Chỉ Số
+                  </Button>
+                </div>
+                <Modal
+                  title={isEditing ? "Cập nhật chỉ số" : "Thêm chỉ số mới"} // Dynamic title
+                  visible={isModalVisible} // Modal visibility
+                  onOk={handleOk} // Save button handler
+                  onCancel={handleCancel} // Cancel button handler
+                >
+                  <Form
+                    form={form}
+                    layout="vertical"
+                    initialValues={{
+                      weight: healthMetrics[0]?.weight || null, // Default to empty string if undefined
+                      lenght: healthMetrics[0]?.lenght || null, // Default to empty string if undefined
+                      editID: healthMetrics[0]?.id || null, // Hidden field for healthMetric ID, defaults to empty string
+                    }}
+                  >
+                    {/* Hidden Field for editID */}
+                    <Form.Item name="editID" hidden={true}>
+                      <Input type="hidden" />
+                    </Form.Item>
+
+                    {/* Weight Field */}
+                    <Form.Item
+                      name="weight"
+                      label="Cân nặng (grams)"
+                      rules={[
+                        { required: true, message: "Weight is required" },
+                      ]}
+                    >
+                      <Input type="number" placeholder="Enter weight (grams)" />
+                    </Form.Item>
+
+                    {/* Height Field */}
+                    <Form.Item
+                      name="lenght"
+                      label="Chiều dài (cm)"
+                      rules={[
+                        { required: true, message: "Lenght is required" },
+                      ]}
+                    >
+                      <Input type="number" placeholder="Enter lenght (cm)" />
+                    </Form.Item>
+                  </Form>
+                </Modal>
+              </div>
+            </div>
+            <HealthMetricsTable healthMetrics={healthMetrics} />
           </div>
-          <div className="w-full flex justify-center mt-4">
-            <Button
-              type="primary"
-              onClick={handleNavigateToGraph}
-              style={{
-                backgroundColor: "#f0f0f0",
-                borderColor: "#d9d9d9",
-                color: "#000",
-              }}
-            >
-              Xem Đồ Thị
-            </Button>
-          </div>
-          <Modal
-            title={isEditing ? "Edit Health Metric" : "Add New Measurement"} // Dynamic title
-            visible={isModalVisible} // Modal visibility
-            onOk={handleOk} // Save button handler
-            onCancel={handleCancel} // Cancel button handler
-          >
-            <Form form={form} layout="vertical">
-              {/* Weight Field */}
-              <Form.Item
-                name="weight"
-                label="Cân nặng (grams)"
-                rules={[{ required: true, message: "Weight is required" }]}
+        ) : (
+          <div className="bg-white shadow-md rounded-lg p-6 mb-6">
+            <h2 className="text-xl font-bold text-gray-800 mb-4">
+              Thông Tin Sức Khỏe Bé
+            </h2>
+            <p className="text-center text-gray-600">
+              Hãy bắt đầu theo dõi sự phát triển của bé trong hôm nay
+            </p>
+            <div className="w-full flex justify-center mt-4">
+              <Button
+                type="primary"
+                onClick={handleAddNew}
+                style={{ backgroundColor: "#1890ff", borderColor: "#1890ff" }}
               >
-                <Input type="number" placeholder="Enter weight (grams)" />
-              </Form.Item>
-
-              {/* Height Field */}
-              <Form.Item
-                name="lenght"
-                label="Chiều dài (cm)"
-                rules={[{ required: true, message: "lenght is required" }]}
+                Nhập Chỉ Số
+              </Button>
+            </div>
+            <Modal
+              title={isEditing ? "Cập nhật chỉ số" : "Thêm chỉ số mới"} // Dynamic title
+              visible={isModalVisible} // Modal visibility
+              onOk={handleOk} // Save button handler
+              onCancel={handleCancel} // Cancel button handler
+            >
+              <Form
+                form={form}
+                layout="vertical"
+                initialValues={{
+                  weight: healthMetrics[0]?.weight || null, // Default to empty string if undefined
+                  lenght: healthMetrics[0]?.lenght || null, // Default to empty string if undefined
+                  editID: healthMetrics[0]?.id || null, // Hidden field for healthMetric ID, defaults to empty string
+                }}
               >
-                <Input type="number" placeholder="Enter lenght (cm)" />
-              </Form.Item>
-            </Form>
-          </Modal>
+                {/* Hidden Field for editID */}
+                <Form.Item name="editID" hidden={true}>
+                  <Input type="hidden" />
+                </Form.Item>
+
+                {/* Weight Field */}
+                <Form.Item
+                  name="weight"
+                  label="Cân nặng (grams)"
+                  rules={[{ required: true, message: "Weight is required" }]}
+                >
+                  <Input type="number" placeholder="Enter weight (grams)" />
+                </Form.Item>
+
+                {/* Height Field */}
+                <Form.Item
+                  name="lenght"
+                  label="Chiều dài (cm)"
+                  rules={[{ required: true, message: "Lenght is required" }]}
+                >
+                  <Input type="number" placeholder="Enter lenght (cm)" />
+                </Form.Item>
+              </Form>
+            </Modal>
+          </div>
+        )
+      ) : (
+        <div className="bg-white shadow-md rounded-lg p-6 mb-6">
+          <h2 className="text-xl font-bold text-gray-800 mb-4">
+            Thông Tin Sức Khỏe Bé
+          </h2>
+          <p className="text-center text-gray-600">
+            Từ tuần 1 tới tuần 7 thai nhi chưa phát triển đủ để có chỉ số.
+          </p>
         </div>
-      </div>
+      )}
+
+      <Footer />
     </div>
   );
 };

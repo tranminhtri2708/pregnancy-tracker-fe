@@ -349,7 +349,7 @@ const PregnancyHomepage = () => {
             >
               <img
                 //https://i.pinimg.com/736x/36/8d/4d/368d4dd9ec1b21434a26795fe293b82b.jpg
-                src="https://i.pinimg.com/736x/21/f6/1a/21f61a0c25168b1ce5d87cc0c5786a06.jpg"
+                src="${"
                 alt="Fixed Image"
                 className="w-full h-32 object-cover rounded-lg mb-2"
               />

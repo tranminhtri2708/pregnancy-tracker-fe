@@ -73,7 +73,7 @@ const Header = () => {
             {[
               { name: "Trang chủ", path: "/" },
               { name: "Gói thành viên", path: "/subscription" },
-              { name: "Công cụ sức khỏe", path: "/baby" },
+              { name: "Công cụ sức khỏe", path: "/whostandard" },
               { name: "Cộng đồng", path: "/community" },
             ].map((item) => (
               <button

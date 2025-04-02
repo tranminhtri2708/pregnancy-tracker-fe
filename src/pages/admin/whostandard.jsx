@@ -30,7 +30,7 @@ const WhoStandard = () => {
   const [isCreateModalVisible, setIsCreateModalVisible] = useState(false); // State for the create modal
   const [form] = Form.useForm();
 
-  const defaultRows = Array.from({ length: 42 }, (_, index) => ({
+  const defaultRows = Array.from({ length: 40 }, (_, index) => ({
     key: index + 1,
     week: index + 1,
     weightMin: null,
@@ -479,12 +479,12 @@ const WhoStandard = () => {
   };
 
   const getDropdownOptions = () => {
-    const totalPages = Math.ceil(42 / 14);
+    const totalPages = Math.ceil(40 / 10);
     const options = [];
 
     for (let page = 1; page <= totalPages; page++) {
-      const startWeek = (page - 1) * 14 + 1;
-      const endWeek = startWeek + 13;
+      const startWeek = (page - 1) * 10 + 1;
+      const endWeek = startWeek + 9;
       options.push({ label: `Week ${startWeek}-${endWeek}`, value: page });
     }
 
@@ -512,7 +512,7 @@ const WhoStandard = () => {
       <Table
         className="border-gray-400"
         columns={columns}
-        dataSource={data.slice((currentPage - 1) * 14, currentPage * 14)}
+        dataSource={data.slice((currentPage - 1) * 10, currentPage * 10)}
         loading={loading}
         bordered
         pagination={false}
