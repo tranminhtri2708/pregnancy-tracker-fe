@@ -153,7 +153,7 @@ const BabyDetails = () => {
       key: "weight",
     },
     {
-      title: "Cân nặng status",
+      title: "Tình trạng cân nặng",
       key: "weightStatus",
       render: (_, record) => {
         const whoData = WHOData.find(
@@ -164,9 +164,9 @@ const BabyDetails = () => {
 
         const status =
           record.weight < whoData.weightMin
-            ? "Dưới chuẩn"
+            ? "Nguy hiểm!"
             : record.weight > whoData.weightMax
-            ? "Trên chuẩn"
+            ? "Nguy hiểm!"
             : "Khỏe mạnh";
 
         return (
@@ -178,7 +178,7 @@ const BabyDetails = () => {
     },
 
     {
-      title: "Chiều dài (cm)",
+      title: "Tình trạng chiều dài (cm)",
       dataIndex: "lenght",
       key: "lenght",
     },
@@ -194,9 +194,9 @@ const BabyDetails = () => {
 
         const status =
           record.lenght < whoData.lenghtMin
-            ? "Dưới chuẩn"
+            ? "Nguy hiểm!"
             : record.lenght > whoData.lenghtMax
-            ? "Trên chuẩn"
+            ? "Nguy hiểm!"
             : "Khỏe mạnh";
 
         return (
@@ -253,6 +253,10 @@ const BabyDetails = () => {
         } else {
           setIsEditing(false);
         }
+        console.log(
+          "13123123",
+          40 - weeksUntilBirth === healthMetrics[0]?.pregnancyWeek
+        );
       }
       await currentWeekData();
       setIsLoading(false);
@@ -262,11 +266,13 @@ const BabyDetails = () => {
 
   // Handle Add/Edit Modal
   const handleAddNew = () => {
+    setIsEditing(false);
     form.resetFields();
     setIsModalVisible(true);
   };
 
   const handleEdit = (record) => {
+    setIsEditing(true);
     setEditingRecord(record);
     form.setFieldsValue(record);
     setIsModalVisible(true);
@@ -283,30 +289,67 @@ const BabyDetails = () => {
   };
 
   const handleOk = async () => {
+    console.log("isEditting?", isEditing);
     try {
       const values = await form.validateFields();
       const currentPregnancyWeek = 40 - weeksUntilBirth;
+      if (isEditing) {
+        await updateHealthMetric(values.editID, values);
 
-      try {
-        await addNewHealthMetric({
-          ...values,
-          childrentId: id,
-          pregnancyWeek: currentPregnancyWeek,
-        });
+        message.success("Health metric updated successfully.");
+        setIsModalVisible(false);
+        await getChildHealthMetrics();
+        await currentWeekData();
+      } else {
+        try {
+          await addNewHealthMetric({
+            ...values,
+            childrentId: id,
+            pregnancyWeek: currentPregnancyWeek,
+          });
 
-        toast.success("Chỉ số sức khỏe đã được thêm thành công!"); // Success message
-      } catch (error) {
-        console.error("Error adding health metric:", error);
-        toast.error("Tuần này đã có dữ liệu hãy update tại bảng dưới");
+          toast.success("Chỉ số sức khỏe đã được thêm thành công!"); // Success message
+        } catch (error) {
+          if (!isEditing) {
+            console.error("Error adding health metric:", error);
+            toast.error("Tuần này đã có dữ liệu hãy update tại bảng dưới");
+          }
+        }
       }
+      form.resetFields();
       setIsModalVisible(false);
+      form.resetFields();
       await getChildHealthMetrics();
+      form.resetFields();
       await currentWeekData();
     } catch (error) {
       message.error("Failed to save health metric.");
     }
   };
+  // const handleOk = async () => {
+  //   try {
+  //     const values = await form.validateFields();
+  //     const currentPregnancyWeek = 40 - weeksUntilBirth;
 
+  //     if (isEditing) {
+  //       await updateHealthMetric(values.editID, values);
+
+  //       message.success("Health metric updated successfully.");
+  //     } else {
+  //       await addNewHealthMetric({
+  //         ...values,
+  //         childrentId: id,
+  //         pregnancyWeek: currentPregnancyWeek,
+  //       });
+  //       message.success("Health metric added successfully.");
+  //     }
+
+  //     setIsModalVisible(false);
+  //     await getChildHealthMetrics();
+  //   } catch (error) {
+  //     message.error("Failed to save health metric.");
+  //   }
+  // };
   const handleCancel = () => {
     setIsModalVisible(false);
   };
@@ -354,7 +397,9 @@ const BabyDetails = () => {
               Tuần thai hiện tại
             </h3>
             <p className="text-2xl font-bold text-pink-600 mt-2">
-              {weeksUntilBirth > 0 ? `${40 - weeksUntilBirth} tuần` : "Tuần 40"}
+              {weeksUntilBirth > 0
+                ? `${40 - weeksUntilBirth} tuần`
+                : `${Math.abs(weeksUntilBirth) + 40} tuần`}
             </p>
             <p className="text-sm text-gray-500">{currentTrimester}</p>
           </div>
@@ -566,7 +611,7 @@ const BabyDetails = () => {
                     </Button>
                   </div>
                   <Modal
-                    title={"Thêm chỉ số mới"} // Dynamic title
+                    title={isEditing ? "Cập nhật chỉ số" : "Thêm chỉ số mới"} // Dynamic title
                     visible={isModalVisible} // Modal visibility
                     onOk={handleOk} // Save button handler
                     onCancel={handleCancel} // Cancel button handler
@@ -627,7 +672,7 @@ const BabyDetails = () => {
                     </Button>
                   </div>
                   <Modal
-                    title={"Thêm chỉ số mới"} // Dynamic title
+                    title={isEditing ? "Cập nhật chỉ số" : "Thêm chỉ số mới"} // Dynamic title
                     visible={isModalVisible} // Modal visibility
                     onOk={handleOk} // Save button handler
                     onCancel={handleCancel} // Cancel button handler
@@ -636,7 +681,9 @@ const BabyDetails = () => {
                       form={form}
                       layout="vertical"
                       initialValues={{
-                        editID: currentWeekMetric?.id || null, // Hidden field for healthMetric ID, defaults to empty string
+                        editID: healthMetrics[0]?.id || null, // Hidden field for healthMetric ID, defaults to empty string
+                        weight: healthMetrics[0]?.weight || null, // Default to empty string if undefined
+                        lenght: healthMetrics[0]?.lenght || null,
                       }}
                     >
                       {/* Hidden Field for editID */}
@@ -702,7 +749,7 @@ const BabyDetails = () => {
               </Button>
             </div>
             <Modal
-              title={"Thêm chỉ số mới"} // Dynamic title
+              title={isEditing ? "Cập nhật chỉ số" : "Thêm chỉ số mới"} // Dynamic title
               visible={isModalVisible} // Modal visibility
               onOk={handleOk} // Save button handler
               onCancel={handleCancel} // Cancel button handler
@@ -711,9 +758,9 @@ const BabyDetails = () => {
                 form={form}
                 layout="vertical"
                 initialValues={{
-                  weight: currentWeekMetric?.weight || null, // Default to empty string if undefined
-                  lenght: currentWeekMetric?.lenght || null, // Default to empty string if undefined
-                  editID: currentWeekMetric?.id || null, // Hidden field for healthMetric ID, defaults to empty string
+                  weight: healthMetrics[0]?.weight || null, // Default to empty string if undefined
+                  lenght: healthMetrics[0]?.lenght || null, // Default to empty string if undefined
+                  editID: healthMetrics[0]?.id || null, // Hidden field for healthMetric ID, defaults to empty string
                 }}
               >
                 {/* Hidden Field for editID */}

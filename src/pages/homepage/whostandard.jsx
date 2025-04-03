@@ -238,9 +238,6 @@ const WhoStandardView = () => {
         const min = record.weightMin || "";
         const max = record.weightMax || "";
         const formatWeight = (value) => {
-          if (value && value > 1000) {
-            return `${(value / 1000).toFixed(1)} kg`;
-          }
           return `${value} gram`;
         };
         return min && max ? (
@@ -579,12 +576,28 @@ const WhoStandardView = () => {
         <i>
           <u className="font-bold italic cursor-pointer text-blue-500 hover:underline">
             <a
-              href="https://hellobacsi.com/mang-thai/thai-ky/tam-ca-nguyet-1/thai-nhi-8-tuan/"
+              href="https://www.vinmec.com/vie/bai-viet/sieu-am-can-nang-thai-nhi-co-chinh-xac-khong-vi"
               target="_blank"
               rel="noopener noreferrer"
               className="font-bold italic"
             >
-              Hello Bacsi
+              Vinmec
+            </a>
+          </u>
+        </i>
+      </h2>
+
+      <h2 className="text-center text-sm font-bold mt-4">
+        * Thông tin khác được tham khảo từ{" "}
+        <i>
+          <u className="font-bold italic cursor-pointer text-blue-500 hover:underline">
+            <a
+              href="https://www.vinmec.com/vie/bai-viet/bang-can-nang-va-chieu-dai-thai-nhi-theo-tieu-chuan-cua-who-vi"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-bold italic"
+            >
+              Vinmec
             </a>
           </u>
         </i>
